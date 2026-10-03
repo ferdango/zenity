@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, MouseEvent, ReactNode, Ref } from 'react'
 import { Link } from 'react-router'
 import { cn } from '../lib/cn'
 import styles from './Button.module.css'
@@ -7,6 +7,7 @@ import { Icon } from './Icon'
 export type ButtonVariant = 'filled' | 'tonal' | 'primaryTonal' | 'outlined' | 'text' | 'danger'
 
 interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
+  ref?: Ref<HTMLButtonElement>
   onClick?: (event: MouseEvent<HTMLElement>) => void
   variant?: ButtonVariant
   size?: 'sm' | 'md' | 'lg'
@@ -61,6 +62,8 @@ export function Button({
   )
 
   if (to) {
+    // Los atributos data-* (p. ej. data-tour) también llegan al enlace
+    const dataAttributes = Object.fromEntries(Object.entries(rest).filter(([key]) => key.startsWith('data-')))
     return (
       <Link
         to={to}
@@ -69,6 +72,7 @@ export function Button({
         data-ripple=""
         onClick={onClick}
         aria-label={rest['aria-label']}
+        {...dataAttributes}
       >
         {content}
       </Link>

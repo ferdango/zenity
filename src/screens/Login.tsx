@@ -8,6 +8,7 @@ import { AppleGlyph } from '../components/Glyphs'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useApp } from '../state/context'
 import styles from './Login.module.css'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -19,6 +20,7 @@ export function Login() {
   const [params, setParams] = useSearchParams()
   const signup = params.get('modo') === 'registro'
   const navigate = useNavigate()
+  const { updateRegistration } = useApp()
   const [email, setEmail] = useState('')
   const [focused, setFocused] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -27,7 +29,9 @@ export function Login() {
 
   const go = (kind: Exclude<Pending, null>) => {
     setPending(kind)
-    window.setTimeout(() => navigate('/notificaciones'), 1100)
+    // Registro: continúa con los formularios de datos personales y de empresa.
+    if (signup && kind === 'email') updateRegistration('personal', { email: email.trim() })
+    window.setTimeout(() => navigate(signup ? '/registro/datos' : '/notificaciones'), 1100)
   }
 
   const onSubmit = (event: FormEvent) => {

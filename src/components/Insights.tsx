@@ -9,9 +9,9 @@ import { Icon } from './Icon'
 import styles from './Insights.module.css'
 import { SparkCluster } from './Spark'
 
-export function SectionHeader({ title, action, id }: { title: string; action?: ReactNode; id?: string }) {
+export function SectionHeader({ title, action, id, tourId }: { title: string; action?: ReactNode; id?: string; tourId?: string }) {
   return (
-    <div className={styles.header}>
+    <div className={styles.header} data-tour={tourId}>
       <SparkCluster size={24} />
       <h2 className={styles.headerTitle} id={id}>
         {title}
@@ -25,7 +25,7 @@ export function SectionHeader({ title, action, id }: { title: string; action?: R
  * Lista de insights de IA. Al entrar en pantalla muestra el loader de Gemini y luego
  * "escribe" el texto palabra por palabra.
  */
-export function InsightList({ insights, title }: { insights: Insight[]; title: string }) {
+export function InsightList({ insights, title, tourId }: { insights: Insight[]; title: string; tourId?: string }) {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' })
   const [ready, setReady] = useState(false)
@@ -38,7 +38,7 @@ export function InsightList({ insights, title }: { insights: Insight[]; title: s
 
   return (
     <section ref={ref} className={styles.section} aria-labelledby={`${insights[0]?.id}-title`} aria-busy={!ready}>
-      <SectionHeader title={title} id={`${insights[0]?.id}-title`} />
+      <SectionHeader title={title} id={`${insights[0]?.id}-title`} tourId={tourId} />
       <motion.ul
         className={styles.list}
         variants={staggerContainer(0.12)}

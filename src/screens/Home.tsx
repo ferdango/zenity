@@ -11,7 +11,9 @@ import { InsightList } from '../components/Insights'
 import { SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
-import { HOME_INSIGHTS, USER } from '../data/mock'
+import { Tour } from '../components/Tour'
+import { HOME_INSIGHTS } from '../data/mock'
+import { TOUR_STEPS } from '../data/tour'
 import { getPeriod, periodLabel, variation } from '../data/selectors'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
@@ -91,7 +93,8 @@ function Carousel() {
 /** Inicio / billetera (Figma: Home). */
 export function Home() {
   const navigate = useNavigate()
-  const { hideBalances, toggleHideBalances, periodKey, setDrawerOpen, openSheet, toast } = useApp()
+  const { hideBalances, toggleHideBalances, periodKey, setDrawerOpen, openSheet, toast, profile, tourDone, tourActive, startTour, endTour } =
+    useApp()
   const scrolled = useScrolled()
   const [generating, setGenerating] = useState(false)
   const period = getPeriod(periodKey)
@@ -99,6 +102,21 @@ export function Home() {
   const dayPart = getDayPart()
   const greeting = GREETING[dayPart]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
+
+  // Primer ingreso: recorrido de bienvenida cuando el inicio ya terminó de animarse
+  useEffect(() => {
+    if (tourDone || tourActive) return
+    const timer = window.setTimeout(startTour, 1200)
+    return () => window.clearTimeout(timer)
+  }, [tourDone, tourActive, startTour])
+
+  const finishTour = (completed: boolean) => {
+    endTour()
+    toast(
+      completed ? '¡Listo! Ya conoces Zenity' : 'Puedes ver el tutorial cuando quieras desde el menú',
+      completed ? 'celebration' : 'tour',
+    )
+  }
 
   const generateReport = () => {
     if (generating) return
@@ -112,14 +130,26 @@ export function Home() {
   return (
     <div className={`z-page ${styles.home}`}>
       <header className={styles.header} data-scrolled={scrolled}>
-        <IconButton icon="menu" label="Abrir menú" className={styles.menuButton} onClick={() => setDrawerOpen(true)} />
+        <IconButton
+          icon="menu"
+          label="Abrir menú"
+          className={styles.menuButton}
+          onClick={() => setDrawerOpen(true)}
+          data-tour="menu"
+        />
         <span className={styles.headerTitle}>Mi billetera</span>
-        <IconButton icon="notifications" label="Notificaciones" badge onClick={() => openSheet('notifications')} />
+        <IconButton
+          icon="notifications"
+          label="Notificaciones"
+          badge
+          onClick={() => openSheet('notifications')}
+          data-tour="notifications"
+        />
       </header>
 
       <div className={styles.layout}>
         <motion.div className={styles.primary} variants={staggerContainer(0.06)} initial="hidden" animate="show">
-          <motion.section className={styles.greeting} variants={fadeUp}>
+          <motion.section className={styles.greeting} variants={fadeUp} data-tour="greeting">
             {dayPart === 'morning' ? (
               <motion.img
                 src={sun}
@@ -137,7 +167,7 @@ export function Home() {
                 Resumen
               </span>
               <h1 className={styles.hello}>
-                {greeting.text}, <GradientText>{USER.firstName}</GradientText>
+                {greeting.text}, <GradientText>{profile.firstName}</GradientText>
               </h1>
             </div>
             <button type="button" className={styles.eye} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
@@ -147,20 +177,22 @@ export function Home() {
           </motion.section>
 
           <motion.div className={styles.period} variants={fadeUp}>
-            <PeriodPicker />
+            <div data-tour="period">
+              <PeriodPicker />
+            </div>
           </motion.div>
 
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} data-tour="accounts">
             <Carousel />
           </motion.div>
 
           <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-            <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva">
+            <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
               Agrega una cuenta
             </Button>
           </motion.div>
 
-          <motion.div className={styles.tiles} variants={staggerContainer(0.07)}>
+          <motion.div className={styles.tiles} variants={staggerContainer(0.07)} data-tour="summary">
             <motion.div variants={fadeUp}>
               <SummaryTile
                 kind="income"
@@ -188,7 +220,7 @@ export function Home() {
         </motion.div>
 
         <div className={styles.secondary}>
-          <InsightList insights={HOME_INSIGHTS} title="Resumen al día de hoy" />
+          <InsightList insights={HOME_INSIGHTS} title="Resumen al día de hoy" tourId="insights" />
           <div className={styles.report}>
             <Button
               variant="tonal"
@@ -198,12 +230,15 @@ export function Home() {
               icon={<Spark size={22} state={generating ? 'thinking' : 'idle'} />}
               onClick={generateReport}
               aria-busy={generating}
+              data-tour="report"
             >
               {generating ? <ShimmerText>Generando reporte…</ShimmerText> : 'Generar reporte completo'}
             </Button>
           </div>
         </div>
       </div>
+
+      {tourActive && <Tour steps={TOUR_STEPS} firstName={profile.firstName} onFinish={finishTour} />}
     </div>
   )
 }

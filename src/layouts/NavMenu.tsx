@@ -5,12 +5,10 @@ import whatsapp from '../assets/brands/whatsapp.svg'
 import { InitialsAvatar } from '../components/Avatars'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
-import { SegmentedTabs } from '../components/SegmentedTabs'
 import { Spark } from '../components/Spark'
-import { USER } from '../data/mock'
 import { cn } from '../lib/cn'
 import { fadeUp, spring, staggerContainer } from '../lib/motion'
-import { type ThemePreference, useApp } from '../state/context'
+import { useApp } from '../state/context'
 import styles from './NavMenu.module.css'
 import { PRIMARY_NAV } from './nav'
 
@@ -28,10 +26,14 @@ function ItemIcon({ icon }: { icon: string }) {
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { theme, setTheme, pending, openSheet, toast } = useApp()
+  const { pending, openSheet, toast, profile, startTour } = useApp()
   const layoutId = `nav-active-${variant}`
 
-  const row = (key: string, content: ReactNode, opts: { to?: string; onClick?: () => void; active?: boolean; end?: ReactNode }) => {
+  const row = (
+    key: string,
+    content: ReactNode,
+    opts: { to?: string; onClick?: () => void; active?: boolean; end?: ReactNode; tour?: string },
+  ) => {
     const inner = (
       <>
         {opts.active && <motion.span layoutId={layoutId} className={styles.activeBg} transition={spring.snappy} />}
@@ -43,7 +45,14 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
     return (
       <motion.li key={key} variants={fadeUp}>
         {opts.to ? (
-          <Link to={opts.to} className={className} data-ripple="" aria-current={opts.active ? 'page' : undefined} onClick={onNavigate}>
+          <Link
+            to={opts.to}
+            className={className}
+            data-ripple=""
+            data-tour={opts.tour}
+            aria-current={opts.active ? 'page' : undefined}
+            onClick={onNavigate}
+          >
             {inner}
           </Link>
         ) : (
@@ -76,11 +85,11 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
         onClick={action(() => toast('Ajustes de cuenta estará disponible pronto', 'settings'))}
       >
         <span className={styles.avatarRing}>
-          <InitialsAvatar initials={USER.initials} size={40} />
+          <InitialsAvatar initials={profile.initials} size={40} />
         </span>
         <span className={styles.profileName}>
-          <strong>{USER.fullName}</strong>
-          <span>Ajustes de cuenta</span>
+          <strong>{profile.fullName}</strong>
+          <span>{profile.company ?? 'Ajustes de cuenta'}</span>
         </span>
         <Icon name="chevron_right" size={18} className={styles.chevron} />
       </button>
@@ -104,7 +113,7 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
                 </span>
                 <span>{item.label}</span>
               </>,
-              { to: item.to, active: item.match(pathname) },
+              { to: item.to, active: item.match(pathname), tour: `nav-${item.id}` },
             ),
           )}
           {row(
@@ -157,6 +166,21 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
             { onClick: action(() => openSheet('faq')) },
           )}
           {row(
+            'tour',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="tour" size={20} />
+              </span>
+              <span>Ver tutorial</span>
+            </>,
+            {
+              onClick: action(() => {
+                if (pathname !== '/inicio') navigate('/inicio')
+                window.setTimeout(startTour, pathname === '/inicio' ? 350 : 900)
+              }),
+            },
+          )}
+          {row(
             'logout',
             <>
               <span className={styles.itemIcon}>
@@ -170,18 +194,6 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
       </div>
 
       <div className={styles.footer}>
-        <span className={styles.themeLabel}>Apariencia</span>
-        <SegmentedTabs<ThemePreference>
-          label="Tema"
-          stretch
-          value={theme}
-          onChange={setTheme}
-          tabs={[
-            { id: 'dark', label: 'Oscuro' },
-            { id: 'light', label: 'Claro' },
-            { id: 'system', label: 'Sistema' },
-          ]}
-        />
         <span className={styles.version}>v. 1.0.0</span>
       </div>
     </nav>

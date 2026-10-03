@@ -69,10 +69,6 @@
   background: var(--z-on-surface);
 }
 
-:root[data-theme='light'] .col[aria-pressed='true'] .bar {
-  background: var(--z-primary);
-}
-
 @media (hover: hover) {
   .col:hover:not([aria-pressed='true']) .bar {
     background: color-mix(in srgb, var(--z-primary) 42%, var(--z-surface-high));

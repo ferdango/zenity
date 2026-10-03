@@ -36,6 +36,7 @@ export function BottomNav() {
                   title={item.label}
                   aria-current={active ? 'page' : undefined}
                   data-ripple=""
+                  data-tour={`nav-${item.id}`}
                 >
                   {active && <motion.span layoutId="bottom-nav-indicator" className={styles.indicator} transition={spring.snappy} />}
                   {item.icon === 'spark' ? <Spark size={24} /> : <Icon name={item.icon} size={24} fill={active} />}

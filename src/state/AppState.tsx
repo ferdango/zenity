@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import {
   type CategoryId,
   type Connection,
@@ -6,21 +6,25 @@ import {
   INITIAL_CONNECTIONS,
   PENDING_TRANSACTIONS,
   type PendingTransaction,
+  USER,
 } from '../data/mock'
 import { getSource } from '../data/sources'
 import { readStorage, writeStorage } from '../lib/storage'
-import { type AppState, AppStateContext, type SheetName, type ThemePreference, type Toast } from './context'
+import { type AppState, AppStateContext, type Profile, type Registration, type SheetName, type Toast } from './context'
 
-const THEME_KEY = 'zenity.theme'
 const HIDE_KEY = 'zenity.hideBalances'
+const PROFILE_KEY = 'zenity.profile'
+const TOUR_KEY = 'zenity.tourDone'
 
-function getSystemTheme(): 'dark' | 'light' {
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+const EMPTY_REGISTRATION: Registration = {
+  personal: { nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
+  company: { razonSocial: '', ruc: '', ingresoMinimo: '' },
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemePreference>(() => readStorage<ThemePreference>(THEME_KEY, 'dark'))
-  const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(getSystemTheme)
+  // Solo se guarda lo necesario para mostrar (nombre y empresa), nunca el resto de datos personales.
+  const [profile, setProfileState] = useState<Profile>(() => readStorage<Profile>(PROFILE_KEY, USER))
+  const [registration, setRegistration] = useState<Registration>(EMPTY_REGISTRATION)
   const [hideBalances, setHideBalances] = useState(() => readStorage(HIDE_KEY, false))
   const [periodKey, setPeriodKey] = useState(DEFAULT_PERIOD)
   const [connections, setConnections] = useState<Connection[]>(INITIAL_CONNECTIONS)
@@ -29,28 +33,21 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sheet, setSheet] = useState<SheetName>(null)
+  const [tourDone, setTourDone] = useState(() => readStorage(TOUR_KEY, false))
+  const [tourActive, setTourActive] = useState(false)
   const toastId = useRef(0)
 
-  const resolvedTheme = theme === 'system' ? systemTheme : theme
-
-  useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: light)')
-    const onChange = () => setSystemTheme(media.matches ? 'light' : 'dark')
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
+  const setProfile = useCallback((next: Profile) => {
+    setProfileState(next)
+    writeStorage(PROFILE_KEY, next)
   }, [])
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = resolvedTheme
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', resolvedTheme === 'light' ? '#ffffff' : '#131314')
-  }, [resolvedTheme])
-
-  const setTheme = useCallback((next: ThemePreference) => {
-    setThemeState(next)
-    writeStorage(THEME_KEY, next)
-  }, [])
+  const updateRegistration = useCallback(
+    <K extends keyof Registration>(part: K, data: Partial<Registration[K]>) => {
+      setRegistration((prev) => ({ ...prev, [part]: { ...prev[part], ...data } }))
+    },
+    [],
+  )
 
   const toggleHideBalances = useCallback(() => {
     setHideBalances((prev) => {
@@ -123,11 +120,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const openSheet = useCallback((next: SheetName) => setSheet(next), [])
 
+  const startTour = useCallback(() => setTourActive(true), [])
+
+  const endTour = useCallback(() => {
+    setTourActive(false)
+    setTourDone(true)
+    writeStorage(TOUR_KEY, true)
+  }, [])
+
   const value = useMemo<AppState>(
     () => ({
-      theme,
-      resolvedTheme,
-      setTheme,
+      profile,
+      setProfile,
+      registration,
+      updateRegistration,
       hideBalances,
       toggleHideBalances,
       periodKey,
@@ -147,11 +153,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setDrawerOpen,
       sheet,
       openSheet,
+      tourDone,
+      tourActive,
+      startTour,
+      endTour,
     }),
     [
-      theme,
-      resolvedTheme,
-      setTheme,
+      profile,
+      setProfile,
+      registration,
+      updateRegistration,
       hideBalances,
       toggleHideBalances,
       periodKey,
@@ -169,6 +180,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       drawerOpen,
       sheet,
       openSheet,
+      tourDone,
+      tourActive,
+      startTour,
+      endTour,
     ],
   )
 

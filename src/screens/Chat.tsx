@@ -7,7 +7,6 @@ import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { Spark } from '../components/Spark'
 import { TopBar } from '../components/TopBar'
-import { USER } from '../data/mock'
 import { answer, type ChatBlock, fileAnswer, SUGGESTIONS } from '../data/chat'
 import { streamDuration, toSegments } from '../lib/richText'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
@@ -201,7 +200,7 @@ function getRecognition(): Recognition | null {
 
 /** Chat con Zenity (Figma: Chat) con el comportamiento de Gemini. */
 export function Chat() {
-  const { connections, periodKey, toast } = useApp()
+  const { connections, periodKey, toast, profile } = useApp()
   const [params, setParams] = useSearchParams()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -354,7 +353,7 @@ export function Chat() {
             >
               <Spark size={44} animateIn />
               <motion.h1 className={styles.hello} variants={fadeUp}>
-                <GradientText>Hola, {USER.firstName}</GradientText>
+                <GradientText>Hola, {profile.firstName}</GradientText>
               </motion.h1>
               <motion.p className={styles.question} variants={fadeUp}>
                 ¿Por dónde empezamos?
