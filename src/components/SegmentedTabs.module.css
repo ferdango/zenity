@@ -1,0 +1,52 @@
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px;
+  margin: -2px;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 20px;
+  flex-shrink: 0;
+  border-radius: var(--z-radius-full);
+  color: var(--z-on-surface-variant);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  transition:
+    color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.stretch .tab {
+  flex: 1;
+}
+
+.tab[aria-selected='true'] {
+  color: var(--z-on-surface);
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.pill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--z-surface-high);
+  z-index: -2;
+}
+
+.primary .pill {
+  background: var(--z-primary-container);
+}
+
+.primary .tab[aria-selected='true'] {
+  color: var(--z-on-primary-container);
+}

@@ -1,0 +1,88 @@
+.screen {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.center {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 20px;
+  padding: 48px var(--z-gutter) 24px;
+  text-align: center;
+}
+
+.iconWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 160px;
+  height: 160px;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow-color) 0%, transparent 65%);
+  opacity: 0.35;
+}
+
+.success {
+  --glow-color: var(--z-positive);
+  color: var(--z-positive);
+}
+
+.error {
+  --glow-color: var(--z-negative);
+  color: var(--z-negative);
+}
+
+.particle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+}
+
+.kicker {
+  font-size: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.title {
+  max-width: 320px;
+  font-size: 2rem;
+  line-height: 2.5rem;
+  font-weight: 420;
+  letter-spacing: -0.01em;
+  color: var(--z-on-surface);
+  text-wrap: balance;
+}
+
+.detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  color: var(--z-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.actions {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px var(--z-gutter) calc(24px + var(--z-safe-bottom));
+}

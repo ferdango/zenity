@@ -1,0 +1,44 @@
+.tabs {
+  padding: 16px var(--z-gutter) 8px;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px var(--z-gutter);
+}
+
+.single {
+  padding: 8px var(--z-gutter);
+}
+
+.list {
+  margin: 0 var(--z-gutter);
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  overflow: hidden;
+}
+
+.list > * + * {
+  border-top: 1px solid var(--z-divider);
+}
+
+.empty {
+  padding: 8px var(--z-gutter) 24px;
+}
+
+.danger {
+  display: grid;
+  padding: 24px var(--z-gutter) 40px;
+}
+
+.dangerIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--z-negative-container);
+  color: var(--z-negative);
+}

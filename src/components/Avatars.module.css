@@ -1,0 +1,128 @@
+.avatar {
+  --av-size: 40px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--av-size);
+  height: var(--av-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.avatar img {
+  width: 68%;
+  height: auto;
+}
+
+.white {
+  background: #fff;
+}
+
+.sheet {
+  background: var(--z-card-green);
+}
+
+.api {
+  background: var(--z-card-purple);
+}
+
+.bank {
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+}
+
+.initials {
+  background: var(--z-surface-highest);
+  color: var(--z-on-surface);
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.check {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--z-card-purple);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--z-bg);
+}
+
+/* ── Logos de fuentes de conexión ─────────────────────────── */
+.logo {
+  --logo-size: 56px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  flex-shrink: 0;
+  border-radius: var(--z-radius-lg);
+  overflow: hidden;
+}
+
+.logo img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+.logoTile {
+  background: var(--z-surface-high);
+}
+
+.mono {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.bcp {
+  background: linear-gradient(135deg, #0a3fa8, #002a8d);
+  color: #fff;
+  font-style: italic;
+  font-size: calc(var(--logo-size) * 0.28);
+}
+
+.bcp::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--logo-size) * 0.15);
+  width: calc(var(--logo-size) * 0.12);
+  height: calc(var(--logo-size) * 0.12);
+  border-top: max(1.5px, calc(var(--logo-size) * 0.045)) solid #ff7800;
+  border-right: max(1.5px, calc(var(--logo-size) * 0.045)) solid #ff7800;
+  transform: rotate(45deg);
+}
+
+.bcp span {
+  padding-left: calc(var(--logo-size) * 0.14);
+}
+
+.bbva {
+  background: linear-gradient(160deg, #1464a5, #072146);
+  color: #fff;
+  font-size: calc(var(--logo-size) * 0.27);
+}
+
+.pichincha {
+  background: #ffdd00;
+}
+
+.pichincha::before {
+  content: '';
+  width: calc(var(--logo-size) * 0.4);
+  height: calc(var(--logo-size) * 0.4);
+  border-radius: 3px;
+  background: #0f265c;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 55% 100%, 55% 45%, 0 45%);
+}
+
+.iconTile {
+  color: #fff;
+}

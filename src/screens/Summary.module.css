@@ -1,0 +1,56 @@
+.hero {
+  display: grid;
+  gap: 2px;
+  padding: 8px var(--z-gutter) 16px;
+}
+
+.label {
+  font-size: 1rem;
+  color: var(--z-on-surface-variant);
+}
+
+.amount {
+  font-size: clamp(2.5rem, 2rem + 3vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 420;
+  letter-spacing: -0.03em;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--z-on-surface-low);
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px 2px 4px;
+  border-radius: var(--z-radius-full);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: var(--z-positive-container);
+  color: var(--z-positive);
+}
+
+.delta[data-negative='true'] {
+  background: var(--z-negative-container);
+  color: var(--z-negative);
+}
+
+.tabs {
+  padding: 0 var(--z-gutter) 12px;
+}
+
+.chart {
+  padding: 0 var(--z-gutter);
+}
+
+.ask {
+  display: flex;
+  justify-content: center;
+  padding: 16px var(--z-gutter) 32px;
+}

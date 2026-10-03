@@ -1,0 +1,126 @@
+.splash {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: calc(24px + var(--z-safe-top)) var(--z-gutter) calc(24px + var(--z-safe-bottom));
+  overflow: hidden;
+}
+
+.hero {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+}
+
+.brand {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+.wordmark {
+  font-size: 2.25rem;
+  line-height: 1;
+  font-weight: 450;
+  letter-spacing: -0.03em;
+  font-variation-settings: 'ROND' 60;
+}
+
+.halo {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--z-blue) 38%, transparent), transparent 65%);
+  filter: blur(8px);
+  z-index: -1;
+}
+
+.floating {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  border-radius: var(--z-radius-full);
+  background: color-mix(in srgb, var(--z-surface-high) 72%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 0 0 1px var(--z-divider),
+    var(--z-shadow-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.f1,
+.f2,
+.f3 {
+  left: 50%;
+  top: 50%;
+}
+
+/* Posiciones relativas al centro del destello */
+.f1 {
+  margin: -128px 0 0 -172px;
+}
+.f2 {
+  margin: -72px 0 0 52px;
+}
+.f3 {
+  margin: 92px 0 0 -158px;
+}
+
+.dot {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--z-surface-highest);
+}
+
+.bottom {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--z-on-surface-variant);
+  margin-bottom: 16px;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+  .f1 {
+    margin-left: -230px;
+  }
+  .f2 {
+    margin-left: 90px;
+  }
+  .f3 {
+    margin-left: -210px;
+  }
+}

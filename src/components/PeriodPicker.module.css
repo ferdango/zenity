@@ -1,0 +1,69 @@
+.picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: var(--z-radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.month {
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+}
+
+.year {
+  background: var(--z-surface-high);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  min-width: 220px;
+  padding: 8px 0;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-high);
+  box-shadow: var(--z-shadow-3);
+  transform-origin: top left;
+}
+
+.menuRight {
+  left: auto;
+  right: 0;
+  transform-origin: top right;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  text-align: left;
+  font-size: 0.9375rem;
+}
+
+.item[aria-checked='true'] {
+  background: color-mix(in srgb, var(--z-primary) 12%, transparent);
+  color: var(--z-primary);
+  font-weight: 500;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+}

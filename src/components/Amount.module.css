@@ -1,0 +1,39 @@
+.amount {
+  display: inline-grid;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.amount > span {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--z-dur-long) var(--z-ease-emphasized),
+    filter var(--z-dur-long) var(--z-ease-emphasized),
+    transform var(--z-dur-long) var(--z-ease-emphasized);
+}
+
+.mask {
+  opacity: 0;
+  filter: blur(8px);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.hidden .value {
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(0.96);
+}
+
+.hidden .mask {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.positive {
+  color: var(--z-positive);
+}
+
+.negative {
+  color: var(--z-negative);
+}

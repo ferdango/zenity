@@ -1,0 +1,192 @@
+.search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  margin: 4px var(--z-gutter) 0;
+  padding: 0 8px 0 20px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  box-shadow: var(--z-glow-input);
+  color: var(--z-on-surface-variant);
+  transition: background-color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.search[data-active='true'] {
+  background: var(--z-surface-high);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--z-on-surface);
+  font-size: 1rem;
+}
+
+.search input::placeholder {
+  color: var(--z-on-surface-low);
+}
+
+.search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  padding: 16px var(--z-gutter) 8px;
+  overflow-x: auto;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+  padding: 8px var(--z-gutter) 32px;
+}
+
+.source {
+  display: grid;
+  grid-template-columns: 56px 1fr 24px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 14px 14px 14px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  text-align: left;
+}
+
+.logoWrap {
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  left: -10px;
+  bottom: -8px;
+  padding: 3px 8px;
+  border-radius: var(--z-radius-full);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1rem;
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--z-surface);
+  white-space: nowrap;
+}
+
+.pink {
+  background: #d93263;
+}
+.orange {
+  background: #f25a1d;
+}
+.blue {
+  background: #3d7cf2;
+}
+
+.sourceText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sourceTitle {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+.sourceDesc {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--z-on-surface-variant);
+}
+
+/* Hoja "Conectando…" */
+.connecting {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 20px 0 8px;
+  text-align: center;
+}
+
+.logoPulse {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.orbit {
+  position: absolute;
+  inset: -14px;
+  border-radius: 26px;
+  background: var(--z-gradient-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+  animation: spin-angle 2.4s linear infinite;
+}
+
+@keyframes spin-angle {
+  to {
+    --z-angle: 360deg;
+  }
+}
+
+.steps {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 8px auto 0;
+  text-align: left;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: var(--z-on-surface-low);
+  transition: color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.step[data-state='done'] {
+  color: var(--z-on-surface);
+}
+
+.step[data-state='active'] {
+  color: var(--z-on-surface);
+}
+
+.stepIcon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.secure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--z-on-surface-low);
+}

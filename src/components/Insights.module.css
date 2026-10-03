@@ -1,0 +1,161 @@
+.section {
+  display: grid;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px var(--z-gutter) 16px;
+}
+
+.headerTitle {
+  flex: 1;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.list {
+  display: grid;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  padding: 16px var(--z-gutter);
+  border-bottom: 1px solid var(--z-divider);
+}
+
+.item:first-child {
+  padding-top: 4px;
+}
+
+.content {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+.body {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  color: var(--z-on-surface-variant);
+}
+
+.note {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+.loading {
+  padding-top: 6px;
+}
+
+/* Tarjetas "Mayor impacto del mes" */
+.impactList {
+  display: grid;
+  gap: 8px;
+  padding: 0 var(--z-gutter);
+}
+
+.impact {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+}
+
+.impactTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.impactName {
+  flex: 1;
+  min-width: 0;
+}
+
+.impactAmount {
+  display: grid;
+  justify-items: end;
+}
+
+.impactValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+}
+
+.impactNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--z-divider);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+/* Chips de insights rápidos */
+.quick {
+  display: flex;
+  gap: 8px;
+  padding: 0 var(--z-gutter) 4px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--z-gutter);
+}
+
+.quickCard {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+  display: grid;
+  gap: 4px;
+  width: 168px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+}
+
+.quickLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.quickValue {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+.quickHint {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.warning {
+  background: color-mix(in srgb, var(--z-warning) 12%, var(--z-surface));
+}
+
+.warning .quickLabel {
+  color: var(--z-warning);
+}

@@ -1,0 +1,56 @@
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  padding: calc(8px + var(--z-safe-top)) 12px 8px;
+  background: transparent;
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.topBar[data-scrolled='true'] {
+  background: var(--z-surface-glass);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 1px 0 var(--z-divider);
+}
+
+.wide {
+  grid-template-columns: auto 1fr auto;
+}
+
+.start,
+.end {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.end {
+  justify-content: flex-end;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  display: block;
+  text-align: center;
+  font-size: 0.8125rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+  font-weight: 400;
+}

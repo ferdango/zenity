@@ -1,0 +1,41 @@
+/* Contenedores de pantalla compartidos */
+.z-page {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.z-container {
+  width: 100%;
+  max-width: var(--z-content);
+  margin-inline: auto;
+}
+
+.z-gutter {
+  padding-inline: var(--z-gutter);
+}
+
+.z-stack {
+  display: grid;
+  gap: 8px;
+}
+
+/* Barra de acciones inferior pegajosa (funciona dentro de contenedores animados) */
+.z-action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+  padding: 28px var(--z-gutter) calc(16px + var(--z-safe-bottom));
+  background: linear-gradient(to bottom, transparent, var(--z-bg) 28px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --z-gutter: 24px;
+  }
+}
