@@ -5,6 +5,7 @@ import mastercard from '../assets/brands/mastercard.svg'
 import visa from '../assets/brands/visa.svg'
 import type { Connection } from '../data/mock'
 import { cn } from '../lib/cn'
+import { useApp } from '../state/context'
 import { Amount } from './Amount'
 import styles from './Cards.module.css'
 import { ApiGlyph, SheetGlyph } from './Glyphs'
@@ -40,6 +41,7 @@ function Digits({ last4 }: { last4: string }) {
 
 /** Tarjeta del carrusel de cuentas en Inicio. */
 export function AccountCard({ connection }: { connection: Connection }) {
+  const holder = useApp().profile.fullName
   const isCard = Boolean(connection.last4 && connection.holder)
   const isNew = Boolean(connection.sourceId)
   return (
@@ -64,7 +66,7 @@ export function AccountCard({ connection }: { connection: Connection }) {
           ) : (
             <Amount value={connection.balance} className={styles.cardAmount} />
           )}
-          {isCard && <p className={styles.cardHolder}>{connection.holder}</p>}
+          {isCard && <p className={styles.cardHolder}>{holder}</p>}
         </div>
         <span className={styles.brand}>
           <BrandMark connection={connection} />
@@ -97,6 +99,7 @@ export function CreditCard({ connection }: { connection: Connection }) {
   }
 
   const isCard = Boolean(connection.last4 && connection.holder)
+  const holder = useApp().profile.fullName
 
   return (
     <div className={styles.creditWrap}>
@@ -119,7 +122,7 @@ export function CreditCard({ connection }: { connection: Connection }) {
         <div className={styles.cardBottom}>
           <div>
             <Amount value={connection.balance} className={styles.creditAmount} />
-            {isCard && <p className={styles.cardHolder}>{connection.holder}</p>}
+            {isCard && <p className={styles.cardHolder}>{holder}</p>}
           </div>
           <span className={styles.brand} style={{ height: 32 }}>
             <BrandMark connection={connection} size={32} />

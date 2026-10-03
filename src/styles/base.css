@@ -19,7 +19,8 @@ html {
 
 body {
   min-height: 100dvh;
-  background: var(--z-bg);
+  /* El fondo lo pinta <html>; así el resplandor ambiental (body::before) queda visible */
+  background: transparent;
   color: var(--z-on-surface);
   font-family: var(--z-font);
   font-size: 1rem;
@@ -32,6 +33,20 @@ body {
   transition:
     background-color var(--z-dur-medium) var(--z-ease-standard),
     color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+/* Luz ambiental de la paleta Midnight: azul arriba a la izquierda, violeta arriba a la
+   derecha y un toque turquesa abajo. Fijo y sin animación para no costar rendimiento. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70vmax 45vmax at -5% -10%, rgb(66 133 244 / 0.16), transparent 62%),
+    radial-gradient(55vmax 40vmax at 105% 0%, rgb(155 114 203 / 0.13), transparent 60%),
+    radial-gradient(80vmax 45vmax at 50% 115%, rgb(20 184 166 / 0.07), transparent 60%);
 }
 
 #root {

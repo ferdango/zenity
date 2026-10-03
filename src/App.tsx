@@ -14,6 +14,7 @@ import { Home } from './screens/Home'
 import { Login } from './screens/Login'
 import { Movements } from './screens/Movements'
 import { NotificationsPrompt } from './screens/NotificationsPrompt'
+import { RegisterCompany, RegisterPersonal } from './screens/Register'
 import { Review } from './screens/Review'
 import { Splash } from './screens/Splash'
 import { Summary } from './screens/Summary'
@@ -56,6 +57,9 @@ function AnimatedRoutes() {
       <Routes location={location} key={routesKey}>
         <Route path="/" element={screen(<Splash />)} />
         <Route path="/login" element={screen(<Login />)} />
+        <Route path="/registro/datos" element={screen(<RegisterPersonal />)} />
+        <Route path="/registro/empresa" element={screen(<RegisterCompany />)} />
+        <Route path="/registro" element={<Navigate to="/registro/datos" replace />} />
         <Route path="/notificaciones" element={screen(<NotificationsPrompt />)} />
         <Route path="/analizando" element={screen(<Analyzing />)} />
         <Route path="/conexiones/resultado" element={screen(<ConnectionResult />)} />

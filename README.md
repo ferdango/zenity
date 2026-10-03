@@ -4,13 +4,17 @@
 
 <p>
   <img src="docs/screenshots/splash.jpg" width="200" alt="Bienvenida" />
-  <img src="docs/screenshots/inicio.jpg" width="200" alt="Inicio" />
-  <img src="docs/screenshots/chat.jpg" width="200" alt="Chat con Zenity" />
-  <img src="docs/screenshots/resumen.jpg" width="200" alt="Resumen" />
+  <img src="docs/screenshots/registro-personal.jpg" width="200" alt="Registro: datos personales" />
+  <img src="docs/screenshots/registro-empresa.jpg" width="200" alt="Registro: datos de la empresa" />
+  <img src="docs/screenshots/onboarding.jpg" width="200" alt="Recorrido de bienvenida" />
 </p>
 <p>
+  <img src="docs/screenshots/inicio.jpg" width="200" alt="Inicio con la paleta Midnight" />
+  <img src="docs/screenshots/chat.jpg" width="200" alt="Chat con Zenity" />
+  <img src="docs/screenshots/resumen.jpg" width="200" alt="Resumen" />
   <img src="docs/screenshots/ingresos.jpg" width="200" alt="Ingresos" />
-  <img src="docs/screenshots/nueva-cuenta-claro.jpg" width="200" alt="Nueva cuenta en tema claro" />
+</p>
+<p>
   <img src="docs/screenshots/escritorio.jpg" width="412" alt="Vista de escritorio" />
 </p>
 
@@ -34,9 +38,11 @@ npm run lint      # oxlint
 | --- | --- | --- |
 | Splash | `/` | Bienvenida con destello animado, resplandor de fondo y CTA |
 | Login (×2) | `/login` · `/login?modo=registro` | Correo con validación, Google/Apple (simulado) |
+| — (nuevo) | `/registro/datos` | Registro paso 1: nombres, apellidos, fecha de nacimiento (+18), correo, celular (+51) y dirección |
+| — (nuevo) | `/registro/empresa` | Registro paso 2: razón social, RUC (con dígito verificador de SUNAT) e ingreso mínimo mensual |
 | Notifications | `/notificaciones` | Hoja inferior para activar notificaciones push |
-| Home | `/inicio` | Saludo según la hora, ocultar saldos, periodo, carrusel de cuentas, ingresos/egresos/total, resumen de IA, reporte |
-| Menu | menú lateral | Drawer en móvil, barra lateral fija en escritorio (como Gemini), tema oscuro/claro/sistema |
+| Home | `/inicio` | Saludo según la hora, ocultar saldos, periodo, carrusel de cuentas, ingresos/egresos/total, resumen de IA, reporte y **recorrido de bienvenida** en el primer ingreso |
+| Menu | menú lateral | Drawer en móvil, barra lateral fija en escritorio (como Gemini), perfil y empresa registrados, "Ver tutorial" |
 | Add new connection | `/conexiones/nueva` | Búsqueda, filtros y conexión animada a bancos, APIs, bases de datos y archivos |
 | Conection added / error | `/conexiones/resultado` | Éxito o error con nube animada (*SQL Server* simula un error la primera vez) |
 | Loading (×4) | `/analizando` | Análisis con IA en 4 pasos con progreso |
@@ -46,9 +52,24 @@ npm run lint      # oxlint
 | Chat | `/chat` | Chat con Zenity: sugerencias, respuestas que se escriben en vivo, tablas, adjuntos y dictado por voz |
 | Single conection / Empty data | `/conexion/:id` | Tarjeta con inclinación 3D, movimientos, estado vacío y eliminar conexión |
 
+## Registro y onboarding
+
+- **Registro en 2 pasos** después de "Regístrate": datos personales y datos de la empresa, con campos *filled* de Material 3 (etiqueta flotante, brillo de Gemini al enfocar), validación en vivo, formato automático del celular y del monto, y verificación simulada del RUC con SUNAT. Los datos solo viven en memoria; la app guarda únicamente el nombre y la razón social para el saludo y el menú.
+- **Recorrido de bienvenida** en el primer ingreso: un foco animado con borde de degradado recorre cada sección del inicio (resumen, periodo, cuentas, agregar cuenta, ingresos/egresos/total, resumen con IA, reporte, notificaciones, menú) y cada opción de la barra inferior. Se puede repetir desde **Menú → Ver tutorial**.
+
+## Paleta Midnight (solo modo oscuro)
+
+El fondo gris neutro (`#131314`) con tiles verde y naranja al 18 % producía tonos oliva y marrón apagados, con poco contraste entre las tarjetas y el fondo. La propuesta actual:
+
+- **Fondo** negro azulado `#0b0d13` con superficies de matiz índigo y una luz ambiental muy suave (azul, violeta y turquesa) detrás de todas las pantallas.
+- **Ingresos**: degradado esmeralda con luz menta en la esquina, borde degradado y halo verde.
+- **Egresos**: degradado rosa/borgoña (en lugar de marrón) con acento coral, más legible como alerta.
+- **Total**: protagonista con el degradado de IA (azul → violeta → rosa) en el relleno y en el borde.
+- Iconos en pastillas del color del acento, montos en blanco y variación vs. mes anterior en píldoras verde/roja según sea buena o mala.
+
 ## Estilo Gemini aplicado
 
-- **Tokens reales de Gemini** (`src/styles/tokens.css`): superficies `#131314` / `#1e1f20` / `#282a2c`, `primary #a8c7fa`, contenedores, contornos y sus equivalentes del tema claro.
+- **Tokens de Gemini** (`src/styles/tokens.css`): roles de color (`primary #a8c7fa`, contenedores, contornos), formas y curvas de movimiento, sobre la paleta Midnight.
 - **Tipografía variable Google Sans Flex** (la de Gemini) con ejes de peso, ancho y redondez; iconos **Material Symbols Rounded** (equivalente público de Google Symbols) con transición de contorno a relleno.
 - **Movimiento Material 3**: curvas `emphasized` y `decelerate`, transición de eje compartido al avanzar/volver (detecta el botón atrás del navegador) y *fade through* entre pestañas.
 - **Efectos de IA**: saludo con degradado que barre el texto, texto con brillo ("Pensando…"), barras de carga azules, texto que aparece palabra por palabra, destello que gira mientras piensa, borde cónico giratorio en el campo de entrada y resplandor de fondo animado.

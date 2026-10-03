@@ -13,35 +13,25 @@ interface SummaryTileProps {
   delta?: number | null
 }
 
-const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'balance' } as const
+const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings' } as const
 
 /** Tiles "Ingresos / Egresos / Total" del Inicio. */
 export function SummaryTile({ kind, label, value, caption, to, delta }: SummaryTileProps) {
   return (
     <Link to={to} className={cn(styles.summary, styles[kind])} data-ripple="">
-      {kind === 'total' ? (
-        <Icon
-          name={value >= 0 ? 'arrow_drop_up' : 'arrow_drop_down'}
-          size={32}
-          className={styles.summaryIcon}
-          style={{ color: value >= 0 ? 'var(--z-positive)' : 'var(--z-negative)' }}
-        />
-      ) : (
-        <Icon name={ICONS[kind]} size={36} weight={300} className={styles.summaryIcon} />
-      )}
+      <span className={styles.summaryIcon} aria-hidden>
+        <Icon name={ICONS[kind]} size={26} weight={500} />
+      </span>
       <span className={styles.summaryText}>
         <span className={styles.summaryLabel}>{label}</span>
         <Amount value={value} className={styles.summaryValue} sign={kind === 'total' ? 'always' : 'never'} />
         <span className={styles.summaryCaption}>
           {caption}
           {delta !== undefined && delta !== null && (
-            <>
-              {' · '}
-              <span className={styles.delta} data-negative={kind === 'expense' ? delta > 0 : delta < 0}>
-                <Icon name={delta >= 0 ? 'arrow_upward' : 'arrow_downward'} size={12} weight={600} />
-                {Math.abs(delta)}% vs. mes anterior
-              </span>
-            </>
+            <span className={styles.delta} data-negative={kind === 'expense' ? delta > 0 : delta < 0}>
+              <Icon name={delta >= 0 ? 'arrow_upward' : 'arrow_downward'} size={13} weight={600} />
+              {Math.abs(delta)}% vs. mes anterior
+            </span>
           )}
         </span>
       </span>

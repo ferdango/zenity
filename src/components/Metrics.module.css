@@ -1,64 +1,131 @@
-/* ── Tiles de resumen (Inicio) ────────────────────────────── */
+/* ── Tiles de resumen (Inicio) ──────────────────────────────
+ * Cada tile tiene su propio "acento luminoso": relleno con degradado profundo,
+ * una luz radial en la esquina, borde degradado de 1px y un halo del mismo color.
+ */
 .summary {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  padding: 14px 16px;
+  padding: 16px;
+  border: 1px solid transparent;
   border-radius: var(--z-radius-xl);
-  background: var(--tile-bg);
+  background:
+    var(--tile-fill) padding-box,
+    var(--tile-border) border-box;
+  box-shadow: var(--tile-glow);
   text-align: left;
-  color: var(--z-on-surface);
+  color: #fff;
+  transition:
+    transform var(--z-dur-medium) var(--z-ease-emphasized),
+    box-shadow var(--z-dur-medium) var(--z-ease-emphasized);
+}
+
+/* Brillo que cruza el tile al pasar el cursor */
+.summary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.12) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 900ms var(--z-ease-emphasized);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .summary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--tile-glow-hover);
+  }
+  .summary:hover::after {
+    transform: translateX(120%);
+  }
+  .summary:hover .summaryArrow {
+    transform: translateX(3px);
+    background: rgb(255 255 255 / 0.18);
+  }
+}
+
+.summary:active {
+  transform: scale(0.985);
 }
 
 .income {
-  --tile-bg: color-mix(in srgb, var(--z-income) 18%, var(--z-bg));
-  --tile-accent: var(--z-positive);
+  --tile-accent: #6ee7b7;
+  --tile-fill:
+    radial-gradient(120% 140% at 0% 0%, rgb(52 211 153 / 0.34) 0%, transparent 55%),
+    linear-gradient(135deg, #0e3d30 0%, #0a2b26 55%, #08201f 100%);
+  --tile-border: linear-gradient(135deg, rgb(110 231 183 / 0.65), rgb(110 231 183 / 0.1) 45%, rgb(110 231 183 / 0.03));
+  --tile-glow: 0 18px 40px -24px rgb(16 185 129 / 0.75);
+  --tile-glow-hover: 0 22px 48px -20px rgb(16 185 129 / 0.85);
 }
 
 .expense {
-  --tile-bg: color-mix(in srgb, var(--z-expense) 18%, var(--z-bg));
-  --tile-accent: var(--z-negative);
+  --tile-accent: #fda4af;
+  --tile-fill:
+    radial-gradient(120% 140% at 0% 0%, rgb(251 113 133 / 0.34) 0%, transparent 55%),
+    linear-gradient(135deg, #4d1528 0%, #34101f 55%, #250b19 100%);
+  --tile-border: linear-gradient(135deg, rgb(253 164 175 / 0.65), rgb(253 164 175 / 0.1) 45%, rgb(253 164 175 / 0.03));
+  --tile-glow: 0 18px 40px -24px rgb(244 63 94 / 0.75);
+  --tile-glow-hover: 0 22px 48px -20px rgb(244 63 94 / 0.85);
 }
 
+/* El total es el protagonista: degradado de IA (azul → violeta → rosa) */
 .total {
-  --tile-bg: var(--z-surface);
-  --tile-accent: var(--z-on-surface);
-}
-
-:root[data-theme='light'] .income {
-  --tile-bg: color-mix(in srgb, var(--z-income) 14%, #fff);
-}
-
-:root[data-theme='light'] .expense {
-  --tile-bg: color-mix(in srgb, var(--z-expense) 12%, #fff);
+  --tile-accent: #c7d2fe;
+  --tile-fill:
+    radial-gradient(120% 140% at 0% 0%, rgb(129 140 248 / 0.4) 0%, transparent 55%),
+    radial-gradient(90% 120% at 100% 100%, rgb(217 101 112 / 0.22) 0%, transparent 60%),
+    linear-gradient(135deg, #1c2a6c 0%, #251f5c 50%, #36194f 100%);
+  --tile-border: linear-gradient(120deg, #4285f4, #9b72cb 50%, #d96570);
+  --tile-glow: 0 18px 44px -22px rgb(99 102 241 / 0.8);
+  --tile-glow-hover: 0 22px 52px -18px rgb(99 102 241 / 0.9);
 }
 
 .summaryIcon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--tile-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile-accent) 28%, transparent);
   color: var(--tile-accent);
 }
 
 .summaryText {
   flex: 1;
   display: grid;
+  gap: 1px;
   min-width: 0;
 }
 
 .summaryLabel {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.25rem;
+  color: color-mix(in srgb, var(--tile-accent) 55%, #fff);
 }
 
 .summaryValue {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 450;
+  font-size: 1.625rem;
+  line-height: 2.125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #fff;
 }
 
 .summaryCaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   font-size: 0.8125rem;
-  line-height: 1rem;
-  color: var(--z-on-surface-variant);
+  line-height: 1.25rem;
+  color: rgb(255 255 255 / 0.66);
 }
 
 .summaryArrow {
@@ -68,28 +135,33 @@
   height: 44px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--tile-accent) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-on-surface) 30%, transparent);
-  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22);
+  color: #fff;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition:
+    transform var(--z-dur-medium) var(--z-ease-emphasized),
+    background-color var(--z-dur-medium) var(--z-ease-standard);
 }
 
-@media (hover: hover) {
-  .summary:hover .summaryArrow {
-    transform: translateX(3px);
-  }
-}
-
+/* Variación vs. mes anterior: píldora verde si es buena, roja si es mala */
 .delta {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  padding: 0 8px 0 5px;
+  border-radius: var(--z-radius-full);
+  background: rgb(134 239 172 / 0.14);
+  color: #86efac;
   font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--z-positive);
+  font-weight: 600;
+  line-height: 1.25rem;
 }
 
 .delta[data-negative='true'] {
-  color: var(--z-negative);
+  background: rgb(252 165 165 / 0.14);
+  color: #fca5a5;
 }
 
 /* ── Tarjetas de métricas (Movimientos) ───────────────────── */

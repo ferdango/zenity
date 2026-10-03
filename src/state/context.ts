@@ -1,7 +1,6 @@
 import { createContext, use } from 'react'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 
-export type ThemePreference = 'dark' | 'light' | 'system'
 export type SheetName = 'notifications' | 'faq' | 'rating' | null
 
 export interface Toast {
@@ -10,10 +9,40 @@ export interface Toast {
   icon?: string
 }
 
+/** Datos del usuario que se muestran en la app (saludo, menú, tarjetas). */
+export interface Profile {
+  firstName: string
+  fullName: string
+  initials: string
+  company?: string
+}
+
+export interface PersonalData {
+  nombres: string
+  apellidos: string
+  nacimiento: string
+  email: string
+  celular: string
+  direccion: string
+}
+
+export interface CompanyData {
+  razonSocial: string
+  ruc: string
+  ingresoMinimo: string
+}
+
+/** Borrador del registro: vive solo en memoria mientras se completan los pasos. */
+export interface Registration {
+  personal: PersonalData
+  company: CompanyData
+}
+
 export interface AppState {
-  theme: ThemePreference
-  resolvedTheme: 'dark' | 'light'
-  setTheme: (theme: ThemePreference) => void
+  profile: Profile
+  setProfile: (profile: Profile) => void
+  registration: Registration
+  updateRegistration: <K extends keyof Registration>(part: K, data: Partial<Registration[K]>) => void
   hideBalances: boolean
   toggleHideBalances: () => void
   periodKey: string
@@ -34,6 +63,11 @@ export interface AppState {
   setDrawerOpen: (open: boolean) => void
   sheet: SheetName
   openSheet: (sheet: SheetName) => void
+  /** Recorrido de bienvenida (onboarding) */
+  tourDone: boolean
+  tourActive: boolean
+  startTour: () => void
+  endTour: () => void
 }
 
 export const AppStateContext = createContext<AppState | null>(null)
