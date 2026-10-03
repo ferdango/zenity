@@ -1,0 +1,37 @@
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.sidenav {
+  display: none;
+}
+
+.main {
+  position: relative;
+  min-width: 0;
+}
+
+.main[data-bottom-nav='true'] {
+  padding-bottom: var(--z-bottom-nav);
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    grid-template-columns: var(--z-sidenav) minmax(0, 1fr);
+  }
+
+  .sidenav {
+    display: block;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    background: var(--z-surface-low);
+    border-right: 1px solid var(--z-divider);
+  }
+
+  .main[data-bottom-nav='true'] {
+    padding-bottom: 32px;
+  }
+}

@@ -1,0 +1,109 @@
+.chart {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 44px 16px 16px;
+  border-radius: var(--z-radius-2xl);
+  background: var(--z-surface);
+}
+
+.axis {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  height: 200px;
+  padding-bottom: 28px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--z-on-surface-low);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.plot {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  height: 200px;
+}
+
+.grid {
+  position: absolute;
+  inset: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.grid span {
+  height: 1px;
+  background: var(--z-divider);
+}
+
+.col {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 28px;
+  min-width: 0;
+  height: 100%;
+}
+
+.track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 10px 10px 6px 6px;
+  background: color-mix(in srgb, var(--z-primary) 26%, var(--z-surface-high));
+  transform-origin: bottom;
+  transition: background-color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.col[aria-pressed='true'] .bar {
+  background: var(--z-on-surface);
+}
+
+:root[data-theme='light'] .col[aria-pressed='true'] .bar {
+  background: var(--z-primary);
+}
+
+@media (hover: hover) {
+  .col:hover:not([aria-pressed='true']) .bar {
+    background: color-mix(in srgb, var(--z-primary) 42%, var(--z-surface-high));
+  }
+}
+
+.label {
+  align-self: end;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.col[aria-pressed='true'] .label {
+  color: var(--z-on-surface);
+  font-weight: 600;
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  padding: 6px 10px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-on-surface);
+  color: var(--z-bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--z-shadow-2);
+  pointer-events: none;
+}

@@ -1,0 +1,313 @@
+/* ── Reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--z-bg);
+  scrollbar-gutter: stable;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--z-bg);
+  color: var(--z-on-surface);
+  font-family: var(--z-font);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+#root {
+  isolation: isolate;
+  min-height: 100dvh;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  overflow-wrap: break-word;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--z-primary) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--z-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbars discretos al estilo Gemini */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--z-outline-variant) transparent;
+}
+
+/* ── Escala tipográfica (gem-sys-typography) ───────────────── */
+.t-display {
+  font-size: clamp(2.25rem, 1.8rem + 2vw, 2.75rem);
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.t-headline-l {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.t-headline-m {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 420;
+  letter-spacing: -0.005em;
+}
+.t-headline-s {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 470;
+}
+.t-title-l {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+.t-title-m {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+.t-title-s {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+.t-body-l {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.t-body-m {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+.t-body-s {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+.t-label-l {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+.t-label-m {
+  font-size: 0.8125rem;
+  line-height: 1rem;
+  font-weight: 500;
+}
+.t-label-s {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+}
+
+.t-variant {
+  color: var(--z-on-surface-variant);
+}
+.t-low {
+  color: var(--z-on-surface-low);
+}
+.t-positive {
+  color: var(--z-positive);
+}
+.t-negative {
+  color: var(--z-negative);
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+}
+.t-strong {
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+/* ── Iconos: Material Symbols Rounded (equivalente a Google Symbols de Gemini) ── */
+.z-icon {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow: hidden;
+  transition: font-variation-settings var(--z-dur-medium) var(--z-ease-emphasized);
+}
+
+.z-icon--gradient {
+  background: var(--z-gradient-spark);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.z-spin {
+  animation: z-spin 1s linear infinite;
+}
+
+@keyframes z-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── State layer + ripple (Material 3) ─────────────────────── */
+[data-ripple] {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+[data-ripple]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--z-dur-short) var(--z-ease-standard);
+  z-index: -1;
+  border-radius: inherit;
+}
+
+@media (hover: hover) {
+  [data-ripple]:hover:not(:disabled, [aria-disabled='true'])::before {
+    opacity: var(--z-state-hover);
+  }
+}
+
+[data-ripple]:focus-visible::before {
+  opacity: var(--z-state-focus);
+}
+
+[data-ripple]:active:not(:disabled, [aria-disabled='true'])::before {
+  opacity: var(--z-state-pressed);
+}
+
+.z-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  transform: scale(0);
+  opacity: 0.16;
+  z-index: -1;
+  animation: z-ripple-in 450ms var(--z-ease-decelerate) forwards;
+}
+
+.z-ripple[data-leaving] {
+  animation:
+    z-ripple-in 450ms var(--z-ease-decelerate) forwards,
+    z-ripple-out 350ms var(--z-ease-standard) forwards;
+}
+
+@keyframes z-ripple-in {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes z-ripple-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ── Utilidades ────────────────────────────────────────────── */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,208 @@
+/*
+ * Zenity design tokens.
+ * Base: tokens del sistema de Gemini (gem-sys-*) adaptados a la marca Zenity
+ * definida en Figma (acentos de tarjetas, verde/naranja de ingresos/egresos).
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Superficies (Gemini dark) ───────────────────────────── */
+  --z-bg: #131314;
+  --z-surface-lowest: #0e0e0e;
+  --z-surface-low: #1b1b1b;
+  --z-surface: #1e1f20;
+  --z-surface-high: #282a2c;
+  --z-surface-highest: #333537;
+  --z-surface-glass: rgb(19 19 20 / 0.72);
+
+  --z-on-surface: #e3e3e3;
+  --z-on-surface-variant: #c4c7c5;
+  --z-on-surface-low: #9a9b9c;
+  --z-outline: #8e918f;
+  --z-outline-variant: #444746;
+  --z-divider: rgb(227 227 227 / 0.08);
+
+  /* ── Roles de color ──────────────────────────────────────── */
+  --z-primary: #a8c7fa;
+  --z-on-primary: #062e6f;
+  --z-primary-container: #1f3760;
+  --z-on-primary-container: #d3e3fd;
+  --z-primary-fixed: #d3e3fd;
+  --z-on-primary-fixed: #041e49;
+  --z-secondary-container: #004a77;
+  --z-on-secondary-container: #c2e7ff;
+
+  --z-positive: #6dd58c;
+  --z-positive-container: rgb(109 213 140 / 0.14);
+  --z-on-positive-container: #c4eed0;
+  --z-negative: #ff8a7a;
+  --z-negative-container: rgb(255 112 90 / 0.14);
+  --z-on-negative-container: #ffdad4;
+  --z-warning: #fdd663;
+  --z-error: #f2b8b5;
+  --z-celestial: #fdd663;
+
+  --z-inverse-surface: #e3e3e3;
+  --z-inverse-on-surface: #303030;
+  --z-scrim: rgb(0 0 0 / 0.55);
+
+  /* ── Marca / IA ──────────────────────────────────────────── */
+  --z-blue: #4285f4;
+  --z-purple: #9b72cb;
+  --z-pink: #d96570;
+  --z-brand-blue: #3186ff;
+  --z-brand-green: #0ebc5f;
+  --z-brand-yellow: #ffcc00;
+  --z-brand-red: #ff4641;
+
+  --z-gradient-spark: linear-gradient(135deg, #4285f4 0%, #9b72cb 55%, #d96570 100%);
+  --z-gradient-ai-text: linear-gradient(
+    74deg,
+    #4285f4 0%,
+    #9b72cb 9%,
+    #d96570 20%,
+    #d96570 24%,
+    #9b72cb 35%,
+    #4285f4 44%,
+    #9b72cb 50%,
+    #d96570 56%,
+    var(--z-bg) 75%,
+    var(--z-bg) 100%
+  );
+  --z-gradient-border: conic-gradient(
+    from var(--z-angle, 0deg),
+    #4285f4,
+    #9b72cb,
+    #d96570,
+    #ffcc00,
+    #0ebc5f,
+    #4285f4
+  );
+
+  /* Skeleton loader (valores reales de Gemini) */
+  --z-skel-1: #1e1f20;
+  --z-skel-2: #333537;
+  --z-skel-3: #487fed;
+
+  /* Tarjetas de cuentas (Figma) */
+  --z-card-purple: #9467d3;
+  --z-card-indigo: #4d54e9;
+  --z-card-light: #e2eefe;
+  --z-card-green: #12b76a;
+  --z-income: #12b76a;
+  --z-expense: #f54c01;
+
+  /* Glow del fondo */
+  --z-glow-1: #1f3b9b;
+  --z-glow-2: #3186ff;
+  --z-glow-3: #9b72cb;
+  --z-glow-4: #d96570;
+  --z-glow-opacity: 0.55;
+
+  /* ── Estados (Material 3) ────────────────────────────────── */
+  --z-state-hover: 0.08;
+  --z-state-focus: 0.1;
+  --z-state-pressed: 0.12;
+
+  /* ── Forma ───────────────────────────────────────────────── */
+  --z-radius-xs: 4px;
+  --z-radius-sm: 8px;
+  --z-radius-md: 12px;
+  --z-radius-lg: 16px;
+  --z-radius-xl: 24px;
+  --z-radius-2xl: 28px;
+  --z-radius-3xl: 36px;
+  --z-radius-full: 9999px;
+
+  /* ── Movimiento (gem-sys-motion) ─────────────────────────── */
+  --z-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --z-ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --z-ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --z-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --z-dur-short: 150ms;
+  --z-dur-medium: 300ms;
+  --z-dur-long: 500ms;
+  --z-dur-xlong: 800ms;
+
+  /* ── Tipografía ──────────────────────────────────────────── */
+  --z-font: 'Google Sans Flex', 'Google Sans', 'Helvetica Neue', system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+
+  /* ── Layout ──────────────────────────────────────────────── */
+  --z-gutter: 16px;
+  --z-content: 640px;
+  --z-sidenav: 288px;
+  --z-bottom-nav: 100px;
+  --z-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --z-safe-top: env(safe-area-inset-top, 0px);
+
+  --z-shadow-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --z-shadow-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --z-shadow-3: 0 4px 8px 3px rgb(0 0 0 / 0.15), 0 1px 3px rgb(0 0 0 / 0.3);
+  --z-glow-input: 0 0 20px 0 rgb(227 227 227 / 0.04);
+}
+
+/* ── Tema claro (Gemini light) ─────────────────────────────── */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --z-bg: #ffffff;
+  --z-surface-lowest: #ffffff;
+  --z-surface-low: #f8fafd;
+  --z-surface: #f0f4f9;
+  --z-surface-high: #e9eef6;
+  --z-surface-highest: #dde3ea;
+  --z-surface-glass: rgb(255 255 255 / 0.76);
+
+  --z-on-surface: #1f1f1f;
+  --z-on-surface-variant: #444746;
+  --z-on-surface-low: #727676;
+  --z-outline: #747775;
+  --z-outline-variant: #c4c7c5;
+  --z-divider: rgb(31 31 31 / 0.08);
+
+  --z-primary: #0b57d0;
+  --z-on-primary: #ffffff;
+  --z-primary-container: #d3e3fd;
+  --z-on-primary-container: #0842a0;
+  --z-primary-fixed: #d3e3fd;
+  --z-on-primary-fixed: #041e49;
+  --z-secondary-container: #c2e7ff;
+  --z-on-secondary-container: #004a77;
+
+  --z-positive: #146c2e;
+  --z-positive-container: #c4eed0;
+  --z-on-positive-container: #0f5223;
+  --z-negative: #c5221f;
+  --z-negative-container: #fce8e6;
+  --z-on-negative-container: #8c1d18;
+  --z-warning: #b06000;
+  --z-error: #b3261e;
+  --z-celestial: #f4b400;
+
+  --z-inverse-surface: #303030;
+  --z-inverse-on-surface: #f2f2f2;
+  --z-scrim: rgb(0 0 0 / 0.32);
+
+  --z-skel-1: #f0f4f9;
+  --z-skel-2: #e9eef6;
+  --z-skel-3: #487fed;
+
+  --z-glow-1: #9dd2ff;
+  --z-glow-2: #7cacf8;
+  --z-glow-3: #c597ff;
+  --z-glow-4: #ffa3c8;
+  --z-glow-opacity: 0.6;
+
+  --z-shadow-1: 0 1px 2px rgb(0 0 0 / 0.08), 0 1px 3px 1px rgb(0 0 0 / 0.06);
+  --z-shadow-2: 0 1px 2px rgb(0 0 0 / 0.1), 0 2px 6px 2px rgb(0 0 0 / 0.08);
+  --z-shadow-3: 0 4px 8px 3px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.1);
+  --z-glow-input: 0 2px 12px 0 rgb(11 87 208 / 0.08);
+}
+
+@property --z-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}

@@ -1,0 +1,43 @@
+.skeleton {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.word {
+  display: inline;
+  animation: word-in 420ms var(--z-ease-decelerate) both;
+}
+
+/* Aparición de cada palabra: desenfoque → nítido (streaming de Gemini) */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.strong {
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+.pos {
+  font-weight: 600;
+  color: var(--z-positive);
+}
+
+.neg {
+  font-weight: 600;
+  color: var(--z-negative);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word {
+    animation: none;
+  }
+}

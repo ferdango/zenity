@@ -1,0 +1,168 @@
+/*
+ * Efectos inspirados en Gemini: texto con degradado que "barre", shimmer de carga,
+ * líneas de skeleton azules, borde cónico giratorio y respiración del destello.
+ */
+
+/* Saludo con degradado (animateGradient de Gemini) */
+.fx-gradient-text {
+  background: var(--z-gradient-ai-text);
+  background-size: 400% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.fx-gradient-text[data-animate='true'] {
+  animation: fx-gradient-sweep 2.2s var(--z-ease-decelerate) both;
+}
+
+@keyframes fx-gradient-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+/* Shimmer de texto (gem-shimmer-sweep) */
+.fx-shimmer-text {
+  background: linear-gradient(
+    100deg,
+    var(--z-on-surface-low) 0%,
+    var(--z-on-surface-low) 38%,
+    var(--z-on-surface) 50%,
+    var(--z-on-surface-low) 62%,
+    var(--z-on-surface-low) 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fx-shimmer 2.2s linear infinite;
+}
+
+@keyframes fx-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  70%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+
+/* Barras de carga del loader de respuestas de Gemini */
+.fx-skeleton-line {
+  height: 14px;
+  border-radius: var(--z-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--z-skel-1) 0%,
+    var(--z-skel-2) 20%,
+    var(--z-skel-3) 40%,
+    var(--z-skel-2) 60%,
+    var(--z-skel-1) 80%,
+    var(--z-skel-1) 100%
+  );
+  background-size: 300% 100%;
+  animation: fx-skeleton 2.4s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes fx-skeleton {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+/* Borde con degradado cónico que gira (input-area-spin) */
+.fx-glow-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.fx-glow-border::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--z-gradient-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--z-dur-long) var(--z-ease-standard);
+  animation: fx-spin-angle 4s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fx-glow-border[data-active='true']::after {
+  opacity: 1;
+}
+
+@keyframes fx-spin-angle {
+  to {
+    --z-angle: 360deg;
+  }
+}
+
+/* Pulso suave (indicador "en vivo") */
+.fx-live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--z-positive);
+  flex-shrink: 0;
+}
+
+.fx-live-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: fx-ping 2s var(--z-ease-standard) infinite;
+}
+
+@keyframes fx-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  80%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-gradient-text[data-animate='true'],
+  .fx-shimmer-text,
+  .fx-skeleton-line,
+  .fx-glow-border::after,
+  .fx-live-dot::after {
+    animation: none;
+  }
+}

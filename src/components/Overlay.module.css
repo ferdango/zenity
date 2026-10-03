@@ -1,0 +1,156 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--z-scrim);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* ── Bottom sheet ──────────────────────────────────────────── */
+.sheetWrap {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 61;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sheet {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 560px;
+  max-height: min(88dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--z-radius-2xl) var(--z-radius-2xl) 0 0;
+  background: var(--z-surface);
+  color: var(--z-on-surface);
+  box-shadow: var(--z-shadow-3);
+  padding-bottom: calc(16px + var(--z-safe-bottom));
+  outline: none;
+  touch-action: none;
+}
+
+.handle {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.handle::before {
+  content: '';
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--z-outline);
+  opacity: 0.6;
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 20px 12px 24px;
+}
+
+.sheetBody {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 24px;
+  touch-action: pan-y;
+}
+
+@media (min-width: 640px) {
+  .sheetWrap {
+    inset: 0;
+    align-items: center;
+    padding: 24px;
+  }
+  .sheet {
+    border-radius: var(--z-radius-2xl);
+    padding-bottom: 20px;
+  }
+}
+
+/* ── Dialog ───────────────────────────────────────────────── */
+.dialogWrap {
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  pointer-events: none;
+}
+
+.dialog {
+  pointer-events: auto;
+  width: min(100%, 360px);
+  padding: 24px;
+  border-radius: var(--z-radius-2xl);
+  background: var(--z-surface-high);
+  box-shadow: var(--z-shadow-3);
+  outline: none;
+  text-align: center;
+}
+
+.dialogIcon {
+  display: grid;
+  place-items: center;
+  margin: 0 auto 16px;
+}
+
+.dialogTitle {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 400;
+}
+
+.dialogText {
+  margin-top: 12px;
+  color: var(--z-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* ── Snackbar ─────────────────────────────────────────────── */
+.toaster {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--z-toast-offset, 16px) + var(--z-safe-bottom));
+  z-index: 80;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-inverse-surface);
+  color: var(--z-inverse-on-surface);
+  box-shadow: var(--z-shadow-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

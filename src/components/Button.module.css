@@ -1,0 +1,140 @@
+.button {
+  --btn-bg: transparent;
+  --btn-fg: var(--z-on-surface);
+  --btn-border: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: var(--z-radius-full);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  box-shadow: inset 0 0 0 1px var(--btn-border);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  text-align: center;
+  transition:
+    transform var(--z-dur-short) var(--z-ease-standard),
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard),
+    opacity var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Deshabilitado al estilo Material 3: opaco, sin transparentar lo que hay detrás */
+.button:disabled,
+.button[aria-disabled='true'] {
+  --btn-fg: color-mix(in srgb, var(--z-on-surface) 38%, transparent);
+  cursor: default;
+}
+
+.filled:disabled,
+.tonal:disabled,
+.primaryTonal:disabled,
+.danger:disabled {
+  --btn-bg: color-mix(in srgb, var(--z-on-surface) 12%, var(--z-bg));
+  --btn-border: transparent;
+}
+
+.outlined:disabled {
+  --btn-border: color-mix(in srgb, var(--z-on-surface) 12%, transparent);
+}
+
+.lg {
+  height: 56px;
+  padding: 0 28px;
+  font-size: 1rem;
+}
+
+.sm {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  gap: 8px;
+}
+
+.full {
+  width: 100%;
+}
+
+/* Variantes (roles de Material 3 / Gemini) */
+.filled {
+  --btn-bg: var(--z-primary);
+  --btn-fg: var(--z-on-primary);
+}
+
+.tonal {
+  --btn-bg: var(--z-surface-high);
+  --btn-fg: var(--z-on-surface);
+}
+
+.primaryTonal {
+  --btn-bg: var(--z-primary-container);
+  --btn-fg: var(--z-on-primary-container);
+}
+
+.outlined {
+  --btn-border: var(--z-outline-variant);
+}
+
+.text {
+  padding-inline: 16px;
+  --btn-fg: var(--z-on-surface);
+}
+
+.danger {
+  --btn-bg: var(--z-negative-container);
+  --btn-fg: var(--z-negative);
+  --btn-border: color-mix(in srgb, var(--z-negative) 45%, transparent);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  animation: rotate 1.1s linear infinite;
+}
+
+.spinner circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 44 70;
+  animation: dash 1.4s var(--z-ease-standard) infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 2 70;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 44 70;
+    stroke-dashoffset: -12;
+  }
+  100% {
+    stroke-dasharray: 44 70;
+    stroke-dashoffset: -60;
+  }
+}

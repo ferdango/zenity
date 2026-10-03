@@ -1,0 +1,150 @@
+/*
+ * Resplandor de fondo inspirado en Gemini (lm-glow / gradient-strip):
+ * manchas radiales que derivan lentamente. Solo se anima transform (GPU).
+ */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Detrás del contenido: cada pantalla crea su propio contexto (isolation: isolate) */
+  z-index: -1;
+  opacity: var(--z-glow-opacity);
+  animation: bloom 1.6s var(--z-ease-decelerate) both;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.bottom {
+  -webkit-mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.55) 28%, transparent 60%);
+  mask-image: linear-gradient(to top, #000 0%, rgb(0 0 0 / 0.55) 28%, transparent 60%);
+}
+
+.top {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.4) 25%, transparent 55%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.4) 25%, transparent 55%);
+}
+
+.intense {
+  opacity: min(1, calc(var(--z-glow-opacity) + 0.3));
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.b1 {
+  width: 130vmax;
+  height: 130vmax;
+  left: -45vmax;
+  bottom: -88vmax;
+  background: radial-gradient(closest-side, var(--z-glow-1), transparent);
+  animation: drift1 18s ease-in-out infinite alternate;
+}
+
+.b2 {
+  width: 90vmax;
+  height: 90vmax;
+  right: -42vmax;
+  bottom: -58vmax;
+  background: radial-gradient(closest-side, var(--z-glow-2), transparent);
+  animation: drift2 22s ease-in-out infinite alternate;
+}
+
+.b3 {
+  width: 70vmax;
+  height: 70vmax;
+  left: 5vmax;
+  bottom: -52vmax;
+  background: radial-gradient(closest-side, var(--z-glow-3), transparent);
+  animation: drift3 26s ease-in-out infinite alternate;
+}
+
+.b4 {
+  width: 46vmax;
+  height: 46vmax;
+  right: 2vmax;
+  bottom: -34vmax;
+  background: radial-gradient(closest-side, var(--z-glow-4), transparent);
+  opacity: 0.7;
+  animation: drift4 20s ease-in-out infinite alternate;
+}
+
+.top .b1 {
+  bottom: auto;
+  top: -95vmax;
+}
+.top .b2 {
+  bottom: auto;
+  top: -62vmax;
+}
+.top .b3 {
+  bottom: auto;
+  top: -56vmax;
+}
+.top .b4 {
+  bottom: auto;
+  top: -38vmax;
+}
+
+.intense .blob {
+  animation-duration: 9s;
+}
+
+.intense .b3 {
+  bottom: -40vmax;
+}
+
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes drift1 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(14vmax, -4vmax, 0) scale(1.08);
+  }
+}
+
+@keyframes drift2 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(-18vmax, -6vmax, 0) scale(0.95);
+  }
+}
+
+@keyframes drift3 {
+  from {
+    transform: translate3d(-6vmax, 4vmax, 0) scale(0.9);
+  }
+  to {
+    transform: translate3d(16vmax, -8vmax, 0) scale(1.1);
+  }
+}
+
+@keyframes drift4 {
+  from {
+    transform: translate3d(4vmax, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-24vmax, -10vmax, 0) scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .blob {
+    animation: none;
+  }
+}

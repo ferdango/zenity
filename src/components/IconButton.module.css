@@ -1,0 +1,93 @@
+.iconButton {
+  --ib-size: 40px;
+  --ib-bg: transparent;
+  --ib-fg: var(--z-on-surface-variant);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--ib-size);
+  height: var(--ib-size);
+  flex-shrink: 0;
+  border-radius: var(--z-radius-full);
+  background: var(--ib-bg);
+  color: var(--ib-fg);
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    color var(--z-dur-medium) var(--z-ease-standard),
+    transform var(--z-dur-short) var(--z-ease-standard);
+}
+
+.iconButton:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.iconButton:disabled {
+  opacity: 0.38;
+}
+
+.sm {
+  --ib-size: 32px;
+}
+.lg {
+  --ib-size: 48px;
+}
+.xl {
+  --ib-size: 56px;
+}
+
+.tonal {
+  --ib-bg: var(--z-surface-high);
+  --ib-fg: var(--z-on-surface);
+}
+
+.filled {
+  --ib-bg: var(--z-primary);
+  --ib-fg: var(--z-on-primary);
+}
+
+.outlined {
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  --ib-fg: var(--z-on-surface);
+}
+
+.inverse {
+  --ib-bg: var(--z-on-surface);
+  --ib-fg: var(--z-bg);
+}
+
+.selected {
+  --ib-bg: var(--z-primary-container);
+  --ib-fg: var(--z-on-primary-container);
+}
+
+.badge {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--z-brand-red);
+  box-shadow: 0 0 0 2px var(--z-bg);
+}
+
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: ping 2.4s var(--z-ease-standard) infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}

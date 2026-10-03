@@ -1,0 +1,141 @@
+/* ── Tiles de resumen (Inicio) ────────────────────────────── */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--tile-bg);
+  text-align: left;
+  color: var(--z-on-surface);
+}
+
+.income {
+  --tile-bg: color-mix(in srgb, var(--z-income) 18%, var(--z-bg));
+  --tile-accent: var(--z-positive);
+}
+
+.expense {
+  --tile-bg: color-mix(in srgb, var(--z-expense) 18%, var(--z-bg));
+  --tile-accent: var(--z-negative);
+}
+
+.total {
+  --tile-bg: var(--z-surface);
+  --tile-accent: var(--z-on-surface);
+}
+
+:root[data-theme='light'] .income {
+  --tile-bg: color-mix(in srgb, var(--z-income) 14%, #fff);
+}
+
+:root[data-theme='light'] .expense {
+  --tile-bg: color-mix(in srgb, var(--z-expense) 12%, #fff);
+}
+
+.summaryIcon {
+  color: var(--tile-accent);
+}
+
+.summaryText {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+
+.summaryLabel {
+  font-size: 1rem;
+  line-height: 1.25rem;
+}
+
+.summaryValue {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 450;
+}
+
+.summaryCaption {
+  font-size: 0.8125rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-variant);
+}
+
+.summaryArrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tile-accent) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-on-surface) 30%, transparent);
+  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
+}
+
+@media (hover: hover) {
+  .summary:hover .summaryArrow {
+    transform: translateX(3px);
+  }
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--z-positive);
+}
+
+.delta[data-negative='true'] {
+  color: var(--z-negative);
+}
+
+/* ── Tarjetas de métricas (Movimientos) ───────────────────── */
+.metric {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  min-width: 0;
+}
+
+.metricOutlined {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+}
+
+.metricLarge {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.metricLabel {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.metricValue {
+  font-size: 1.625rem;
+  line-height: 2.125rem;
+  font-weight: 420;
+}
+
+.metricLarge .metricValue {
+  font-size: 2rem;
+  line-height: 2.5rem;
+}
+
+.metricCaption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.metricIcon {
+  margin-bottom: 6px;
+}
