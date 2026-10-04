@@ -8,8 +8,10 @@ import { AppleGlyph } from '../components/Glyphs'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useTimeouts } from '../lib/useTimeouts'
 import { useApp } from '../state/context'
 import styles from './Login.module.css'
+import type { VerifyState } from './VerifyOtp'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
@@ -20,8 +22,10 @@ export function Login() {
   const [params, setParams] = useSearchParams()
   const signup = params.get('modo') === 'registro'
   const navigate = useNavigate()
-  const { updateRegistration } = useApp()
-  const [email, setEmail] = useState('')
+  const schedule = useTimeouts()
+  const { registration, updateRegistration } = useApp()
+  // Si vuelve desde la verificación ("Cambiar correo"), el correo sigue escrito
+  const [email, setEmail] = useState(registration.personal.email)
   const [focused, setFocused] = useState(false)
   const [touched, setTouched] = useState(false)
   const [pending, setPending] = useState<Pending>(null)
@@ -29,9 +33,15 @@ export function Login() {
 
   const go = (kind: Exclude<Pending, null>) => {
     setPending(kind)
-    // Registro: continúa con los formularios de datos personales y de empresa.
-    if (signup && kind === 'email') updateRegistration('personal', { email: email.trim() })
-    window.setTimeout(() => navigate(signup ? '/registro/datos' : '/notificaciones'), 1100)
+    if (kind === 'email') updateRegistration('personal', { email: email.trim() })
+    schedule(() => {
+      // Registro: continúa con los formularios de datos personales y de empresa.
+      if (signup) return navigate('/registro/datos')
+      if (kind === 'apple') return navigate('/notificaciones')
+      // Inicio de sesión con correo o con Google: verificación con código de 4 dígitos.
+      const state: VerifyState = kind === 'email' ? { via: 'email', email: email.trim() } : { via: 'google' }
+      navigate('/verificacion', { state })
+    }, 1100)
   }
 
   const onSubmit = (event: FormEvent) => {
@@ -102,7 +112,7 @@ export function Login() {
             {touched && !valid && !focused ? 'Ingresa un correo válido, por ejemplo nombre@empresa.com' : ''}
           </span>
           <Button type="submit" size="lg" fullWidth loading={pending === 'email'} disabled={pending !== null && pending !== 'email'}>
-            {signup ? 'Continuar' : 'Inicia sesión'}
+            {signup ? 'Continuar' : pending === 'email' ? 'Enviando código…' : 'Inicia sesión'}
           </Button>
         </motion.form>
 
@@ -121,7 +131,7 @@ export function Login() {
             disabled={pending !== null && pending !== 'google'}
             onClick={() => go('google')}
           >
-            {signup ? 'Regístrate' : 'Inicia sesión'} con Google
+            {pending === 'google' ? 'Conectando con Google…' : `${signup ? 'Regístrate' : 'Inicia sesión'} con Google`}
           </Button>
           <Button
             variant="outlined"
@@ -133,7 +143,7 @@ export function Login() {
             disabled={pending !== null && pending !== 'apple'}
             onClick={() => go('apple')}
           >
-            {signup ? 'Regístrate' : 'Inicia sesión'} con Apple
+            {pending === 'apple' ? 'Conectando con Apple…' : `${signup ? 'Regístrate' : 'Inicia sesión'} con Apple`}
           </Button>
         </motion.div>
 

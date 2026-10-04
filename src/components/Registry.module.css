@@ -1,0 +1,290 @@
+/* ── Estado de la consulta dentro del campo ─────────────────── */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--z-on-surface-low);
+}
+
+.statusVerified {
+  color: var(--z-positive);
+}
+
+/* ── Aviso previo ──────────────────────────────────────────── */
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-lg);
+  background: color-mix(in srgb, var(--z-primary) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-primary) 16%, transparent);
+  color: var(--z-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+
+.hint strong {
+  color: var(--z-on-surface);
+  font-weight: 500;
+}
+
+/* ── Esqueleto de carga ────────────────────────────────────── */
+.skeleton {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface-low);
+  box-shadow: inset 0 0 0 1px var(--z-divider);
+}
+
+.skeletonHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeletonAvatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+}
+
+.skeletonLines {
+  flex: 1;
+  display: grid;
+  gap: 10px;
+}
+
+.skeletonField {
+  height: 52px;
+  border-radius: var(--z-radius-lg);
+  opacity: 0.55;
+}
+
+/* ── Identidad verificada (RENIEC) ─────────────────────────── */
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--z-radius-lg);
+  background: color-mix(in srgb, var(--z-positive) 9%, var(--z-surface-low));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-positive) 28%, transparent);
+}
+
+.identityIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--z-positive) 18%, transparent);
+  color: var(--z-positive);
+}
+
+.identityText {
+  display: grid;
+  min-width: 0;
+}
+
+.identityText strong {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.identityText span {
+  font-size: 0.8125rem;
+  color: var(--z-on-surface-variant);
+}
+
+/* ── Ficha RUC (SUNAT) ─────────────────────────────────────── */
+.company {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid transparent;
+  border-radius: var(--z-radius-xl);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgb(66 133 244 / 0.12), transparent 60%) padding-box,
+    linear-gradient(var(--z-surface), var(--z-surface)) padding-box,
+    linear-gradient(135deg, rgb(66 133 244 / 0.55), rgb(155 114 203 / 0.25) 45%, rgb(217 101 112 / 0.12)) border-box;
+  box-shadow: 0 18px 40px -26px rgb(66 133 244 / 0.6);
+}
+
+.companyHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.companyAvatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--z-gradient-spark);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.companyTitle {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.companyTitle strong {
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+.companyTitle span {
+  font-size: 0.8125rem;
+  color: var(--z-on-surface-low);
+  font-variant-numeric: tabular-nums;
+}
+
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 3px 8px 3px 6px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-positive-container);
+  color: var(--z-positive);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 8px;
+  border-radius: var(--z-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.pill[data-tone='good'] {
+  background: rgb(134 239 172 / 0.12);
+  color: #86efac;
+}
+
+.pill[data-tone='bad'] {
+  background: rgb(252 165 165 / 0.14);
+  color: #fca5a5;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.kind {
+  font-size: 0.8125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--z-divider);
+}
+
+.fact {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.factWide {
+  grid-column: 1 / -1;
+}
+
+.fact dt {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.fact dd {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface);
+  overflow-wrap: anywhere;
+}
+
+.ciiu {
+  margin-right: 4px;
+  color: var(--z-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.line {
+  display: block;
+}
+
+.line + .line {
+  margin-top: 4px;
+}
+
+.muted {
+  display: block;
+  color: var(--z-on-surface-low);
+  font-size: 0.8125rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chip {
+  padding: 2px 10px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.companyFoot {
+  font-size: 0.6875rem;
+  color: var(--z-on-surface-low);
+}

@@ -17,6 +17,10 @@ interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'pr
   trailing?: ReactNode
   /** Mantiene la etiqueta arriba (inputs de fecha) */
   floatLabel?: boolean
+  /** Dato verificado (RENIEC, SUNAT): solo lectura, con candado */
+  locked?: boolean
+  /** Destaca por un momento el campo recién completado automáticamente */
+  autofilled?: boolean
 }
 
 /** Campo de texto "filled" de Material 3 con etiqueta flotante y brillo de Gemini al enfocar. */
@@ -29,6 +33,8 @@ export function TextField({
   valid,
   trailing,
   floatLabel,
+  locked,
+  autofilled,
   className,
   id,
   onFocus,
@@ -43,8 +49,17 @@ export function TextField({
   const style = prefix ? ({ '--prefix-pad': `${prefix.length * 0.62 + 0.45}em` } as CSSProperties) : undefined
 
   return (
-    <div className={cn(styles.field, error && styles.invalid, !input.value && styles.empty, className)}>
-      <label htmlFor={inputId} className={cn(styles.box, 'fx-glow-border')} data-active={focused && !error}>
+    <div
+      className={cn(
+        styles.field,
+        error && styles.invalid,
+        !input.value && styles.empty,
+        locked && styles.locked,
+        autofilled && styles.autofilled,
+        className,
+      )}
+    >
+      <label htmlFor={inputId} className={cn(styles.box, 'fx-glow-border')} data-active={focused && !error && !locked}>
         {icon && <Icon name={icon} size={22} className={styles.icon} />}
         <span className={cn(styles.control, floatLabel && styles.float)} style={style}>
           <input
@@ -61,6 +76,7 @@ export function TextField({
               onBlur?.(event)
             }}
             {...input}
+            readOnly={locked || input.readOnly}
           />
           <span className={styles.label}>{label}</span>
           {prefix && (
@@ -83,6 +99,7 @@ export function TextField({
           )}
         </AnimatePresence>
         {trailing}
+        {locked && <Icon name="lock" size={18} className={styles.lock} label="Dato verificado, no editable" />}
       </label>
       <AnimatePresence initial={false} mode="wait">
         {message && (

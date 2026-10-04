@@ -28,11 +28,11 @@ export function validateBirthdate(value: string): string | null {
   return null
 }
 
-/** Fecha máxima permitida (hace 18 años) en formato del input date. */
-export function adultMaxDate(today = new Date()): string {
-  const d = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate())
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** DNI peruano: 8 dígitos. */
+export function validateDni(value: string): string | null {
+  if (!value) return 'Ingresa tu número de DNI'
+  if (!/^\d{8}$/.test(value)) return 'El DNI tiene 8 dígitos'
+  return null
 }
 
 export function validateEmail(value: string): string | null {

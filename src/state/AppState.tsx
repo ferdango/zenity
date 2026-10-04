@@ -17,8 +17,10 @@ const PROFILE_KEY = 'zenity.profile'
 const TOUR_KEY = 'zenity.tourDone'
 
 const EMPTY_REGISTRATION: Registration = {
-  personal: { nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
-  company: { razonSocial: '', ruc: '', ingresoMinimo: '' },
+  personal: { dni: '', nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
+  company: { ruc: '', razonSocial: '', nombreComercial: '', ingresoMinimo: '' },
+  reniec: null,
+  sunat: null,
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -43,11 +45,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const updateRegistration = useCallback(
-    <K extends keyof Registration>(part: K, data: Partial<Registration[K]>) => {
+    <K extends 'personal' | 'company'>(part: K, data: Partial<Registration[K]>) => {
       setRegistration((prev) => ({ ...prev, [part]: { ...prev[part], ...data } }))
     },
     [],
   )
+
+  const setLookup = useCallback(<K extends 'reniec' | 'sunat'>(kind: K, result: Registration[K]) => {
+    setRegistration((prev) => ({ ...prev, [kind]: result }))
+  }, [])
 
   const toggleHideBalances = useCallback(() => {
     setHideBalances((prev) => {
@@ -134,6 +140,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setProfile,
       registration,
       updateRegistration,
+      setLookup,
       hideBalances,
       toggleHideBalances,
       periodKey,
@@ -163,6 +170,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setProfile,
       registration,
       updateRegistration,
+      setLookup,
       hideBalances,
       toggleHideBalances,
       periodKey,

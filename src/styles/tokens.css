@@ -94,6 +94,10 @@
   --z-income: #12b76a;
   --z-expense: #f54c01;
 
+  /* Íconos de app de las notificaciones simuladas (SMS y correo) */
+  --z-app-sms: linear-gradient(180deg, #5cf08a 0%, #1fbf4f 100%);
+  --z-app-mail: linear-gradient(180deg, #5aa9ff 0%, #1a6dff 100%);
+
   /* Glow del fondo */
   --z-glow-1: #1f3b9b;
   --z-glow-2: #3186ff;

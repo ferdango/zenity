@@ -1,0 +1,195 @@
+.content {
+  display: grid;
+  gap: 28px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 16px var(--z-gutter) calc(32px + var(--z-safe-bottom));
+}
+
+.header {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.headerIcon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 4px;
+  border-radius: 20px;
+  background: var(--z-gradient-spark);
+  color: #fff;
+  box-shadow: 0 14px 36px -14px color-mix(in srgb, var(--z-purple) 85%, transparent);
+  transition: box-shadow var(--z-dur-long) var(--z-ease-standard);
+}
+
+.headerIcon[data-success='true'] {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+  box-shadow: 0 14px 36px -14px rgb(16 185 129 / 0.85);
+}
+
+.headerGlyph {
+  display: inline-flex;
+}
+
+.title {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.subtitle {
+  max-width: 36ch;
+  color: var(--z-on-surface-variant);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  text-wrap: pretty;
+}
+
+.destination {
+  color: var(--z-on-surface);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.link {
+  margin-top: -4px;
+  padding: 6px 12px;
+  border-radius: var(--z-radius-full);
+  color: var(--z-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.code {
+  display: grid;
+  gap: 14px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 20px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-low);
+  text-align: center;
+}
+
+.status[data-tone='error'] {
+  color: var(--z-negative);
+}
+
+.status[data-tone='success'] {
+  color: var(--z-positive);
+}
+
+/* Sugerencia de autocompletado, como la del teclado cuando llega un SMS */
+.suggestionSlot {
+  display: grid;
+  min-height: 62px;
+}
+
+.suggestion,
+.waiting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px 10px 10px;
+  border-radius: var(--z-radius-lg);
+  text-align: left;
+}
+
+.suggestion {
+  background: var(--z-surface);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  color: var(--z-on-surface);
+}
+
+.waiting {
+  box-shadow: inset 0 0 0 1px var(--z-divider);
+}
+
+.suggestionIcon,
+.waitingIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.suggestionIcon[data-tone='sms'] {
+  background: var(--z-app-sms);
+}
+
+.suggestionIcon[data-tone='mail'] {
+  background: var(--z-app-mail);
+}
+
+.suggestionText {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+}
+
+.caption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.suggestionCode {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  font-variant-numeric: tabular-nums;
+}
+
+.suggestionAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--z-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.resend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 8px;
+  min-height: 40px;
+  font-size: 0.875rem;
+  color: var(--z-on-surface-variant);
+  text-align: center;
+}
+
+.countdown {
+  color: var(--z-on-surface);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.legal {
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+  text-align: center;
+}
