@@ -4,17 +4,18 @@
 
 <p>
   <img src="docs/screenshots/splash.jpg" width="200" alt="Bienvenida" />
+  <img src="docs/screenshots/verificacion.jpg" width="200" alt="Verificación con código de 4 dígitos" />
   <img src="docs/screenshots/registro-personal.jpg" width="200" alt="Registro: datos personales" />
   <img src="docs/screenshots/registro-empresa.jpg" width="200" alt="Registro: datos de la empresa" />
-  <img src="docs/screenshots/onboarding.jpg" width="200" alt="Recorrido de bienvenida" />
 </p>
 <p>
+  <img src="docs/screenshots/onboarding.jpg" width="200" alt="Recorrido de bienvenida" />
   <img src="docs/screenshots/inicio.jpg" width="200" alt="Inicio con la paleta Midnight" />
   <img src="docs/screenshots/chat.jpg" width="200" alt="Chat con Zenity" />
   <img src="docs/screenshots/resumen.jpg" width="200" alt="Resumen" />
-  <img src="docs/screenshots/ingresos.jpg" width="200" alt="Ingresos" />
 </p>
 <p>
+  <img src="docs/screenshots/ingresos.jpg" width="200" alt="Ingresos" />
   <img src="docs/screenshots/escritorio.jpg" width="412" alt="Vista de escritorio" />
 </p>
 
@@ -37,9 +38,10 @@ npm run lint      # oxlint
 | Figma | Ruta | Qué hace |
 | --- | --- | --- |
 | Splash | `/` | Bienvenida con destello animado, resplandor de fondo y CTA |
-| Login (×2) | `/login` · `/login?modo=registro` | Correo con validación, Google/Apple (simulado) |
-| — (nuevo) | `/registro/datos` | Registro paso 1: nombres, apellidos, fecha de nacimiento (+18), correo, celular (+51) y dirección |
-| — (nuevo) | `/registro/empresa` | Registro paso 2: razón social, RUC (con dígito verificador de SUNAT) e ingreso mínimo mensual |
+| Login (×2) | `/login` · `/login?modo=registro` | Correo con validación, Google/Apple (simulado). Al iniciar sesión con correo o con Google pide un código de verificación |
+| — (nuevo) | `/verificacion` | Código OTP de 4 dígitos enviado al correo (inicio con correo) o por SMS (inicio con Google), con notificación simulada, autocompletado, 3 intentos y reenvío |
+| — (nuevo) | `/registro/datos` | Registro paso 1: el DNI va primero; la consulta a RENIEC completa nombres, apellidos, fecha de nacimiento y dirección, y se agregan correo y celular (+51) |
+| — (nuevo) | `/registro/empresa` | Registro paso 2: el RUC va primero (con dígito verificador); la consulta a SUNAT muestra la ficha de la empresa y completa razón social y nombre comercial; luego el ingreso mínimo mensual |
 | Notifications | `/notificaciones` | Hoja inferior para activar notificaciones push |
 | Home | `/inicio` | Saludo según la hora, ocultar saldos, periodo, carrusel de cuentas, ingresos/egresos/total, resumen de IA, reporte y **recorrido de bienvenida** en el primer ingreso |
 | Menu | menú lateral | Drawer en móvil, barra lateral fija en escritorio (como Gemini), perfil y empresa registrados, "Ver tutorial" |
@@ -52,9 +54,13 @@ npm run lint      # oxlint
 | Chat | `/chat` | Chat con Zenity: sugerencias, respuestas que se escriben en vivo, tablas, adjuntos y dictado por voz |
 | Single conection / Empty data | `/conexion/:id` | Tarjeta con inclinación 3D, movimientos, estado vacío y eliminar conexión |
 
-## Registro y onboarding
+## Acceso, registro y onboarding
 
-- **Registro en 2 pasos** después de "Regístrate": datos personales y datos de la empresa, con campos *filled* de Material 3 (etiqueta flotante, brillo de Gemini al enfocar), validación en vivo, formato automático del celular y del monto, y verificación simulada del RUC con SUNAT. Los datos solo viven en memoria; la app guarda únicamente el nombre y la razón social para el saludo y el menú.
+- **Verificación con código de 4 dígitos** al iniciar sesión con correo o con Google. El código "llega" como una notificación simulada (correo o SMS) y como sugerencia de autocompletado, igual que la del teclado del celular: al tocarla se escribe solo. Las casillas aceptan escribir, pegar y el autocompletado real del sistema (`autocomplete="one-time-code"`), verifican solas al completar los 4 dígitos y muestran los estados de verificando, error (con sacudida), éxito y bloqueo tras 3 intentos, con reenvío después de 30 segundos.
+- **Registro en 2 pasos** después de "Regístrate", con campos *filled* de Material 3 (etiqueta flotante, brillo de Gemini al enfocar), validación en vivo y formato automático del celular y del monto. Los datos solo viven en memoria; la app guarda únicamente el nombre y la empresa para el saludo y el menú.
+  - **Paso 1 · DNI → RENIEC**: al escribir los 8 dígitos se consulta RENIEC (barras de carga azules de Gemini) y se completan nombres, apellidos y fecha de nacimiento (bloqueados, con candado) y la dirección (editable). Faltan solo el correo y el celular.
+  - **Paso 2 · RUC → SUNAT**: con el RUC completo y su dígito verificador válido se consulta SUNAT y aparece la ficha de la empresa: estado y condición, tipo de contribuyente, nombre comercial, trabajadores, actividad económica (CIIU) principal y secundarias, domicilio fiscal, fechas de inscripción e inicio de actividades, sistemas de emisión y contabilidad, comercio exterior y comprobantes electrónicos. Se completan la razón social (bloqueada) y el nombre comercial (editable).
+  - **Consultas simuladas**: no hay conexión real con RENIEC ni SUNAT. Los datos se generan a partir del número (el mismo documento siempre devuelve la misma persona o empresa) con la forma de una respuesta real, en `src/data/registry.ts`, para cambiarlas luego por una API. Para probar: cualquier DNI de 8 dígitos; un DNI con todos los dígitos iguales o `12345678` no existe. RUC de ejemplo `20123456786`; un RUC 10 con tu DNI (`10` + DNI + dígito verificador) devuelve a la misma persona como "persona natural con negocio"; un RUC con los 8 dígitos centrales iguales (p. ej. `20111111112`) no existe.
 - **Recorrido de bienvenida** en el primer ingreso: un foco animado con borde de degradado recorre cada sección del inicio (resumen, periodo, cuentas, agregar cuenta, ingresos/egresos/total, resumen con IA, reporte, notificaciones, menú) y cada opción de la barra inferior. Se puede repetir desde **Menú → Ver tutorial**.
 
 ## Paleta Midnight (solo modo oscuro)
@@ -95,7 +101,7 @@ src/
   layouts/     shell con navegación, transiciones entre pantallas, menú
   screens/     una pantalla por archivo
   data/        datos de ejemplo, selectores, insights y respuestas del chat
-  state/       estado global (tema, saldos ocultos, periodo, conexiones, revisión)
+  state/       estado global (perfil, saldos ocultos, periodo, conexiones, revisión, recorrido)
   lib/         utilidades (formato, animaciones, ripple…)
 ```
 

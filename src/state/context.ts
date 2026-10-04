@@ -1,5 +1,6 @@
 import { createContext, use } from 'react'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
+import type { ReniecPerson, SunatCompany } from '../data/registry'
 
 export type SheetName = 'notifications' | 'faq' | 'rating' | null
 
@@ -18,6 +19,7 @@ export interface Profile {
 }
 
 export interface PersonalData {
+  dni: string
   nombres: string
   apellidos: string
   nacimiento: string
@@ -27,8 +29,9 @@ export interface PersonalData {
 }
 
 export interface CompanyData {
-  razonSocial: string
   ruc: string
+  razonSocial: string
+  nombreComercial: string
   ingresoMinimo: string
 }
 
@@ -36,13 +39,22 @@ export interface CompanyData {
 export interface Registration {
   personal: PersonalData
   company: CompanyData
+  /** Respuesta de RENIEC para el DNI ingresado */
+  reniec: ReniecPerson | null
+  /** Ficha RUC de SUNAT de la empresa */
+  sunat: SunatCompany | null
 }
+
+type RegistrationForm = 'personal' | 'company'
+type RegistrationLookup = 'reniec' | 'sunat'
 
 export interface AppState {
   profile: Profile
   setProfile: (profile: Profile) => void
   registration: Registration
-  updateRegistration: <K extends keyof Registration>(part: K, data: Partial<Registration[K]>) => void
+  updateRegistration: <K extends RegistrationForm>(part: K, data: Partial<Registration[K]>) => void
+  /** Guarda la respuesta de la consulta a RENIEC o SUNAT */
+  setLookup: <K extends RegistrationLookup>(kind: K, result: Registration[K]) => void
   hideBalances: boolean
   toggleHideBalances: () => void
   periodKey: string

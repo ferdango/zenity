@@ -62,9 +62,35 @@ export function formatShortDate(iso: string): string {
   return `${dd}/${mm}/${yy}`
 }
 
+/** "2015-03-12" → "12/03/2015" */
+export function formatDate(iso: string): string {
+  const [y, m, d] = iso.split('-')
+  return `${d}/${m}/${y}`
+}
+
+/** "1988-05-12" → "12 de mayo de 1988" */
+export function formatLongDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} de ${MONTHS[m - 1].toLowerCase()} de ${y}`
+}
+
 /** Enmascara un número de cuenta: "1910898773626893" → "•••• 6893" */
 export function maskNumber(value: string): string {
   return `•••• ${value.slice(-4)}`
+}
+
+/** Enmascara un correo: "fernando@gmail.com" → "fe••••••@gmail.com" */
+export function maskEmail(email: string): string {
+  const [user, domain] = email.split('@')
+  if (!user || !domain) return email
+  const visible = user.slice(0, user.length > 3 ? 2 : 1)
+  const hidden = Math.min(Math.max(user.length - visible.length, 3), 6)
+  return `${visible}${'•'.repeat(hidden)}@${domain}`
+}
+
+/** Enmascara un celular peruano: "987654321" → "+51 ••• ••• 321" */
+export function maskPhone(digits: string): string {
+  return `+51 ••• ••• ${digits.slice(-3)}`
 }
 
 export function percent(part: number, total: number): number {

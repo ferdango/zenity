@@ -136,20 +136,6 @@
   overflow-x: auto;
 }
 
-.verify {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--z-on-surface-low);
-}
-
-.verified {
-  color: var(--z-positive);
-}
-
 .legal {
   font-size: 0.75rem;
   line-height: 1.125rem;

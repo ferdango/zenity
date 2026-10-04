@@ -132,6 +132,40 @@
   color: var(--z-positive);
 }
 
+/* Dato verificado (RENIEC, SUNAT): solo lectura */
+.locked .box {
+  background: var(--z-surface-low);
+  box-shadow: inset 0 0 0 1px var(--z-divider);
+  cursor: default;
+}
+
+.locked .control input {
+  cursor: default;
+}
+
+.lock {
+  flex-shrink: 0;
+  color: var(--z-on-surface-low);
+}
+
+/* Recién completado automáticamente: destello azul que se desvanece */
+.autofilled .box {
+  animation: autofill 1.6s var(--z-ease-standard);
+}
+
+@keyframes autofill {
+  from {
+    background: color-mix(in srgb, var(--z-primary) 16%, var(--z-surface));
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--z-primary) 70%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .autofilled .box {
+    animation: none;
+  }
+}
+
 .message {
   display: flex;
   align-items: flex-start;

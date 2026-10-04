@@ -18,6 +18,7 @@ import { RegisterCompany, RegisterPersonal } from './screens/Register'
 import { Review } from './screens/Review'
 import { Splash } from './screens/Splash'
 import { Summary } from './screens/Summary'
+import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
@@ -57,6 +58,7 @@ function AnimatedRoutes() {
       <Routes location={location} key={routesKey}>
         <Route path="/" element={screen(<Splash />)} />
         <Route path="/login" element={screen(<Login />)} />
+        <Route path="/verificacion" element={screen(<VerifyOtp />)} />
         <Route path="/registro/datos" element={screen(<RegisterPersonal />)} />
         <Route path="/registro/empresa" element={screen(<RegisterCompany />)} />
         <Route path="/registro" element={<Navigate to="/registro/datos" replace />} />
