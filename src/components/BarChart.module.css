@@ -69,6 +69,14 @@
   background: var(--z-on-surface);
 }
 
+.bar[data-negative='true'] {
+  background: color-mix(in srgb, var(--z-negative) 40%, var(--z-surface-high));
+}
+
+.col[aria-pressed='true'] .bar[data-negative='true'] {
+  background: var(--z-negative);
+}
+
 @media (hover: hover) {
   .col:hover:not([aria-pressed='true']) .bar {
     background: color-mix(in srgb, var(--z-primary) 42%, var(--z-surface-high));

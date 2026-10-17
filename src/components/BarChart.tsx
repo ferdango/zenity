@@ -22,7 +22,7 @@ function niceMax(value: number) {
 /** Gráfico de barras animado: las barras crecen con resorte y el tooltip sigue a la selección. */
 export function BarChart({ data, selected, onSelect, formatValue, label }: BarChartProps) {
   const tooltipId = useId()
-  const max = niceMax(Math.max(...data.map((d) => d.value)))
+  const max = niceMax(Math.max(...data.map((d) => Math.abs(d.value))))
   const ticks = Array.from({ length: 5 }, (_, i) => Math.round((max / 4) * i))
 
   return (
@@ -40,7 +40,8 @@ export function BarChart({ data, selected, onSelect, formatValue, label }: BarCh
         </div>
         {data.map((d, i) => {
           const isSelected = i === selected
-          const pct = Math.max(4, (d.value / max) * 100)
+          // Los valores negativos se dibujan con su magnitud y en otro color
+          const pct = Math.max(4, (Math.abs(d.value) / max) * 100)
           return (
             <button
               key={d.label}
@@ -63,6 +64,7 @@ export function BarChart({ data, selected, onSelect, formatValue, label }: BarCh
                 )}
                 <motion.span
                   className={styles.bar}
+                  data-negative={d.value < 0}
                   initial={{ height: '0%' }}
                   animate={{ height: `${pct}%` }}
                   transition={{ ...spring.soft, delay: i * 0.05 }}

@@ -19,6 +19,7 @@ import { RegisterCompany, RegisterPersonal } from './screens/Register'
 import { Review } from './screens/Review'
 import { Splash } from './screens/Splash'
 import { Summary } from './screens/Summary'
+import { Sunat } from './screens/Sunat'
 import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
@@ -32,6 +33,7 @@ function isShellPath(path: string) {
     path === '/conexiones/nueva' ||
     path === '/negocios/nuevo' ||
     path.startsWith('/movimientos/') ||
+    path.startsWith('/sunat/') ||
     path.startsWith('/conexion/')
   )
 }
@@ -71,6 +73,7 @@ function AnimatedRoutes() {
           <Route path="/inicio" element={<Home />} />
           <Route path="/movimientos/:tab" element={<Movements />} />
           <Route path="/resumen" element={<Summary />} />
+          <Route path="/sunat/:tab" element={<Sunat />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/revisar" element={<Review />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
@@ -78,6 +81,7 @@ function AnimatedRoutes() {
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
         </Route>
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />
+        <Route path="/sunat" element={<Navigate to="/sunat/balance" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

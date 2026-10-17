@@ -40,7 +40,13 @@ export const PRIMARY_NAV: NavItem[] = [
 
 /** Rutas de primer nivel: entre ellas se usa la transición "fade through" de Material 3. */
 export function isTabRoute(path: string): boolean {
-  return path === '/inicio' || path === '/resumen' || path === '/chat' || path.startsWith('/movimientos/')
+  return (
+    path === '/inicio' ||
+    path === '/resumen' ||
+    path === '/chat' ||
+    path.startsWith('/movimientos/') ||
+    path.startsWith('/sunat/')
+  )
 }
 
 /** Rutas que muestran la barra de navegación inferior en móvil. */

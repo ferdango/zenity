@@ -189,6 +189,16 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
               end: pending.length > 0 ? <span className={styles.count}>{pending.length}</span> : undefined,
             },
           )}
+          {row(
+            'sunat',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="account_balance" size={20} />
+              </span>
+              <span>SUNAT · SIRE</span>
+            </>,
+            { to: '/sunat/balance', active: pathname.startsWith('/sunat/') },
+          )}
         </motion.ul>
 
         <div className={styles.divider} />

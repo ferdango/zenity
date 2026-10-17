@@ -15,10 +15,12 @@ import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
 import { businessName } from '../data/businesses'
 import { movementInsights } from '../data/insights'
+import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
 import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
 import { TOUR_STEPS } from '../data/tour'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useSire } from '../lib/useSire'
 import { useApp } from '../state/context'
 import styles from './Home.module.css'
 
@@ -112,6 +114,8 @@ export function Home() {
     ledger,
   } = useApp()
   const scrolled = useScrolled()
+  const sire = useSire()
+  const taxPeriod = sirePeriod(sire, periodKey)
   const [generating, setGenerating] = useState(false)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
@@ -257,6 +261,15 @@ export function Home() {
             </motion.div>
             <motion.div variants={fadeUp}>
               <SummaryTile kind="total" label="Total" value={neto} caption={month} to="/movimientos/todo" />
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <SummaryTile
+                kind="tax"
+                label="Impuestos SUNAT"
+                value={totalAPagar(taxPeriod, sire.regimen)}
+                caption={`IGV + Renta · vence el ${formatDue(vencimiento(taxPeriod.key, business.ruc))}`}
+                to="/sunat/impuestos"
+              />
             </motion.div>
           </motion.div>
         </motion.div>

@@ -5,7 +5,7 @@ import { Icon } from './Icon'
 import styles from './Metrics.module.css'
 
 interface SummaryTileProps {
-  kind: 'income' | 'expense' | 'total'
+  kind: 'income' | 'expense' | 'total' | 'tax'
   label: string
   value: number
   caption: string
@@ -13,9 +13,9 @@ interface SummaryTileProps {
   delta?: number | null
 }
 
-const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings' } as const
+const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings', tax: 'account_balance' } as const
 
-/** Tiles "Ingresos / Egresos / Total" del Inicio. */
+/** Tiles "Ingresos / Egresos / Total / Impuestos SUNAT" del Inicio. */
 export function SummaryTile({ kind, label, value, caption, to, delta }: SummaryTileProps) {
   return (
     <Link to={to} className={cn(styles.summary, styles[kind])} data-ripple="">
