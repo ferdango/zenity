@@ -2,6 +2,7 @@ import { formatMoney } from '../lib/format'
 import type { Ledger } from './ledger'
 import type { Connection, RichText } from './mock'
 import { accountTotals, categoryTotals, getPeriod, getTransactions, periodLabel, totals, variation } from './selectors'
+import { formatDue, REGIMENES, renta, type Sire, sirePeriod, vencimiento } from './sire'
 
 export type ChatText = RichText | string
 
@@ -14,6 +15,7 @@ export type ChatBlock =
 export const SUGGESTIONS = [
   { label: 'Explícame este balance', icon: 'query_stats' },
   { label: '¿Qué aumentó esta semana?', icon: 'trending_up' },
+  { label: '¿Cuánto pago de IGV este mes?', icon: 'account_balance' },
   { label: 'Subir un archivo', icon: 'upload_file', upload: true },
   { label: '¿Qué cuenta generó más?', icon: 'leaderboard' },
   { label: 'Consolidado general de mis cuentas', icon: 'account_balance' },
@@ -34,10 +36,13 @@ interface Context {
   ledger: Ledger
   /** Nombre del negocio (RUC) activo */
   business: string
+  ruc: string
+  /** Comprobantes del SIRE del negocio activo */
+  sire: Sire
 }
 
 /** Genera una respuesta simulada (demo sin backend) con los datos del negocio activo. */
-export function answer(question: string, { connections, periodKey, ledger, business }: Context): ChatBlock[] {
+export function answer(question: string, { connections, periodKey, ledger, business, ruc, sire }: Context): ChatBlock[] {
   const q = normalize(question)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period).toLowerCase()
@@ -50,6 +55,51 @@ export function answer(question: string, { connections, periodKey, ledger, busin
   const margin = t.ingresos ? Math.round((t.neto / t.ingresos) * 100) : 0
   const [topAccount] = accountTotals(txs, connections, 'income')
   const idle = connections.find((c) => c.balance === 0)
+
+  // El SIRE solo depende del RUC: responde aunque el negocio no tenga cuentas conectadas
+  if (/\b(igv|sunat|sire|impuestos?|tributos?|renta|credito fiscal|declarar|declaracion)\b/.test(q)) {
+    const sp = sirePeriod(sire, periodKey)
+    const { igv } = sp
+    const ir = renta(sp, sire.regimen)
+    const regimen = REGIMENES[sire.regimen]
+    return [
+      {
+        type: 'p',
+        text: ['Con los comprobantes del ', { b: 'SIRE' }, ' de ', { b: business }, ' en ', month, ', esto pagarías a SUNAT:'],
+      },
+      {
+        type: 'table',
+        head: ['Concepto', 'Monto'],
+        rows: [
+          ['Débito fiscal (IGV de ventas)', m(igv.debito)],
+          ['Crédito fiscal (IGV de compras)', m(-igv.credito)],
+          ...(igv.saldoAnterior > 0 ? [['Saldo a favor anterior', m(-igv.saldoAnterior)]] : []),
+          ['IGV a pagar', m(igv.aPagar)],
+          [`Renta ${regimen.short} (${(regimen.tasa * 100).toLocaleString('es-PE')}% de ${m(ir.ingresosNetos)})`, m(ir.aPagar)],
+        ],
+        foot: ['Total', m(igv.aPagar + ir.aPagar)],
+      },
+      {
+        type: 'p',
+        text: [
+          'Vence el ',
+          { b: formatDue(vencimiento(sp.key, ruc)) },
+          ` (RUC terminado en ${ruc.at(-1)}) y se declara en el Formulario Virtual 621.`,
+          ...(igv.saldoFavor > 0 ? [' Además te queda ', { pos: m(igv.saldoFavor) }, ' de saldo a favor de IGV para el próximo mes.'] : []),
+          ...(igv.noDeducible > 0
+            ? [' Ojo: perdiste ', { neg: m(igv.noDeducible) }, ' de crédito fiscal por compras con boleta o de proveedores no habidos.']
+            : []),
+        ],
+      },
+      {
+        type: 'actions',
+        items: [
+          { label: 'Ver impuestos', to: '/sunat/impuestos', icon: 'calculate' },
+          { label: 'Ver comprobantes', to: '/sunat/comprobantes', icon: 'receipt_long' },
+        ],
+      },
+    ]
+  }
 
   if (q.includes('conectar')) {
     return [

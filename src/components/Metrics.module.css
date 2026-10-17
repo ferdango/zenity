@@ -73,6 +73,17 @@
   --tile-glow-hover: 0 22px 48px -20px rgb(244 63 94 / 0.85);
 }
 
+/* Impuestos SUNAT: ámbar, para que el vencimiento llame la atención sin alarmar */
+.tax {
+  --tile-accent: #fcd34d;
+  --tile-fill:
+    radial-gradient(120% 140% at 0% 0%, rgb(251 191 36 / 0.3) 0%, transparent 55%),
+    linear-gradient(135deg, #47330c 0%, #33240b 55%, #241a0a 100%);
+  --tile-border: linear-gradient(135deg, rgb(252 211 77 / 0.6), rgb(252 211 77 / 0.1) 45%, rgb(252 211 77 / 0.03));
+  --tile-glow: 0 18px 40px -24px rgb(245 158 11 / 0.7);
+  --tile-glow-hover: 0 22px 48px -20px rgb(245 158 11 / 0.8);
+}
+
 /* El total es el protagonista: degradado de IA (azul → violeta → rosa) */
 .total {
   --tile-accent: #c7d2fe;

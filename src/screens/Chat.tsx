@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { type ChangeEvent, type FormEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { GradientText, RichTextView, ShimmerText } from '../components/AiText'
 import { BusinessButton } from '../components/Business'
@@ -12,6 +12,7 @@ import { businessName } from '../data/businesses'
 import { answer, type ChatBlock, fileAnswer, SUGGESTIONS } from '../data/chat'
 import { streamDuration, toSegments } from '../lib/richText'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useSire } from '../lib/useSire'
 import { useApp } from '../state/context'
 import styles from './Chat.module.css'
 
@@ -204,6 +205,11 @@ function getRecognition(): Recognition | null {
 export function Chat() {
   const { connections, periodKey, toast, profile, ledger, business } = useApp()
   const name = businessName(business)
+  const sire = useSire()
+  const context = useMemo(
+    () => ({ connections, periodKey, ledger, business: name, ruc: business.ruc, sire }),
+    [connections, periodKey, ledger, name, business.ruc, sire],
+  )
   const [params, setParams] = useSearchParams()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -239,9 +245,9 @@ export function Chat() {
       if (!value) return
       setMessages((list) => [...list, { id: nextId.current++, role: 'user', text: value, status: 'done' }])
       setInput('')
-      respond(answer(value, { connections, periodKey, ledger, business: name }))
+      respond(answer(value, context))
     },
-    [connections, periodKey, ledger, name, respond],
+    [context, respond],
   )
 
   // Pregunta enviada desde otra pantalla (?q=…)
@@ -410,7 +416,7 @@ export function Chat() {
                     <div className={styles.bubble}>{msg.text}</div>
                   </motion.div>
                 ) : (
-                  <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, { connections, periodKey, ledger, business: name }))} />
+                  <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, context))} />
                 ),
               )}
             </motion.div>
