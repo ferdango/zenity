@@ -3,7 +3,8 @@
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: 48px 1fr 48px;
+  /* Lados iguales y flexibles: el título queda centrado aunque haya varias acciones */
+  grid-template-columns: minmax(48px, 1fr) minmax(0, auto) minmax(48px, 1fr);
   align-items: center;
   gap: 8px;
   min-height: 64px;
@@ -34,6 +35,11 @@
 
 .end {
   justify-content: flex-end;
+}
+
+/* El título puede encogerse (con puntos suspensivos) cuando las acciones ocupan más */
+.topBar > :nth-child(2) {
+  min-width: 0;
 }
 
 .title {

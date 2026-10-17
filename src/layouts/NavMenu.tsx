@@ -3,14 +3,20 @@ import type { ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import whatsapp from '../assets/brands/whatsapp.svg'
 import { InitialsAvatar } from '../components/Avatars'
+import { BusinessAvatar } from '../components/Business'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { Spark } from '../components/Spark'
+import { businessName } from '../data/businesses'
 import { cn } from '../lib/cn'
 import { fadeUp, spring, staggerContainer } from '../lib/motion'
+import { useSwitchBusiness } from '../lib/useSwitchBusiness'
 import { useApp } from '../state/context'
 import styles from './NavMenu.module.css'
 import { PRIMARY_NAV } from './nav'
+
+/** Negocios que se muestran como acceso directo; el resto, en "Tus negocios". */
+const QUICK_LIMIT = 4
 
 interface NavMenuProps {
   variant: 'drawer' | 'rail'
@@ -26,7 +32,9 @@ function ItemIcon({ icon }: { icon: string }) {
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { pending, openSheet, toast, profile, startTour } = useApp()
+  const { pending, openSheet, toast, profile, startTour, business, businesses } = useApp()
+  const switchTo = useSwitchBusiness()
+  const others = businesses.filter((b) => b.id !== business.id)
   const layoutId = `nav-active-${variant}`
 
   const row = (
@@ -89,7 +97,7 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
         </span>
         <span className={styles.profileName}>
           <strong>{profile.fullName}</strong>
-          <span>{profile.company ?? 'Ajustes de cuenta'}</span>
+          <span>Ajustes de cuenta</span>
         </span>
         <Icon name="chevron_right" size={18} className={styles.chevron} />
       </button>
@@ -99,6 +107,57 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
           Nueva conexión
         </Button>
       )}
+
+      <section className={styles.businesses} aria-labelledby={`${layoutId}-negocios`}>
+        <p className={styles.sectionLabel} id={`${layoutId}-negocios`}>
+          Tus negocios
+        </p>
+        <button
+          type="button"
+          className={styles.activeBusiness}
+          data-ripple=""
+          aria-haspopup="dialog"
+          aria-label={`Negocio activo: ${businessName(business)}, RUC ${business.ruc}. Ver todos los negocios`}
+          onClick={action(() => openSheet('businesses'))}
+        >
+          <BusinessAvatar business={business} size={36} />
+          <span className={styles.businessText}>
+            <span>{businessName(business)}</span>
+            <span>RUC {business.ruc}</span>
+          </span>
+          <Icon name="unfold_more" size={20} className={styles.chevron} />
+        </button>
+        <div className={styles.quickSwitch} role="group" aria-label="Cambiar de negocio">
+          {others.slice(0, QUICK_LIMIT).map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                className={styles.quick}
+                data-ripple=""
+                title={`${businessName(b)} · RUC ${b.ruc}`}
+                onClick={action(() => switchTo(b))}
+              >
+                <BusinessAvatar business={b} size={22} />
+                <span>{businessName(b)}</span>
+              </button>
+            ))}
+          {others.length > QUICK_LIMIT && (
+            <button
+              type="button"
+              className={styles.quick}
+              data-ripple=""
+              aria-label={`Ver los ${others.length} negocios`}
+              onClick={action(() => openSheet('businesses'))}
+            >
+              <span>+{others.length - QUICK_LIMIT}</span>
+            </button>
+          )}
+          <Link to="/negocios/nuevo" className={cn(styles.quick, styles.quickAdd)} data-ripple="" onClick={onNavigate}>
+            <Icon name="add" size={18} />
+            <span>Agregar RUC</span>
+          </Link>
+        </div>
+      </section>
 
       <div className={styles.divider} />
 

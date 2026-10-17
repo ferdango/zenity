@@ -1,0 +1,174 @@
+/* ── Avatar del negocio (monograma con color propio) ───────── */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  background: linear-gradient(135deg, #4285f4, #9b72cb);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+
+.avatar[data-tone='1'] {
+  background: linear-gradient(135deg, #f97316, #e11d48);
+}
+
+.avatar[data-tone='2'] {
+  background: linear-gradient(135deg, #10b981, #0e7490);
+}
+
+.avatar[data-tone='3'] {
+  background: linear-gradient(135deg, #eab308, #ea580c);
+}
+
+.avatar[data-tone='4'] {
+  background: linear-gradient(135deg, #06b6d4, #6366f1);
+}
+
+/* ── Selector del encabezado del inicio ────────────────────── */
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: min(100%, 300px);
+  height: 48px;
+  padding: 0 10px 0 9px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  text-align: left;
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.switcherText {
+  display: grid;
+  min-width: 0;
+}
+
+.switcherText strong {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.switcherText span {
+  overflow: hidden;
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+  color: var(--z-on-surface-low);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.switcherIcon {
+  flex-shrink: 0;
+  color: var(--z-on-surface-variant);
+}
+
+/* ── Avatar en barras superiores ───────────────────────────── */
+.avatarButton {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+/* ── Hoja "Tus negocios" ───────────────────────────────────── */
+.picker {
+  display: grid;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+.lead {
+  margin-top: -4px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.list {
+  display: grid;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 12px 10px 10px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface-low);
+  box-shadow: inset 0 0 0 1px var(--z-divider);
+  text-align: left;
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.rowActive {
+  background: color-mix(in srgb, var(--z-primary) 10%, var(--z-surface-low));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--z-primary) 55%, transparent);
+}
+
+.rowText {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+}
+
+.rowText strong {
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rowText span {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowText .rowFigures {
+  margin-top: 2px;
+  color: var(--z-on-surface-variant);
+}
+
+.rowAmount {
+  font-weight: 500;
+  color: var(--z-on-surface);
+}
+
+.radio {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--z-outline);
+  color: var(--z-on-primary);
+}
+
+.rowActive .radio {
+  background: var(--z-primary);
+  box-shadow: none;
+}

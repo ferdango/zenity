@@ -1,20 +1,15 @@
 import { MONTHS, MONTHS_SHORT, percent } from '../lib/format'
-import {
-  type AvatarKind,
-  BASE_TRANSACTIONS,
-  CATEGORIES,
-  type CategoryId,
-  type Connection,
-  PERIODS,
-  type Period,
-  type Transaction,
-  type TxType,
-} from './mock'
+import type { Ledger } from './ledger'
+import { type AvatarKind, CATEGORIES, type CategoryId, type Connection, PERIODS, type Period, type Transaction, type TxType } from './mock'
 
-const BASE = PERIODS[PERIODS.length - 1]
+/** Mes y año de un periodo (calendario común a todos los negocios). */
+export function calendarPeriod(key: string): Period {
+  return PERIODS.find((p) => p.key === key) ?? PERIODS[PERIODS.length - 1]
+}
 
-export function getPeriod(key: string): Period {
-  return PERIODS.find((p) => p.key === key) ?? BASE
+/** Cifras del periodo para un negocio. */
+export function getPeriod(ledger: Ledger, key: string): Period {
+  return ledger.periods.find((p) => p.key === key) ?? ledger.periods[ledger.periods.length - 1]
 }
 
 export function periodLabel(p: Period): string {
@@ -28,16 +23,17 @@ export function periodShort(p: Period): string {
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 /**
- * Transacciones del periodo. Marzo usa los datos base; los demás meses escalan los
- * montos para que la suma coincida exactamente con la serie mensual.
+ * Transacciones del periodo de un negocio. El último mes usa sus movimientos base; los
+ * demás escalan los montos para que la suma coincida exactamente con la serie mensual.
  */
-export function getTransactions(periodKey: string): Transaction[] {
-  const period = getPeriod(periodKey)
-  if (period.key === BASE.key) return BASE_TRANSACTIONS
+export function getTransactions(ledger: Ledger, periodKey: string): Transaction[] {
+  const last = ledger.periods[ledger.periods.length - 1]
+  const period = getPeriod(ledger, periodKey)
+  if (period.key === last.key || ledger.base.length === 0) return ledger.base
 
   const scale = (type: TxType, target: number, base: number) => {
-    const items = BASE_TRANSACTIONS.filter((t) => (type === 'income' ? t.amount > 0 : t.amount < 0))
-    const factor = target / base
+    const items = ledger.base.filter((t) => (type === 'income' ? t.amount > 0 : t.amount < 0))
+    const factor = base ? target / base : 0
     let acc = 0
     return items.map((t, i) => {
       const sign = Math.sign(t.amount)
@@ -50,7 +46,7 @@ export function getTransactions(periodKey: string): Transaction[] {
     })
   }
 
-  return [...scale('income', period.ingresos, BASE.ingresos), ...scale('expense', period.egresos, BASE.egresos)].sort(
+  return [...scale('income', period.ingresos, last.ingresos), ...scale('expense', period.egresos, last.egresos)].sort(
     (a, b) => b.date.localeCompare(a.date),
   )
 }
@@ -122,11 +118,12 @@ export function accountTotals(txs: Transaction[], connections: Connection[], typ
 }
 
 /** Variación porcentual frente al periodo anterior */
-export function variation(periodKey: string, field: 'ingresos' | 'egresos' | 'balance'): number | null {
-  const index = PERIODS.findIndex((p) => p.key === periodKey)
+export function variation(ledger: Ledger, periodKey: string, field: 'ingresos' | 'egresos' | 'balance'): number | null {
+  const index = ledger.periods.findIndex((p) => p.key === periodKey)
   if (index <= 0) return null
-  const prev = PERIODS[index - 1][field]
-  const curr = PERIODS[index][field]
+  const prev = ledger.periods[index - 1][field]
+  const curr = ledger.periods[index][field]
+  if (!prev) return null
   return Math.round(((curr - prev) / prev) * 1000) / 10
 }
 

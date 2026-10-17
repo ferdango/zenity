@@ -3,6 +3,11 @@ import type { TourStep } from '../components/Tour'
 /** Recorrido del primer ingreso: secciones del Inicio y cada opción de la navegación. */
 export const TOUR_STEPS: TourStep[] = [
   {
+    target: 'business',
+    title: 'Tus negocios',
+    body: 'Cada RUC tiene sus propias cuentas, movimientos y reportes. Toca aquí para cambiar de negocio o agregar otro.',
+  },
+  {
     target: 'greeting',
     title: 'Tu resumen del día',
     body: 'Te saludamos con el estado de tus cuentas. Toca el ojo para ocultar o mostrar tus saldos.',
