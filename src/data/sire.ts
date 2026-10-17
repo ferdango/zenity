@@ -1,4 +1,4 @@
-import { formatMoney, MONTHS } from '../lib/format'
+import { formatAxis, formatMoney, MONTHS } from '../lib/format'
 import { rucCheckDigit } from '../lib/validation'
 import type { Business } from './businesses'
 import type { Ledger } from './ledger'
@@ -105,27 +105,51 @@ export interface SirePeriod {
   propuesta: boolean
 }
 
-export type Regimen = 'rer' | 'rmt' | 'general'
+export type Regimen = 'general' | 'rmt' | 'rer'
 
-export const REGIMENES: Record<Regimen, { label: string; short: string; tasa: number; nota: string }> = {
-  rer: {
-    label: 'Régimen Especial (RER)',
-    short: 'RER',
+/** Orden en que se ofrecen al registrar un RUC. */
+export const REGIMEN_ORDER: Regimen[] = ['general', 'rmt', 'rer']
+
+/** Tope anual de ingresos (y de compras) del RER. */
+export const RER_LIMIT = 525000
+
+export const REGIMENES: Record<
+  Regimen,
+  { label: string; short: string; tasa: number; requisito: string; nota: string }
+> = {
+  general: {
+    label: 'Régimen General',
+    short: 'General',
     tasa: 0.015,
-    nota: 'Cuota mensual del 1.5% de tus ingresos netos. Es definitiva: no hay declaración anual de Renta.',
+    requisito: 'Sin tope de ingresos · 29.5% anual sobre la utilidad',
+    nota: 'Pago a cuenta del 1.5% de tus ingresos netos (o el coeficiente del año anterior, si es mayor). Se regulariza en la declaración anual.',
   },
   rmt: {
     label: 'Régimen MYPE Tributario',
     short: 'RMT',
     tasa: 0.01,
+    requisito: 'Ingresos de hasta 1,700 UIT al año · se regulariza en la anual',
     nota: 'Pago a cuenta del 1% de tus ingresos netos mientras al año no superes 300 UIT. Se regulariza en la declaración anual.',
   },
-  general: {
-    label: 'Régimen General',
-    short: 'General',
+  rer: {
+    label: 'Régimen Especial (RER)',
+    short: 'RER',
     tasa: 0.015,
-    nota: 'Pago a cuenta del 1.5% de tus ingresos netos (o el coeficiente del año anterior, si es mayor). Se regulariza en la declaración anual.',
+    requisito: 'Ingresos de hasta S/ 525,000 al año · cuota definitiva',
+    nota: 'Cuota mensual del 1.5% de tus ingresos netos. Es definitiva: no hay declaración anual de Renta.',
   },
+}
+
+/** Motivo por el que el RER no aplica a un ingreso mensual dado (null si aplica). */
+export function rerUnavailable(ingresoMensual: number): string | null {
+  const anual = ingresoMensual * 12
+  if (anual <= RER_LIMIT) return null
+  return `Con S/ ${formatAxis(anual)} al año superas el tope del RER (S/ ${formatAxis(RER_LIMIT)})`
+}
+
+/** "1%", "1.5%" */
+export function rateLabel(rate: number): string {
+  return `${(rate * 100).toLocaleString('es-PE')}%`
 }
 
 export interface Sire {
@@ -378,11 +402,6 @@ function sumBook(records: SireRecord[]): BookTotals {
   }
 }
 
-function regimenOf(business: Business): Regimen {
-  const r = seeded(`regimen-tributario:${business.ruc}`)()
-  return r < 0.6 ? 'rmt' : r < 0.85 ? 'rer' : 'general'
-}
-
 export function buildSire(business: Business): Sire {
   const rand = seeded(`sire:${business.ruc}`)
   const numbering = { factura: between(rand, 120, 900), boleta: between(rand, 1500, 8000), nota: between(rand, 4, 40) }
@@ -420,7 +439,7 @@ export function buildSire(business: Business): Sire {
     }
   })
 
-  return { regimen: regimenOf(business), periods }
+  return { regimen: business.regimen, periods }
 }
 
 // ── Consultas ─────────────────────────────────────────────────

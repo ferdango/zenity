@@ -4,10 +4,12 @@ import { useNavigate } from 'react-router'
 import { BusinessAvatar } from '../components/Business'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
+import { RegimenPicker } from '../components/RegimenPicker'
 import { CompanyProfile, LookupHint, LookupSkeleton, LookupStatus } from '../components/Registry'
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
 import { businessName } from '../data/businesses'
+import type { Regimen } from '../data/sire'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
 import { useRucLookup } from '../lib/useRucLookup'
@@ -32,6 +34,8 @@ export function AddBusiness() {
   const [nombreComercial, setNombreComercial] = useState('')
   const [touched, setTouched] = useState(false)
   const [autofilled, setAutofilled] = useState(false)
+  const [regimen, setRegimen] = useState<Regimen | ''>('')
+  const [regimenTouched, setRegimenTouched] = useState(false)
   const existing = businesses.find((b) => b.ruc === ruc)
   const lookup = useRucLookup(ruc, {
     blocked: existing ? `Este RUC ya está en tus negocios como ${businessName(existing)}` : null,
@@ -61,7 +65,12 @@ export function AddBusiness() {
       if (!searching) document.getElementById('business-ruc')?.focus()
       return
     }
-    const created = addBusiness(company, nombreComercial)
+    if (!regimen) {
+      setRegimenTouched(true)
+      document.getElementById('business-regimen')?.focus()
+      return
+    }
+    const created = addBusiness(company, nombreComercial, regimen)
     window.scrollTo({ top: 0, behavior: 'instant' })
     toast(`Agregaste ${businessName(created)}. Conecta su primera cuenta`, 'add_business')
     navigate('/inicio', { replace: true })
@@ -142,6 +151,17 @@ export function AddBusiness() {
                     value={nombreComercial}
                     helper="Así lo verás en el selector de negocios"
                     onChange={(event) => setNombreComercial(event.target.value)}
+                  />
+                </motion.div>
+                <motion.p className={form.sectionLabel} variants={fadeUp}>
+                  Régimen tributario
+                </motion.p>
+                <motion.div variants={fadeUp}>
+                  <RegimenPicker
+                    id="business-regimen"
+                    value={regimen}
+                    error={regimenTouched && !regimen ? 'Elige el régimen tributario del negocio' : null}
+                    onChange={setRegimen}
                   />
                 </motion.div>
               </motion.div>

@@ -3,6 +3,7 @@ import type { Business } from '../data/businesses'
 import type { Ledger } from '../data/ledger'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
+import type { Regimen } from '../data/sire'
 
 export type SheetName = 'notifications' | 'faq' | 'rating' | 'businesses' | null
 
@@ -35,6 +36,8 @@ export interface CompanyData {
   razonSocial: string
   nombreComercial: string
   ingresoMinimo: string
+  /** '' mientras no se elija */
+  regimen: Regimen | ''
 }
 
 /** Borrador del registro: vive solo en memoria mientras se completan los pasos. */
@@ -68,9 +71,9 @@ export interface AppState {
   ledger: Ledger
   switchBusiness: (id: string) => void
   /** Agrega un RUC consultado en SUNAT y lo deja activo */
-  addBusiness: (company: SunatCompany, nombreComercial: string) => Business
+  addBusiness: (company: SunatCompany, nombreComercial: string, regimen: Regimen) => Business
   /** Registro: el RUC registrado pasa a ser el único negocio, con las cuentas de ejemplo */
-  registerBusiness: (company: SunatCompany, nombreComercial: string) => void
+  registerBusiness: (company: SunatCompany, nombreComercial: string, regimen: Regimen) => void
   /** Conexiones del negocio activo */
   connections: Connection[]
   addConnection: (sourceId: string) => Connection | null

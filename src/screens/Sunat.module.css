@@ -388,22 +388,6 @@
   opacity: 0.8;
 }
 
-.regimenTabs {
-  display: grid;
-  gap: 8px;
-  padding: 10px 0 6px;
-}
-
-.regimenNote {
-  font-size: 0.8125rem;
-  line-height: 1.125rem;
-  color: var(--z-on-surface-low);
-}
-
-.regimenNote[data-simulated='true'] {
-  color: var(--z-warning);
-}
-
 @media (min-width: 720px) {
   .dueSplit {
     max-width: 420px;

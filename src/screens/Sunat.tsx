@@ -19,7 +19,7 @@ import {
   formatDue,
   noDeducibles,
   previousSirePeriod,
-  type Regimen,
+  rateLabel,
   REGIMENES,
   renta,
   SIN_CREDITO,
@@ -328,22 +328,18 @@ function Section({ icon, title, caption, children }: { icon: string; title: stri
   )
 }
 
-const percentLabel = (rate: number) => `${(rate * 100).toLocaleString('es-PE')}%`
-
 function TaxesTab({ sire, period, month }: { sire: Sire; period: SirePeriod; month: string }) {
   const { business } = useApp()
-  const [regimen, setRegimen] = useState<Regimen>(sire.regimen)
   const { igv } = period
-  const own = renta(period, sire.regimen)
-  const simulated = renta(period, regimen)
-  const total = igv.aPagar + own.aPagar
+  const regimen = REGIMENES[sire.regimen]
+  const ir = renta(period, sire.regimen)
+  const total = igv.aPagar + ir.aPagar
   const due = formatDue(vencimiento(period.key, business.ruc))
   const previous = previousSirePeriod(sire, period.key)
   const calendar = calendarPeriod(period.key)
   const nextMonth = MONTHS[(calendar.month + 1) % 12].toLowerCase()
   const excluded = noDeducibles(period)
   const exonerado = period.totalCompras.noGravado
-  const difference = simulated.aPagar - own.aPagar
 
   return (
     <motion.div className={styles.stack} variants={staggerContainer(0.07)} initial="hidden" animate="show">
@@ -365,8 +361,8 @@ function TaxesTab({ sire, period, month }: { sire: Sire; period: SirePeriod; mon
             )}
           </div>
           <div>
-            <span>Renta · {REGIMENES[sire.regimen].short}</span>
-            <Amount value={own.aPagar} />
+            <span>Renta · {regimen.short}</span>
+            <Amount value={ir.aPagar} />
           </div>
         </div>
         <span className={styles.dueForm}>Se declara en el Formulario Virtual 621 (IGV-Renta mensual), en soles enteros.</span>
@@ -425,36 +421,17 @@ function TaxesTab({ sire, period, month }: { sire: Sire; period: SirePeriod; mon
         </div>
       </Section>
 
-      <Section icon="percent" title="Impuesto a la Renta" caption="Pago a cuenta mensual según tu régimen">
-        <div className={styles.regimenTabs}>
-          <SegmentedTabs<Regimen>
-            label="Régimen tributario"
-            stretch
-            value={regimen}
-            onChange={setRegimen}
-            tabs={(['rer', 'rmt', 'general'] as const).map((id) => ({ id, label: REGIMENES[id].short }))}
-          />
-          <p className={styles.regimenNote} data-simulated={regimen !== sire.regimen}>
-            {regimen === sire.regimen ? (
-              `Tu régimen: ${REGIMENES[sire.regimen].label}, según tu ficha RUC.`
-            ) : (
-              <>
-                Simulación: con {REGIMENES[regimen].short} pagarías <Amount value={Math.abs(difference)} animate={false} />{' '}
-                {difference >= 0 ? 'más' : 'menos'} que en tu régimen ({REGIMENES[sire.regimen].short}).
-              </>
-            )}
-          </p>
-        </div>
-        <TaxLine label="Ingresos netos del mes" hint="Base imponible de tus ventas" value={simulated.ingresosNetos} />
-        <TaxLine op="×" label="Tasa" value={percentLabel(simulated.tasa)} />
+      <Section icon="percent" title="Impuesto a la Renta" caption={`${regimen.label} · el que elegiste al registrar el RUC`}>
+        <TaxLine label="Ingresos netos del mes" hint="Base imponible de tus ventas" value={ir.ingresosNetos} />
+        <TaxLine op="×" label={`Tasa ${regimen.short}`} value={rateLabel(ir.tasa)} />
         <TaxLine
           op="="
-          label={regimen === 'rer' ? 'Cuota mensual' : 'Pago a cuenta'}
+          label={sire.regimen === 'rer' ? 'Cuota mensual' : 'Pago a cuenta'}
           hint="Se paga redondeado a soles enteros"
-          value={simulated.monto}
+          value={ir.monto}
           tone="negative"
         />
-        <p className={styles.cardNote}>{REGIMENES[regimen].nota}</p>
+        <p className={styles.cardNote}>{regimen.nota}</p>
       </Section>
 
       <motion.p className={styles.footnote} variants={fadeUp}>

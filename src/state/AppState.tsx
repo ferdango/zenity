@@ -1,8 +1,9 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { type Business, DEMO_BUSINESSES, businessFromCompany } from '../data/businesses'
+import { type Business, DEMO_BUSINESSES, businessFromCompany, withRegimen } from '../data/businesses'
 import { buildLedger } from '../data/ledger'
 import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, USER } from '../data/mock'
 import type { SunatCompany } from '../data/registry'
+import type { Regimen } from '../data/sire'
 import { getSource } from '../data/sources'
 import { readStorage, writeStorage } from '../lib/storage'
 import { type AppState, AppStateContext, type Profile, type Registration, type SheetName, type Toast } from './context'
@@ -15,7 +16,7 @@ const ACTIVE_BUSINESS_KEY = 'zenity.business'
 
 const EMPTY_REGISTRATION: Registration = {
   personal: { dni: '', nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
-  company: { ruc: '', razonSocial: '', nombreComercial: '', ingresoMinimo: '' },
+  company: { ruc: '', razonSocial: '', nombreComercial: '', ingresoMinimo: '', regimen: '' },
   reniec: null,
   sunat: null,
 }
@@ -27,7 +28,7 @@ function loadBusinesses(): Business[] {
     Array.isArray(stored) &&
     stored.length > 0 &&
     stored.every((b: Partial<Business> | null) => typeof b?.ruc === 'string' && Array.isArray(b.connections))
-  return valid ? (stored as Business[]) : DEMO_BUSINESSES
+  return valid ? (stored as Business[]).map(withRegimen) : DEMO_BUSINESSES
 }
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
@@ -102,8 +103,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addBusiness = useCallback(
-    (company: SunatCompany, nombreComercial: string) => {
-      const created = businessFromCompany(company, nombreComercial, businesses.length)
+    (company: SunatCompany, nombreComercial: string, regimen: Regimen) => {
+      const created = businessFromCompany(company, nombreComercial, regimen, businesses.length)
       setBusinesses((list) => (list.some((b) => b.id === created.id) ? list : [...list, created]))
       setActiveId(created.id)
       setCategorized({})
@@ -112,9 +113,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [businesses.length],
   )
 
-  const registerBusiness = useCallback((company: SunatCompany, nombreComercial: string) => {
+  const registerBusiness = useCallback((company: SunatCompany, nombreComercial: string, regimen: Regimen) => {
     // El prototipo le da al RUC registrado las cuentas de ejemplo del Figma
-    const registered = { ...businessFromCompany(company, nombreComercial, 0), connections: INITIAL_CONNECTIONS, scale: 1 }
+    const registered = { ...businessFromCompany(company, nombreComercial, regimen, 0), connections: INITIAL_CONNECTIONS, scale: 1 }
     setBusinesses([registered])
     setActiveId(registered.id)
     setReviewed({})
