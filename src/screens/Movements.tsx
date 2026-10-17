@@ -3,12 +3,15 @@ import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
 import { AccountSelector } from '../components/AccountSelector'
 import { Amount } from '../components/Amount'
+import { BusinessButton } from '../components/Business'
 import { Button } from '../components/Button'
+import { EmptyState } from '../components/EmptyState'
 import { ImpactList, InsightList, QuickInsights, SectionHeader } from '../components/Insights'
 import { MetricCard } from '../components/Metrics'
 import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TopBar } from '../components/TopBar'
 import { CategoryRow, TransactionRow } from '../components/Transactions'
+import { businessName } from '../data/businesses'
 import { expenseQuickInsights, incomeQuickInsights, movementInsights } from '../data/insights'
 import {
   avatarFor,
@@ -41,15 +44,15 @@ function isTab(value: string | undefined): value is Tab {
 export function Movements() {
   const { tab } = useParams()
   const navigate = useNavigate()
-  const { connections, periodKey } = useApp()
+  const { connections, periodKey, ledger, business } = useApp()
   const [accountId, setAccountId] = useState<string | 'all'>('all')
   const [openCategory, setOpenCategory] = useState<string | null>('first')
 
   if (!isTab(tab)) return <Navigate to="/movimientos/todo" replace />
 
-  const period = getPeriod(periodKey)
+  const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
-  const txs = filterByAccount(getTransactions(periodKey), accountId)
+  const txs = filterByAccount(getTransactions(ledger, periodKey), accountId)
   const t = totals(txs)
   const focus = tab === 'ingresos' ? 'income' : tab === 'egresos' ? 'expense' : 'all'
   const insights = movementInsights(txs, connections, accountId, month, focus)
@@ -84,7 +87,20 @@ export function Movements() {
 
   return (
     <div className="z-page">
-      <TopBar title={TITLES[tab]} />
+      <TopBar title={TITLES[tab]} subtitle={businessName(business)} end={<BusinessButton />} />
+      {ledger.empty ? (
+        <div className="z-container z-gutter">
+          <EmptyState
+            title={`${businessName(business)} aún no tiene cuentas`}
+            description="Conecta una cuenta de este RUC para ver sus ingresos y egresos."
+            action={
+              <Button icon="add" to="/conexiones/nueva">
+                Conectar cuenta
+              </Button>
+            }
+          />
+        </div>
+      ) : (
       <div className="z-container">
         <div className={styles.top}>
           <AccountSelector connections={connections} value={accountId} onChange={setAccountId} />
@@ -164,7 +180,7 @@ export function Movements() {
                 <div className={styles.metrics}>
                   <MetricCard label="Ingresos" value={t.ingresos} icon="up" size="lg" caption={month} />
                 </div>
-                <QuickInsights items={incomeQuickInsights(txs, connections, periodKey)} />
+                <QuickInsights items={incomeQuickInsights(txs, connections, ledger, periodKey)} />
                 <InsightList insights={insights} title="Resumen de hoy" />
                 <SectionHeader title="Categorías con mayor impacto" />
                 {categoryList('income')}
@@ -185,6 +201,7 @@ export function Movements() {
           </motion.div>
         </AnimatePresence>
       </div>
+      )}
     </div>
   )
 }

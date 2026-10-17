@@ -1,6 +1,7 @@
 import { formatMoney } from '../lib/format'
 import type { QuickInsight } from '../components/Insights'
-import { type Connection, type Insight, PERIODS, type Transaction } from './mock'
+import type { Ledger } from './ledger'
+import type { Connection, Insight, Transaction } from './mock'
 import { accountTotals, categoryTotals, getTransactions, totals, variation } from './selectors'
 
 const money = (n: number) => formatMoney(n)
@@ -34,7 +35,8 @@ export function movementInsights(
   }
 
   if (t.ingresos === 0 && t.egresos === 0) {
-    return [{ ...summary, body: ['Esta cuenta aún no tiene movimientos en ', { b: month.toLowerCase() }, '.'] }]
+    const subject = account ? 'Esta cuenta aún no tiene' : 'Tus cuentas aún no tienen'
+    return [{ ...summary, body: [`${subject} movimientos en `, { b: month.toLowerCase() }, '.'] }]
   }
 
   const type = focus === 'expense' ? 'expense' : 'income'
@@ -77,10 +79,10 @@ export function movementInsights(
   return [summary, category]
 }
 
-export function incomeQuickInsights(txs: Transaction[], connections: Connection[], periodKey: string): QuickInsight[] {
+export function incomeQuickInsights(txs: Transaction[], connections: Connection[], ledger: Ledger, periodKey: string): QuickInsight[] {
   const [top] = categoryTotals(txs, 'income')
   const [bestAccount] = accountTotals(txs, connections, 'income')
-  const delta = variation(periodKey, 'ingresos')
+  const delta = variation(ledger, periodKey, 'ingresos')
   return [
     {
       id: 'source',
@@ -156,14 +158,14 @@ export function expenseQuickInsights(txs: Transaction[], connections: Connection
 }
 
 /** Insights de "Explícame este balance" para la pantalla Resumen. */
-export function balanceInsights(periodKey: string, connections: Connection[], month: string): Insight[] {
-  const index = PERIODS.findIndex((p) => p.key === periodKey)
-  const period = PERIODS[index]
-  const previous = index > 0 ? PERIODS[index - 1] : null
-  const txs = getTransactions(periodKey)
+export function balanceInsights(ledger: Ledger, periodKey: string, connections: Connection[], month: string): Insight[] {
+  const index = Math.max(0, ledger.periods.findIndex((p) => p.key === periodKey))
+  const period = ledger.periods[index]
+  const previous = index > 0 ? ledger.periods[index - 1] : null
+  const txs = getTransactions(ledger, periodKey)
   const t = totals(txs)
   const margin = t.ingresos ? Math.round((t.neto / t.ingresos) * 100) : 0
-  const delta = variation(periodKey, 'balance')
+  const delta = variation(ledger, periodKey, 'balance')
   const [bestAccount] = accountTotals(txs, connections, 'income')
   const [topExpense] = categoryTotals(txs, 'expense')
 

@@ -1,8 +1,10 @@
 import { createContext, use } from 'react'
+import type { Business } from '../data/businesses'
+import type { Ledger } from '../data/ledger'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
 
-export type SheetName = 'notifications' | 'faq' | 'rating' | null
+export type SheetName = 'notifications' | 'faq' | 'rating' | 'businesses' | null
 
 export interface Toast {
   id: number
@@ -59,6 +61,17 @@ export interface AppState {
   toggleHideBalances: () => void
   periodKey: string
   setPeriodKey: (key: string) => void
+  /** Negocios (RUC) del usuario; cada uno con sus propias conexiones y datos */
+  businesses: Business[]
+  /** Negocio activo: todo lo que se ve en la app es de este RUC */
+  business: Business
+  ledger: Ledger
+  switchBusiness: (id: string) => void
+  /** Agrega un RUC consultado en SUNAT y lo deja activo */
+  addBusiness: (company: SunatCompany, nombreComercial: string) => Business
+  /** Registro: el RUC registrado pasa a ser el único negocio, con las cuentas de ejemplo */
+  registerBusiness: (company: SunatCompany, nombreComercial: string) => void
+  /** Conexiones del negocio activo */
   connections: Connection[]
   addConnection: (sourceId: string) => Connection | null
   removeConnection: (id: string) => void

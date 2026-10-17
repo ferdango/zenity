@@ -15,7 +15,8 @@ interface BarChartProps {
 
 function niceMax(value: number) {
   const step = value > 4000 ? 1000 : value > 1500 ? 500 : 250
-  return Math.ceil((value * 1.02) / step) * step
+  // Nunca 0: un negocio sin movimientos también dibuja su escala
+  return Math.max(step, Math.ceil((value * 1.02) / step) * step)
 }
 
 /** Gráfico de barras animado: las barras crecen con resorte y el tooltip sigue a la selección. */

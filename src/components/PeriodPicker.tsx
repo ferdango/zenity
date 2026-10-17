@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { PERIODS } from '../data/mock'
-import { getPeriod } from '../data/selectors'
+import { calendarPeriod } from '../data/selectors'
 import { cn } from '../lib/cn'
 import { MONTHS } from '../lib/format'
 import { ease } from '../lib/motion'
@@ -15,7 +15,7 @@ type MenuKind = 'month' | 'year' | null
 export function PeriodPicker() {
   const { periodKey, setPeriodKey } = useApp()
   const [menu, setMenu] = useState<MenuKind>(null)
-  const period = getPeriod(periodKey)
+  const period = calendarPeriod(periodKey)
   const years = [...new Set(PERIODS.map((p) => p.year))]
   const monthsOfYear = PERIODS.filter((p) => p.year === period.year)
 

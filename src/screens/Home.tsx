@@ -3,18 +3,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import sun from '../assets/sun.svg'
 import { GradientText, ShimmerText } from '../components/AiText'
+import { BusinessSwitcher } from '../components/Business'
 import { Button } from '../components/Button'
 import { AccountCard } from '../components/Cards'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
-import { InsightList } from '../components/Insights'
+import { InsightList, SectionHeader } from '../components/Insights'
 import { SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
-import { HOME_INSIGHTS } from '../data/mock'
+import { businessName } from '../data/businesses'
+import { movementInsights } from '../data/insights'
+import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
 import { TOUR_STEPS } from '../data/tour'
-import { getPeriod, periodLabel, variation } from '../data/selectors'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
@@ -93,15 +95,36 @@ function Carousel() {
 /** Inicio / billetera (Figma: Home). */
 export function Home() {
   const navigate = useNavigate()
-  const { hideBalances, toggleHideBalances, periodKey, setDrawerOpen, openSheet, toast, profile, tourDone, tourActive, startTour, endTour } =
-    useApp()
+  const {
+    hideBalances,
+    toggleHideBalances,
+    periodKey,
+    setDrawerOpen,
+    openSheet,
+    toast,
+    profile,
+    tourDone,
+    tourActive,
+    startTour,
+    endTour,
+    business,
+    connections,
+    ledger,
+  } = useApp()
   const scrolled = useScrolled()
   const [generating, setGenerating] = useState(false)
-  const period = getPeriod(periodKey)
+  const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
   const dayPart = getDayPart()
   const greeting = GREETING[dayPart]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
+  const name = businessName(business)
+  // Insights del negocio: los del Figma para el negocio base; para el resto, generados de sus datos
+  const insights =
+    ledger.insights ??
+    movementInsights(getTransactions(ledger, periodKey), connections, 'all', month, 'all').map((insight, i) =>
+      i === 0 ? { ...insight, title: `${name}: así cerró ${month.toLowerCase()}` } : insight,
+    )
 
   // Primer ingreso: recorrido de bienvenida cuando el inicio ya terminó de animarse
   useEffect(() => {
@@ -137,7 +160,7 @@ export function Home() {
           onClick={() => setDrawerOpen(true)}
           data-tour="menu"
         />
-        <span className={styles.headerTitle}>Mi billetera</span>
+        <BusinessSwitcher />
         <IconButton
           icon="notifications"
           label="Notificaciones"
@@ -182,15 +205,34 @@ export function Home() {
             </div>
           </motion.div>
 
-          <motion.div variants={fadeUp} data-tour="accounts">
-            <Carousel />
-          </motion.div>
+          {ledger.empty ? (
+            <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
+              <div className={styles.empty}>
+                <span className={styles.emptyIcon}>
+                  <Icon name="add_card" size={28} />
+                </span>
+                <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
+                <p className={styles.emptyText}>
+                  Bancos, APIs, bases de datos o Excel. Aquí solo verás los movimientos de este RUC.
+                </p>
+                <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
+                  Conectar cuenta
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <>
+              <motion.div variants={fadeUp} data-tour="accounts">
+                <Carousel />
+              </motion.div>
 
-          <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-            <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
-              Agrega una cuenta
-            </Button>
-          </motion.div>
+              <motion.div variants={fadeUp} style={{ display: 'grid' }}>
+                <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
+                  Agrega una cuenta
+                </Button>
+              </motion.div>
+            </>
+          )}
 
           <motion.div className={styles.tiles} variants={staggerContainer(0.07)} data-tour="summary">
             <motion.div variants={fadeUp}>
@@ -200,7 +242,7 @@ export function Home() {
                 value={period.ingresos}
                 caption={month}
                 to="/movimientos/ingresos"
-                delta={variation(periodKey, 'ingresos')}
+                delta={variation(ledger, periodKey, 'ingresos')}
               />
             </motion.div>
             <motion.div variants={fadeUp}>
@@ -210,7 +252,7 @@ export function Home() {
                 value={period.egresos}
                 caption={month}
                 to="/movimientos/egresos"
-                delta={variation(periodKey, 'egresos')}
+                delta={variation(ledger, periodKey, 'egresos')}
               />
             </motion.div>
             <motion.div variants={fadeUp}>
@@ -220,8 +262,17 @@ export function Home() {
         </motion.div>
 
         <div className={styles.secondary}>
-          <InsightList insights={HOME_INSIGHTS} title="Resumen al día de hoy" tourId="insights" />
-          <div className={styles.report}>
+          {ledger.empty ? (
+            <section className={styles.emptyInsights}>
+              <SectionHeader title="Resumen al día de hoy" tourId="insights" />
+              <p className={styles.emptyText}>
+                Cuando conectes una cuenta, Zenity analizará los movimientos de {name} y te explicará lo más importante.
+              </p>
+            </section>
+          ) : (
+            <InsightList key={business.id} insights={insights} title="Resumen al día de hoy" tourId="insights" />
+          )}
+          <div className={styles.report} hidden={ledger.empty}>
             <Button
               variant="tonal"
               size="lg"

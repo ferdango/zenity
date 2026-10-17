@@ -17,9 +17,11 @@ import {
 } from '../components/Registry'
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
-import { consultarDni, consultarRuc, type ReniecPerson, type SunatCompany } from '../data/registry'
+import { consultarDni, type ReniecPerson } from '../data/registry'
 import { formatLongDate } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useFocusOnEnter } from '../lib/useFocusOnEnter'
+import { useRucLookup } from '../lib/useRucLookup'
 import { useTimeouts } from '../lib/useTimeouts'
 import {
   ageFrom,
@@ -33,7 +35,6 @@ import {
   validateIncome,
   validateName,
   validatePhone,
-  validateRuc,
 } from '../lib/validation'
 import { type CompanyData, type PersonalData, useApp } from '../state/context'
 import styles from './Register.module.css'
@@ -126,17 +127,6 @@ function focusFirstInvalid<T extends object>(prefix: string, errors: Record<keyo
   if (!first) return false
   document.getElementById(`${prefix}-${String(first)}`)?.focus()
   return true
-}
-
-/** Enfoca el primer campo cuando termina la transición de entrada. */
-function useFocusOnEnter(id: string, enabled: boolean) {
-  useEffect(() => {
-    if (!enabled) return
-    const timer = window.setTimeout(() => document.getElementById(id)?.focus({ preventScroll: true }), 450)
-    return () => window.clearTimeout(timer)
-    // Solo al entrar a la pantalla
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 }
 
 const fadeSwap = {
@@ -344,47 +334,26 @@ const INCOME_PRESETS = [5000, 10000, 30000, 50000, 100000]
 export function RegisterCompany() {
   const navigate = useNavigate()
   const schedule = useTimeouts()
-  const { registration, updateRegistration, setLookup, setProfile, toast } = useApp()
+  const { registration, updateRegistration, setLookup, setProfile, registerBusiness, toast } = useApp()
   const personal = registration.personal
   const [values, setValues] = useState<CompanyData>(registration.company)
   const [touched, setTouched] = useState<Touched<CompanyData>>({})
-  const [company, setCompany] = useState<SunatCompany | null>(registration.sunat)
-  const [failure, setFailure] = useState<{ ruc: string; message: string } | null>(null)
   const [autofilled, setAutofilled] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-
-  const rucFormat = validateRuc(values.ruc)
-  const verified = company !== null && company.ruc === values.ruc
-  const notFound = failure?.ruc === values.ruc
-  const searching = !rucFormat && !verified && !notFound
-  const lookup: LookupState = verified ? 'verified' : searching ? 'searching' : 'idle'
+  const { company, verified, searching, notFound, error: rucError, state: lookup } = useRucLookup(values.ruc, {
+    initial: registration.sunat,
+    onFound: (found) => {
+      setAutofilled(true)
+      setValues((v) => ({ ...v, razonSocial: found.razonSocial, nombreComercial: found.nombreComercial ?? '' }))
+    },
+  })
 
   useFocusOnEnter('company-ruc', !verified)
-
-  // Consulta a SUNAT en cuanto el RUC tiene formato y dígito verificador válidos
-  useEffect(() => {
-    if (!searching) return
-    let active = true
-    const ruc = values.ruc
-    consultarRuc(ruc).then((result) => {
-      if (!active) return
-      if (!result.ok) {
-        setFailure({ ruc, message: result.error })
-        return
-      }
-      setCompany(result.data)
-      setAutofilled(true)
-      setValues((v) => ({ ...v, razonSocial: result.data.razonSocial, nombreComercial: result.data.nombreComercial ?? '' }))
-    })
-    return () => {
-      active = false
-    }
-  }, [searching, values.ruc])
 
   if (!personal.nombres) return <Navigate to="/registro/datos" replace />
 
   const errors: Record<keyof CompanyData, string | null> = {
-    ruc: rucFormat ?? (notFound ? failure.message : null),
+    ruc: rucError,
     razonSocial: validateCompanyName(values.razonSocial),
     nombreComercial: null,
     ingresoMinimo: validateIncome(values.ingresoMinimo),
@@ -418,6 +387,7 @@ export function RegisterCompany() {
     const nombreComercial = values.nombreComercial.trim()
     updateRegistration('company', { ...values, nombreComercial })
     setLookup('sunat', company)
+    if (company) registerBusiness(company, nombreComercial)
     const firstName = personal.nombres.split(' ')[0]
     const firstSurname = personal.apellidos.split(' ')[0]
     schedule(() => {
@@ -479,7 +449,7 @@ export function RegisterCompany() {
         </motion.div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {verified ? (
+          {verified && company ? (
             <motion.div key="filled" className={styles.form} variants={staggerContainer(0.05)} initial="hidden" animate="show" exit={fadeSwap.exit}>
               <motion.div variants={fadeUp}>
                 <CompanyProfile company={company} />

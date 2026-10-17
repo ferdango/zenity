@@ -121,6 +121,92 @@
   color: var(--z-on-surface-low);
 }
 
+/* ── Negocios (RUC) ────────────────────────────────────────── */
+.businesses {
+  display: grid;
+  gap: 8px;
+  padding: 4px 8px 0;
+}
+
+.sectionLabel {
+  padding: 8px 8px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--z-on-surface-low);
+}
+
+.activeBusiness {
+  display: grid;
+  grid-template-columns: 36px 1fr 20px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px 10px 10px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-high);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  text-align: left;
+}
+
+.businessText {
+  display: grid;
+  min-width: 0;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+}
+
+.businessText span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.businessText span:first-child {
+  font-weight: 500;
+}
+
+.businessText span:last-child {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cambio en un toque a los demás negocios */
+.quickSwitch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 34px;
+  padding: 0 10px 0 5px;
+  border-radius: var(--z-radius-full);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  color: var(--z-on-surface);
+}
+
+.quick span {
+  max-width: 128px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quickAdd {
+  padding-left: 10px;
+  color: var(--z-primary);
+  font-weight: 500;
+}
+
 .count {
   min-width: 24px;
   height: 24px;

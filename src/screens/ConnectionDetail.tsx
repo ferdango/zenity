@@ -24,7 +24,7 @@ type Tab = 'todo' | 'ingresos' | 'egresos'
 export function ConnectionDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { connections, periodKey, removeConnection, toast } = useApp()
+  const { connections, periodKey, removeConnection, toast, ledger } = useApp()
   const [tab, setTab] = useState<Tab>('todo')
   const [confirm, setConfirm] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -36,8 +36,8 @@ export function ConnectionDetail() {
 
   if (!connection) return <Navigate to="/inicio" replace />
 
-  const month = periodLabel(getPeriod(periodKey))
-  const all = filterByAccount(getTransactions(periodKey), connection.id)
+  const month = periodLabel(getPeriod(ledger, periodKey))
+  const all = filterByAccount(getTransactions(ledger, periodKey), connection.id)
   const t = totals(all)
   const list = all.filter((tx) => (tab === 'todo' ? true : tab === 'ingresos' ? tx.amount > 0 : tx.amount < 0))
   const empty = all.length === 0

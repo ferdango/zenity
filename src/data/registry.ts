@@ -47,10 +47,10 @@ export interface SunatCompany {
 
 export type Lookup<T> = { ok: true; data: T } | { ok: false; error: string }
 
-type Rand = () => number
+export type Rand = () => number
 
 /** Generador pseudoaleatorio con semilla (FNV-1a + mulberry32). */
-function seeded(text: string): Rand {
+export function seeded(text: string): Rand {
   let hash = 2166136261
   for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619)
   let state = hash >>> 0

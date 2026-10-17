@@ -5,6 +5,7 @@ import { Toaster } from './components/Toaster'
 import { AppShell } from './layouts/AppShell'
 import { RouteMotion } from './layouts/RouteMotion'
 import { saveScroll, useRouteTransition } from './layouts/transitions'
+import { AddBusiness } from './screens/AddBusiness'
 import { AddConnection } from './screens/AddConnection'
 import { Analyzing } from './screens/Analyzing'
 import { Chat } from './screens/Chat'
@@ -29,6 +30,7 @@ function isShellPath(path: string) {
     path === '/chat' ||
     path === '/revisar' ||
     path === '/conexiones/nueva' ||
+    path === '/negocios/nuevo' ||
     path.startsWith('/movimientos/') ||
     path.startsWith('/conexion/')
   )
@@ -72,6 +74,7 @@ function AnimatedRoutes() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/revisar" element={<Review />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
+          <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
         </Route>
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />

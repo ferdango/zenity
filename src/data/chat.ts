@@ -1,4 +1,5 @@
 import { formatMoney } from '../lib/format'
+import type { Ledger } from './ledger'
 import type { Connection, RichText } from './mock'
 import { accountTotals, categoryTotals, getPeriod, getTransactions, periodLabel, totals, variation } from './selectors'
 
@@ -30,20 +31,25 @@ function normalize(text: string) {
 interface Context {
   connections: Connection[]
   periodKey: string
+  ledger: Ledger
+  /** Nombre del negocio (RUC) activo */
+  business: string
 }
 
-/** Genera una respuesta simulada (demo sin backend) a partir de los datos de ejemplo. */
-export function answer(question: string, { connections, periodKey }: Context): ChatBlock[] {
+/** Genera una respuesta simulada (demo sin backend) con los datos del negocio activo. */
+export function answer(question: string, { connections, periodKey, ledger, business }: Context): ChatBlock[] {
   const q = normalize(question)
-  const period = getPeriod(periodKey)
+  const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period).toLowerCase()
-  const txs = getTransactions(periodKey)
+  const txs = getTransactions(ledger, periodKey)
   const t = totals(txs)
   const incomeCats = categoryTotals(txs, 'income')
   const expenseCats = categoryTotals(txs, 'expense')
-  const dIn = variation(periodKey, 'ingresos')
-  const dOut = variation(periodKey, 'egresos')
+  const dIn = variation(ledger, periodKey, 'ingresos')
+  const dOut = variation(ledger, periodKey, 'egresos')
   const margin = t.ingresos ? Math.round((t.neto / t.ingresos) * 100) : 0
+  const [topAccount] = accountTotals(txs, connections, 'income')
+  const idle = connections.find((c) => c.balance === 0)
 
   if (q.includes('conectar')) {
     return [
@@ -69,10 +75,27 @@ export function answer(question: string, { connections, periodKey }: Context): C
     ]
   }
 
+  if (ledger.empty && !q.includes('conectar')) {
+    return [
+      {
+        type: 'p',
+        text: [{ b: business }, ' aún no tiene cuentas conectadas, así que todavía no tengo movimientos que analizar.'],
+      },
+      {
+        type: 'p',
+        text: 'Conecta un banco, una API, una base de datos o un Excel de este RUC y te explico sus ingresos, egresos y balance.',
+      },
+      { type: 'actions', items: [{ label: 'Conectar cuenta', to: '/conexiones/nueva', icon: 'add' }] },
+    ]
+  }
+
   if (q.includes('consolidado') || q.includes('todas mis cuentas') || q.includes('general')) {
     const total = connections.reduce((acc, c) => acc + c.balance, 0)
     return [
-      { type: 'p', text: ['Este es el consolidado de tus ', { b: `${connections.length} cuentas conectadas` }, ':'] },
+      {
+        type: 'p',
+        text: ['Este es el consolidado de las ', { b: `${connections.length} cuentas conectadas` }, ' de ', { b: business }, ':'],
+      },
       {
         type: 'table',
         head: ['Cuenta', 'Saldo'],
@@ -84,9 +107,8 @@ export function answer(question: string, { connections, periodKey }: Context): C
         text: [
           'Tu saldo consolidado es ',
           { b: m(total) },
-          '. ',
-          { b: 'Locales Nacional' },
-          ' aún no tiene movimientos: importa el Excel al día de hoy para incluirlo.',
+          '.',
+          ...(idle ? [' ', { b: idle.name }, ' aún no tiene movimientos: actualízala para incluirla.'] : []),
         ],
       },
       { type: 'actions', items: [{ label: 'Ver mi billetera', to: '/inicio', icon: 'account_balance_wallet' }] },
@@ -136,9 +158,8 @@ export function answer(question: string, { connections, periodKey }: Context): C
           { pos: m(w.ingresos) },
           ' y salieron ',
           { neg: m(w.egresos) },
-          '. Lo que más aumentó fueron las ',
-          { b: 'ventas de Negocio Retail 1' },
-          ', impulsadas por la tienda de Miraflores.',
+          '.',
+          ...(topAccount ? [' Lo que más aportó fue ', { b: topAccount.connection.name }, '.'] : []),
         ],
       },
       { type: 'list', items: top.map((tx) => [{ b: tx.title }, ': ', tx.amount > 0 ? { pos: m(tx.amount, 'always') } : { neg: m(tx.amount) }]) },
@@ -181,7 +202,7 @@ export function answer(question: string, { connections, periodKey }: Context): C
           'Mi recomendación: revisa los gastos de ',
           { b: expenseCats[0]?.label.toLowerCase() ?? 'comercial' },
           ' y concilia los cobros pendientes de ',
-          { b: 'Negocio Retail 1' },
+          { b: topAccount?.connection.name ?? business },
           ' para mejorar tu margen.',
         ],
       },

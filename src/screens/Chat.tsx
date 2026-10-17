@@ -2,11 +2,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import { type ChangeEvent, type FormEvent, type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { GradientText, RichTextView, ShimmerText } from '../components/AiText'
+import { BusinessButton } from '../components/Business'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { Spark } from '../components/Spark'
 import { TopBar } from '../components/TopBar'
+import { businessName } from '../data/businesses'
 import { answer, type ChatBlock, fileAnswer, SUGGESTIONS } from '../data/chat'
 import { streamDuration, toSegments } from '../lib/richText'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
@@ -200,7 +202,8 @@ function getRecognition(): Recognition | null {
 
 /** Chat con Zenity (Figma: Chat) con el comportamiento de Gemini. */
 export function Chat() {
-  const { connections, periodKey, toast, profile } = useApp()
+  const { connections, periodKey, toast, profile, ledger, business } = useApp()
+  const name = businessName(business)
   const [params, setParams] = useSearchParams()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
@@ -236,9 +239,9 @@ export function Chat() {
       if (!value) return
       setMessages((list) => [...list, { id: nextId.current++, role: 'user', text: value, status: 'done' }])
       setInput('')
-      respond(answer(value, { connections, periodKey }))
+      respond(answer(value, { connections, periodKey, ledger, business: name }))
     },
-    [connections, periodKey, respond],
+    [connections, periodKey, ledger, name, respond],
   )
 
   // Pregunta enviada desde otra pantalla (?q=…)
@@ -337,7 +340,13 @@ export function Chat() {
     <div className={`z-page ${styles.page}`}>
       <TopBar
         title="Zenity"
-        end={messages.length > 0 && <IconButton icon="edit_square" label="Nuevo chat" onClick={reset} />}
+        subtitle={name}
+        end={
+          <>
+            {messages.length > 0 && <IconButton icon="edit_square" label="Nuevo chat" onClick={reset} />}
+            <BusinessButton />
+          </>
+        }
       />
 
       <div className={styles.body}>
@@ -401,7 +410,7 @@ export function Chat() {
                     <div className={styles.bubble}>{msg.text}</div>
                   </motion.div>
                 ) : (
-                  <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, { connections, periodKey }))} />
+                  <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, { connections, periodKey, ledger, business: name }))} />
                 ),
               )}
             </motion.div>

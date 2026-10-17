@@ -9,6 +9,7 @@ import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { TopBar } from '../components/TopBar'
+import { businessName } from '../data/businesses'
 import { SOURCE_FILTERS, type Source, type SourceKind } from '../data/mock'
 import { getSource, SOURCES } from '../data/sources'
 import { cn } from '../lib/cn'
@@ -113,6 +114,7 @@ function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: 
 
 /** Nueva cuenta / fuentes de conexión (Figma: Add new connection). */
 export function AddConnection() {
+  const { business } = useApp()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -133,7 +135,7 @@ export function AddConnection() {
 
   return (
     <div className="z-page">
-      <TopBar title="Nueva cuenta" />
+      <TopBar title="Nueva cuenta" subtitle={`Para ${businessName(business)}`} />
       <div className="z-container">
         <label className={cn(styles.search, 'fx-glow-border')} data-active={focused}>
           <Icon name="search" size={22} />

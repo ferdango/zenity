@@ -15,6 +15,7 @@
   <img src="docs/screenshots/resumen.jpg" width="200" alt="Resumen" />
 </p>
 <p>
+  <img src="docs/screenshots/negocios.jpg" width="200" alt="Selector de negocios (RUC)" />
   <img src="docs/screenshots/ingresos.jpg" width="200" alt="Ingresos" />
   <img src="docs/screenshots/escritorio.jpg" width="412" alt="Vista de escritorio" />
 </p>
@@ -43,8 +44,9 @@ npm run lint      # oxlint
 | — (nuevo) | `/registro/datos` | Registro paso 1: el DNI va primero; la consulta a RENIEC completa nombres, apellidos, fecha de nacimiento y dirección, y se agregan correo y celular (+51) |
 | — (nuevo) | `/registro/empresa` | Registro paso 2: el RUC va primero (con dígito verificador); la consulta a SUNAT muestra la ficha de la empresa y completa razón social y nombre comercial; luego el ingreso mínimo mensual |
 | Notifications | `/notificaciones` | Hoja inferior para activar notificaciones push |
-| Home | `/inicio` | Saludo según la hora, ocultar saldos, periodo, carrusel de cuentas, ingresos/egresos/total, resumen de IA, reporte y **recorrido de bienvenida** en el primer ingreso |
-| Menu | menú lateral | Drawer en móvil, barra lateral fija en escritorio (como Gemini), perfil y empresa registrados, "Ver tutorial" |
+| Home | `/inicio` | **Selector de negocio (RUC)**, saludo según la hora, ocultar saldos, periodo, carrusel de cuentas del negocio, ingresos/egresos/total, resumen de IA, reporte y **recorrido de bienvenida** en el primer ingreso |
+| Menu | menú lateral | Drawer en móvil, barra lateral fija en escritorio (como Gemini), perfil, **tus negocios** con cambio en un toque, "Ver tutorial" |
+| — (nuevo) | `/negocios/nuevo` | Agregar otro RUC: consulta a SUNAT con su ficha, nombre comercial y aviso si el RUC ya está agregado |
 | Add new connection | `/conexiones/nueva` | Búsqueda, filtros y conexión animada a bancos, APIs, bases de datos y archivos |
 | Conection added / error | `/conexiones/resultado` | Éxito o error con nube animada (*SQL Server* simula un error la primera vez) |
 | Loading (×4) | `/analizando` | Análisis con IA en 4 pasos con progreso |
@@ -62,6 +64,13 @@ npm run lint      # oxlint
   - **Paso 2 · RUC → SUNAT**: con el RUC completo y su dígito verificador válido se consulta SUNAT y aparece la ficha de la empresa: estado y condición, tipo de contribuyente, nombre comercial, trabajadores, actividad económica (CIIU) principal y secundarias, domicilio fiscal, fechas de inscripción e inicio de actividades, sistemas de emisión y contabilidad, comercio exterior y comprobantes electrónicos. Se completan la razón social (bloqueada) y el nombre comercial (editable).
   - **Consultas simuladas**: no hay conexión real con RENIEC ni SUNAT. Los datos se generan a partir del número (el mismo documento siempre devuelve la misma persona o empresa) con la forma de una respuesta real, en `src/data/registry.ts`, para cambiarlas luego por una API. Para probar: cualquier DNI de 8 dígitos; un DNI con todos los dígitos iguales o `12345678` no existe. RUC de ejemplo `20123456786`; un RUC 10 con tu DNI (`10` + DNI + dígito verificador) devuelve a la misma persona como "persona natural con negocio"; un RUC con los 8 dígitos centrales iguales (p. ej. `20111111112`) no existe.
 - **Recorrido de bienvenida** en el primer ingreso: un foco animado con borde de degradado recorre cada sección del inicio (resumen, periodo, cuentas, agregar cuenta, ingresos/egresos/total, resumen con IA, reporte, notificaciones, menú) y cada opción de la barra inferior. Se puede repetir desde **Menú → Ver tutorial**.
+
+## Varios negocios (RUC)
+
+- **Cada RUC es independiente**: tiene sus propias cuentas conectadas, movimientos, balance mes a mes, insights, movimientos por revisar y respuestas del chat. Nada se mezcla entre negocios.
+- **Cambio rápido**: el selector del encabezado del inicio (avatar, nombre y RUC) abre **Tus negocios** con el saldo y las cuentas de cada uno. En Movimientos, Balance y el chat, el avatar del negocio arriba a la derecha abre la misma hoja, y el menú lateral muestra el negocio activo con accesos de un toque a los demás. Al cambiar, la pantalla entra con un fundido y un aviso confirma el negocio activo.
+- **Agregar otro RUC** (`/negocios/nuevo`): se consulta en SUNAT y el negocio nuevo empieza sin cuentas, con un estado vacío que invita a conectar la primera. Si el RUC ya está agregado, ofrece ir a ese negocio.
+- El registro deja el RUC registrado como único negocio. Sin registro, la demo trae dos negocios de ejemplo: **Andes Market** (los datos del Figma) y **Cocina Pacífico**. Los negocios y sus cuentas se guardan en el navegador.
 
 ## Paleta Midnight (solo modo oscuro)
 
@@ -100,8 +109,8 @@ src/
   components/  UI reutilizable (botones, chips, hojas, tarjetas, gráfico, textos de IA…)
   layouts/     shell con navegación, transiciones entre pantallas, menú
   screens/     una pantalla por archivo
-  data/        datos de ejemplo, selectores, insights y respuestas del chat
-  state/       estado global (perfil, saldos ocultos, periodo, conexiones, revisión, recorrido)
+  data/        datos de ejemplo, negocios y sus datos (ledger), consultas RENIEC/SUNAT, insights y chat
+  state/       estado global (perfil, negocios y su RUC activo, saldos ocultos, periodo, revisión, recorrido)
   lib/         utilidades (formato, animaciones, ripple…)
 ```
 

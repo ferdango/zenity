@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
+import { BusinessPicker } from '../components/Business'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { FAQ, NOTIFICATIONS } from '../data/mock'
@@ -77,7 +78,7 @@ function Rating({ onDone }: { onDone: (stars: number) => void }) {
   )
 }
 
-/** Hojas globales abiertas desde el menú o la campana: notificaciones, FAQ y calificación. */
+/** Hojas globales abiertas desde el menú o la campana: negocios, notificaciones, FAQ y calificación. */
 export function GlobalSheets() {
   const { sheet, openSheet, toast } = useApp()
   const close = () => openSheet(null)
@@ -100,6 +101,10 @@ export function GlobalSheets() {
             </motion.li>
           ))}
         </motion.ul>
+      </BottomSheet>
+
+      <BottomSheet open={sheet === 'businesses'} onClose={close} title="Tus negocios">
+        <BusinessPicker onDone={close} />
       </BottomSheet>
 
       <BottomSheet open={sheet === 'faq'} onClose={close} title="Preguntas frecuentes">
