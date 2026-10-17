@@ -1,0 +1,131 @@
+.picker {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  cursor: pointer;
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.option[data-checked='true'] {
+  background: color-mix(in srgb, var(--z-primary) 10%, var(--z-surface));
+  box-shadow: inset 0 0 0 2px var(--z-primary);
+}
+
+.option[data-unavailable='true']:not([data-checked='true']) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.option[data-unavailable='true'][data-checked='true'] {
+  box-shadow: inset 0 0 0 2px var(--z-error);
+}
+
+.option:has(.input:focus-visible) {
+  outline: 2px solid var(--z-primary);
+  outline-offset: 2px;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--z-outline);
+  transition: box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.option[data-checked='true'] .radio {
+  box-shadow: inset 0 0 0 2px var(--z-primary);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--z-primary);
+}
+
+.text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
+.head strong {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+}
+
+.rate {
+  padding: 1px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface-variant);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+}
+
+.option[data-checked='true'] .rate {
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+}
+
+.desc {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+.desc[data-warning='true'] {
+  color: var(--z-warning);
+}
+
+.help,
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 2px 4px 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.error {
+  color: var(--z-error);
+}

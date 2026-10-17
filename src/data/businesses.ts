@@ -1,5 +1,6 @@
 import { type Connection, INITIAL_CONNECTIONS } from './mock'
 import { type SunatCompany, seeded } from './registry'
+import type { Regimen } from './sire'
 
 /**
  * Un negocio es un RUC con sus propias conexiones. Cada negocio es independiente:
@@ -11,6 +12,8 @@ export interface Business {
   razonSocial: string
   nombreComercial: string | null
   tipoContribuyente: string
+  /** Régimen tributario elegido al registrar el RUC: define la tasa de Renta */
+  regimen: Regimen
   connections: Connection[]
   /** Escala de los montos de ejemplo respecto al negocio base (1 = datos base del demo) */
   scale: number
@@ -61,6 +64,7 @@ export const DEMO_BUSINESSES: Business[] = [
     razonSocial: 'Comercializadora Los Andes S.A.C.',
     nombreComercial: 'Andes Market',
     tipoContribuyente: 'Sociedad anónima cerrada',
+    regimen: 'rmt',
     connections: INITIAL_CONNECTIONS,
     scale: 1,
     tone: 0,
@@ -71,6 +75,7 @@ export const DEMO_BUSINESSES: Business[] = [
     razonSocial: 'Inversiones Gastronómicas del Pacífico S.A.C.',
     nombreComercial: 'Cocina Pacífico',
     tipoContribuyente: 'Sociedad anónima cerrada',
+    regimen: 'rer',
     connections: COCINA_CONNECTIONS,
     scale: 0.58,
     tone: 1,
@@ -99,7 +104,7 @@ export function businessBalance(business: Business): number {
 }
 
 /** Crea un negocio a partir de la ficha de SUNAT. Empieza sin conexiones. */
-export function businessFromCompany(company: SunatCompany, nombreComercial: string, tone: number): Business {
+export function businessFromCompany(company: SunatCompany, nombreComercial: string, regimen: Regimen, tone: number): Business {
   const rand = seeded(`negocio:${company.ruc}`)
   return {
     id: company.ruc,
@@ -107,8 +112,21 @@ export function businessFromCompany(company: SunatCompany, nombreComercial: stri
     razonSocial: company.razonSocial,
     nombreComercial: nombreComercial.trim() || null,
     tipoContribuyente: company.tipoContribuyente,
+    regimen,
     connections: [],
     scale: Math.round((0.35 + rand() * 1.2) * 100) / 100,
     tone: tone % BUSINESS_TONES,
   }
+}
+
+const REGIMENES_VALIDOS: readonly string[] = ['general', 'rmt', 'rer']
+
+/**
+ * Negocios guardados antes de que el registro pidiera el régimen: se les asigna el que
+ * ya mostraba el demo para ese RUC, así sus impuestos no cambian.
+ */
+export function withRegimen(business: Business): Business {
+  if (REGIMENES_VALIDOS.includes(business.regimen)) return business
+  const r = seeded(`regimen-tributario:${business.ruc}`)()
+  return { ...business, regimen: r < 0.6 ? 'rmt' : r < 0.85 ? 'rer' : 'general' }
 }

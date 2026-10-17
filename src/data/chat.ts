@@ -2,7 +2,7 @@ import { formatMoney } from '../lib/format'
 import type { Ledger } from './ledger'
 import type { Connection, RichText } from './mock'
 import { accountTotals, categoryTotals, getPeriod, getTransactions, periodLabel, totals, variation } from './selectors'
-import { formatDue, REGIMENES, renta, type Sire, sirePeriod, vencimiento } from './sire'
+import { formatDue, rateLabel, REGIMENES, renta, type Sire, sirePeriod, vencimiento } from './sire'
 
 export type ChatText = RichText | string
 
@@ -75,7 +75,7 @@ export function answer(question: string, { connections, periodKey, ledger, busin
           ['Crédito fiscal (IGV de compras)', m(-igv.credito)],
           ...(igv.saldoAnterior > 0 ? [['Saldo a favor anterior', m(-igv.saldoAnterior)]] : []),
           ['IGV a pagar', m(igv.aPagar)],
-          [`Renta ${regimen.short} (${(regimen.tasa * 100).toLocaleString('es-PE')}% de ${m(ir.ingresosNetos)})`, m(ir.aPagar)],
+          [`Renta ${regimen.short} (${rateLabel(regimen.tasa)} de ${m(ir.ingresosNetos)})`, m(ir.aPagar)],
         ],
         foot: ['Total', m(igv.aPagar + ir.aPagar)],
       },

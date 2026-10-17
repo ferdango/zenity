@@ -7,6 +7,7 @@ import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
+import { RegimenPicker } from '../components/RegimenPicker'
 import {
   CompanyProfile,
   IdentityVerified,
@@ -18,6 +19,7 @@ import {
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
 import { consultarDni, type ReniecPerson } from '../data/registry'
+import { rerUnavailable } from '../data/sire'
 import { formatLongDate } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
@@ -27,6 +29,7 @@ import {
   ageFrom,
   formatAmountInput,
   formatPhone,
+  parseAmount,
   validateAddress,
   validateBirthdate,
   validateCompanyName,
@@ -352,11 +355,18 @@ export function RegisterCompany() {
 
   if (!personal.nombres) return <Navigate to="/registro/datos" replace />
 
+  // Un ingreso mínimo por encima del tope anual del RER lo descarta
+  const rerReason = rerUnavailable(parseAmount(values.ingresoMinimo))
   const errors: Record<keyof CompanyData, string | null> = {
     ruc: rucError,
     razonSocial: validateCompanyName(values.razonSocial),
     nombreComercial: null,
     ingresoMinimo: validateIncome(values.ingresoMinimo),
+    regimen: !values.regimen
+      ? 'Elige el régimen tributario de tu empresa'
+      : values.regimen === 'rer' && rerReason
+        ? 'Tus ingresos superan el tope del RER: elige General o RMT'
+        : null,
   }
   // El RUC completo (11 dígitos) se valida al instante: es el que dispara la consulta
   const show = (key: keyof CompanyData) =>
@@ -381,13 +391,13 @@ export function RegisterCompany() {
       if (!searching) document.getElementById('company-ruc')?.focus()
       return
     }
-    setTouched({ ruc: true, razonSocial: true, nombreComercial: true, ingresoMinimo: true })
-    if (focusFirstInvalid<CompanyData>('company', errors)) return
+    setTouched({ ruc: true, razonSocial: true, nombreComercial: true, ingresoMinimo: true, regimen: true })
+    if (focusFirstInvalid<CompanyData>('company', errors) || !values.regimen) return
     setSubmitting(true)
     const nombreComercial = values.nombreComercial.trim()
     updateRegistration('company', { ...values, nombreComercial })
     setLookup('sunat', company)
-    if (company) registerBusiness(company, nombreComercial)
+    if (company) registerBusiness(company, nombreComercial, values.regimen)
     const firstName = personal.nombres.split(' ')[0]
     const firstSurname = personal.apellidos.split(' ')[0]
     schedule(() => {
@@ -518,6 +528,22 @@ export function RegisterCompany() {
                     </Chip>
                   )
                 })}
+              </motion.div>
+
+              <motion.p className={styles.sectionLabel} variants={fadeUp}>
+                Régimen tributario
+              </motion.p>
+              <motion.div variants={fadeUp}>
+                <RegimenPicker
+                  id="company-regimen"
+                  value={values.regimen}
+                  error={show('regimen')}
+                  unavailable={rerReason ? { rer: rerReason } : undefined}
+                  onChange={(regimen) => {
+                    setValues((v) => ({ ...v, regimen }))
+                    setTouched((t) => ({ ...t, regimen: true }))
+                  }}
+                />
               </motion.div>
             </motion.div>
           ) : searching ? (
