@@ -50,7 +50,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'menu',
     title: 'Menú',
-    body: 'Tu perfil, movimientos por revisar, preguntas frecuentes y este tutorial.',
+    body: 'Tus negocios, los movimientos por revisar, SUNAT y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
   },
   {
     target: 'nav-wallet',

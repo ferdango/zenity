@@ -14,10 +14,12 @@ interface BottomSheetProps {
   label?: string
   children: ReactNode
   showClose?: boolean
+  /** Si se define, muestra un botón de volver antes del título (vistas anidadas) */
+  onBack?: () => void
 }
 
 /** Hoja inferior de Material 3: entra con resorte y se cierra arrastrando hacia abajo. */
-export function BottomSheet({ open, onClose, title, label, children, showClose = true }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, title, label, children, showClose = true, onBack }: BottomSheetProps) {
   const panelRef = useOverlay(open, onClose)
   const dragControls = useDragControls()
 
@@ -57,7 +59,10 @@ export function BottomSheet({ open, onClose, title, label, children, showClose =
               <div className={styles.handle} onPointerDown={(event) => dragControls.start(event)} />
               {(title || showClose) && (
                 <div className={styles.sheetHeader} onPointerDown={(event) => dragControls.start(event)}>
-                  <h2 className="t-headline-s">{title}</h2>
+                  {onBack && <IconButton icon="arrow_back" label="Volver" variant="tonal" onClick={onBack} />}
+                  <h2 className="t-headline-s" style={{ flex: 1 }}>
+                    {title}
+                  </h2>
                   {showClose && <IconButton icon="close" label="Cerrar" onClick={onClose} />}
                 </div>
               )}
