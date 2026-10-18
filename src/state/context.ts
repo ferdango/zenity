@@ -5,7 +5,7 @@ import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
 
-export type SheetName = 'notifications' | 'faq' | 'rating' | 'businesses' | null
+export type SheetName = 'notifications' | 'account' | 'businesses' | null
 
 export interface Toast {
   id: number
