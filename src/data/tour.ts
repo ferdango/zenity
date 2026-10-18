@@ -24,7 +24,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     target: 'add-account',
-    title: 'Agrega una cuenta',
+    title: 'Agregar una conexión',
     body: 'Conecta bancos, APIs, bases de datos o archivos para consolidar todo en un solo lugar.',
   },
   {

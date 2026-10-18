@@ -232,7 +232,7 @@ export function Home() {
 
               <motion.div variants={fadeUp} style={{ display: 'grid' }}>
                 <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
-                  Agrega una cuenta
+                  Agregar una conexión
                 </Button>
               </motion.div>
             </>
