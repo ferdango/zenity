@@ -16,24 +16,30 @@ import {
   type LookupState,
   LookupStatus,
 } from '../components/Registry'
+import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
 import { consultarDni, type ReniecPerson } from '../data/registry'
 import { rerUnavailable } from '../data/sire'
-import { formatLongDate, maskWords } from '../lib/format'
+import { formatDate, maskWords } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
 import { useRucLookup } from '../lib/useRucLookup'
 import { useTimeouts } from '../lib/useTimeouts'
 import {
-  ageFrom,
+  birthToIso,
+  cleanDocument,
+  DOC_ORDER,
+  DOC_TYPES,
+  type DocType,
   formatAmountInput,
+  formatBirthInput,
   formatPhone,
   parseAmount,
   validateAddress,
   validateBirthdate,
   validateCompanyName,
-  validateDni,
+  validateDocument,
   validateEmail,
   validateIncome,
   validateName,
@@ -159,11 +165,17 @@ export function RegisterPersonal() {
   const [person, setPerson] = useState<ReniecPerson | null>(registration.reniec)
   const [failure, setFailure] = useState<{ dni: string; message: string } | null>(null)
   const [autofilled, setAutofilled] = useState(false)
+  const [birthText, setBirthText] = useState(values.nacimiento ? formatDate(values.nacimiento) : '')
 
-  const dniFormat = validateDni(values.dni)
-  const verified = person !== null && person.dni === values.dni
-  const notFound = failure?.dni === values.dni
-  const searching = !dniFormat && !verified && !notFound
+  // RENIEC solo consulta DNI: con pasaporte o carné de extranjería los datos se escriben a mano
+  const tipoDoc = values.tipoDoc
+  const isDni = tipoDoc === 'dni'
+  const docFormat = validateDocument(tipoDoc, values.dni)
+  const verified = isDni && person !== null && person.dni === values.dni
+  const manual = !isDni && !docFormat
+  const ready = verified || manual
+  const notFound = isDni && failure?.dni === values.dni
+  const searching = isDni && !docFormat && !verified && !notFound
   const lookup: LookupState = verified ? 'verified' : searching ? 'searching' : 'idle'
 
   useFocusOnEnter('personal-dni', !verified)
@@ -189,7 +201,8 @@ export function RegisterPersonal() {
   }, [searching, values.dni])
 
   const errors: Record<keyof PersonalData, string | null> = {
-    dni: dniFormat ?? (notFound ? failure.message : null),
+    tipoDoc: null,
+    dni: docFormat ?? (notFound ? failure.message : null),
     nombres: validateName(values.nombres, 'nombres'),
     apellidos: validateName(values.apellidos, 'apellidos'),
     nacimiento: validateBirthdate(values.nacimiento),
@@ -208,9 +221,13 @@ export function RegisterPersonal() {
   })
 
   // Si cambia el DNI ya verificado, los datos de RENIEC dejan de corresponder
-  const onDniChange = (raw: string) => {
-    const dni = raw.replace(/\D/g, '').slice(0, 8)
+  const onDocChange = (raw: string) => {
+    const dni = cleanDocument(tipoDoc, raw)
     setAutofilled(false)
+    if (!isDni) {
+      setValues((v) => ({ ...v, dni }))
+      return
+    }
     setValues((v) => {
       if (person && dni === person.dni) return { ...v, dni, ...identityFrom(person) }
       if (person && v.dni === person.dni) return { ...v, dni, ...EMPTY_IDENTITY }
@@ -218,9 +235,25 @@ export function RegisterPersonal() {
     })
   }
 
+  // Cambiar de documento empieza de cero: cada tipo trae sus propios datos
+  const onTipoDocChange = (next: DocType) => {
+    if (next === tipoDoc) return
+    setValues((v) => ({ ...v, tipoDoc: next, dni: '', ...EMPTY_IDENTITY }))
+    setBirthText('')
+    setAutofilled(false)
+    setFailure(null)
+    setTouched({})
+  }
+
+  const onBirthChange = (raw: string) => {
+    const text = formatBirthInput(raw)
+    setBirthText(text)
+    setValues((v) => ({ ...v, nacimiento: birthToIso(text) }))
+  }
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (!verified) {
+    if (!ready) {
       setTouched((t) => ({ ...t, dni: true }))
       if (!searching) document.getElementById('personal-dni')?.focus()
       return
@@ -228,7 +261,7 @@ export function RegisterPersonal() {
     setTouched({ dni: true, nombres: true, apellidos: true, nacimiento: true, email: true, celular: true, direccion: true })
     if (focusFirstInvalid<PersonalData>('personal', errors)) return
     updateRegistration('personal', { ...values, email: values.email.trim(), direccion: values.direccion.trim() })
-    setLookup('reniec', person)
+    setLookup('reniec', verified ? person : null)
     navigate('/registro/empresa')
   }
 
@@ -237,49 +270,88 @@ export function RegisterPersonal() {
       step={1}
       icon="person"
       title="Tus datos personales"
-      subtitle="Ingresa tu DNI y completamos tus datos con RENIEC."
+      subtitle="Elige tu documento. Con DNI completamos tus datos con RENIEC."
       formId="register-personal"
-      cta={verified ? 'Continuar' : searching ? 'Consultando…' : 'Consultar DNI'}
-      ctaIcon={verified ? 'arrow_forward' : 'person_search'}
+      cta={ready ? 'Continuar' : searching ? 'Consultando…' : isDni ? 'Consultar DNI' : 'Continuar'}
+      ctaIcon={ready || !isDni ? 'arrow_forward' : 'person_search'}
       submitting={searching}
       backTo="/login?modo=registro"
     >
       <motion.form id="register-personal" className={styles.form} onSubmit={onSubmit} noValidate variants={staggerContainer(0.05)}>
         <motion.div variants={fadeUp}>
+          <SegmentedTabs<DocType>
+            label="Tipo de documento"
+            stretch
+            value={tipoDoc}
+            onChange={onTipoDocChange}
+            tabs={DOC_ORDER.map((id) => ({ id, label: DOC_TYPES[id].short }))}
+          />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
           <TextField
             {...field('dni')}
-            label="DNI"
+            label={DOC_TYPES[tipoDoc].label}
             icon="id_card"
-            inputMode="numeric"
+            inputMode={isDni ? 'numeric' : 'text'}
             autoComplete="off"
+            autoCapitalize={isDni ? undefined : 'characters'}
+            maxLength={DOC_TYPES[tipoDoc].maxLength}
             valid={false}
-            onChange={(event) => onDniChange(event.target.value)}
-            helper={show('dni') || verified ? undefined : 'Documento Nacional de Identidad (8 dígitos)'}
-            trailing={<LookupStatus state={lookup} source="RENIEC" />}
+            onChange={(event) => onDocChange(event.target.value)}
+            helper={show('dni') || ready ? undefined : DOC_TYPES[tipoDoc].helper}
+            trailing={isDni ? <LookupStatus state={lookup} source="RENIEC" /> : undefined}
           />
         </motion.div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {verified ? (
-            <motion.div key="filled" className={styles.form} variants={staggerContainer(0.05)} initial="hidden" animate="show" exit={fadeSwap.exit}>
-              <motion.div variants={fadeUp}>
-                <IdentityVerified person={person} />
-              </motion.div>
-              <motion.div className={styles.row} variants={fadeUp}>
-                <TextField id="personal-nombres" label="Nombres" icon="person" locked autofilled={autofilled} value={maskWords(values.nombres)} error={show('nombres')} />
-                <TextField id="personal-apellidos" label="Apellidos" icon="badge" locked autofilled={autofilled} value={maskWords(values.apellidos)} error={show('apellidos')} />
-              </motion.div>
-              <motion.div variants={fadeUp}>
-                <TextField
-                  id="personal-nacimiento"
-                  label="Fecha de nacimiento"
-                  icon="cake"
-                  locked
-                  autofilled={autofilled}
-                  value={values.nacimiento ? maskWords(`${formatLongDate(values.nacimiento)} · ${ageFrom(values.nacimiento)} años`) : ''}
-                  error={show('nacimiento')}
-                />
-              </motion.div>
+          {ready ? (
+            <motion.div key={`filled-${tipoDoc}`} className={styles.form} variants={staggerContainer(0.05)} initial="hidden" animate="show" exit={fadeSwap.exit}>
+              {verified && person ? (
+                <>
+                  <motion.div variants={fadeUp}>
+                    <IdentityVerified person={person} />
+                  </motion.div>
+                  <motion.div className={styles.row} variants={fadeUp}>
+                    <TextField id="personal-nombres" label="Nombres" icon="person" locked autofilled={autofilled} value={maskWords(values.nombres)} error={show('nombres')} />
+                    <TextField id="personal-apellidos" label="Apellidos" icon="badge" locked autofilled={autofilled} value={maskWords(values.apellidos)} error={show('apellidos')} />
+                  </motion.div>
+                  <motion.div variants={fadeUp}>
+                    <TextField
+                      id="personal-nacimiento"
+                      label="Fecha de nacimiento (dd/MM/yyyy)"
+                      icon="cake"
+                      locked
+                      autofilled={autofilled}
+                      value={values.nacimiento ? maskWords(formatDate(values.nacimiento)) : ''}
+                      error={show('nacimiento')}
+                    />
+                  </motion.div>
+                </>
+              ) : (
+                <>
+                  <motion.p className={styles.sectionLabel} variants={fadeUp}>
+                    Tus datos, como figuran en tu documento
+                  </motion.p>
+                  <motion.div className={styles.row} variants={fadeUp}>
+                    <TextField label="Nombres" icon="person" autoComplete="given-name" maxLength={60} {...field('nombres')} />
+                    <TextField label="Apellidos" icon="badge" autoComplete="family-name" maxLength={60} {...field('apellidos')} />
+                  </motion.div>
+                  <motion.div variants={fadeUp}>
+                    <TextField
+                      {...field('nacimiento')}
+                      label="Fecha de nacimiento (dd/MM/yyyy)"
+                      icon="cake"
+                      inputMode="numeric"
+                      autoComplete="bday"
+                      placeholder="dd/MM/yyyy"
+                      floatLabel
+                      value={birthText}
+                      onChange={(event) => onBirthChange(event.target.value)}
+                    />
+                  </motion.div>
+                </>
+              )}
               <motion.div variants={fadeUp}>
                 <TextField label="Correo electrónico" icon="alternate_email" type="email" inputMode="email" autoComplete="email" {...field('email')} />
               </motion.div>
@@ -298,15 +370,26 @@ export function RegisterPersonal() {
                 />
               </motion.div>
               <motion.div variants={fadeUp}>
-                <TextField
-                  label="Dirección"
-                  icon="location_on"
-                  locked
-                  autofilled={autofilled}
-                  {...field('direccion')}
-                  value={maskWords(values.direccion)}
-                  helper={show('direccion') ? undefined : 'Domicilio según tu DNI, protegido.'}
-                />
+                {verified ? (
+                  <TextField
+                    label="Dirección"
+                    icon="location_on"
+                    locked
+                    autofilled={autofilled}
+                    {...field('direccion')}
+                    value={maskWords(values.direccion)}
+                    helper={show('direccion') ? undefined : 'Domicilio según tu DNI, protegido.'}
+                  />
+                ) : (
+                  <TextField
+                    label="Dirección"
+                    icon="location_on"
+                    autoComplete="street-address"
+                    maxLength={120}
+                    {...field('direccion')}
+                    helper={show('direccion') ? undefined : 'Calle, número y distrito donde vives'}
+                  />
+                )}
               </motion.div>
             </motion.div>
           ) : searching ? (
@@ -316,8 +399,17 @@ export function RegisterPersonal() {
           ) : (
             <motion.div key="hint" {...fadeSwap}>
               <LookupHint>
-                Con tu DNI completamos automáticamente tus <strong>nombres, apellidos, fecha de nacimiento y dirección</strong>{' '}
-                desde RENIEC.
+                {isDni ? (
+                  <>
+                    Con tu DNI completamos automáticamente tus <strong>nombres, apellidos, fecha de nacimiento y dirección</strong>{' '}
+                    desde RENIEC.
+                  </>
+                ) : (
+                  <>
+                    RENIEC solo consulta DNI. Con tu {tipoDoc === 'pp' ? 'pasaporte' : 'carné de extranjería'} escribirás tus{' '}
+                    <strong>datos personales</strong> a mano al ingresar el número.
+                  </>
+                )}
               </LookupHint>
             </motion.div>
           )}
@@ -432,10 +524,10 @@ export function RegisterCompany() {
         </span>
         <span className={styles.summaryText}>
           <strong>
-            {maskWords(`${personal.nombres} ${personal.apellidos}`)}
+            {personal.tipoDoc === 'dni' ? maskWords(`${personal.nombres} ${personal.apellidos}`) : `${personal.nombres} ${personal.apellidos}`}
           </strong>
           <span>
-            DNI {personal.dni} · {personal.email}
+            {DOC_TYPES[personal.tipoDoc].short} {personal.dni} · {personal.email}
           </span>
         </span>
         <IconButton icon="edit" label="Editar datos personales" size="sm" onClick={() => navigate('/registro/datos')} />

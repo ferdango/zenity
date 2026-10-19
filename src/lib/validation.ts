@@ -35,6 +35,43 @@ export function validateDni(value: string): string | null {
   return null
 }
 
+export type DocType = 'dni' | 'pp' | 'ce'
+
+/** Documentos de identidad con los que se puede registrar una persona. */
+export const DOC_TYPES: Record<DocType, { short: string; label: string; helper: string; maxLength: number }> = {
+  dni: { short: 'DNI', label: 'DNI', helper: 'Documento Nacional de Identidad (8 dígitos)', maxLength: 8 },
+  pp: { short: 'PP', label: 'Pasaporte (PP)', helper: 'Número de pasaporte (6 a 12 letras o números)', maxLength: 12 },
+  ce: { short: 'CE', label: 'Carné de extranjería (CE)', helper: 'Número de carné de extranjería (9 a 12 caracteres)', maxLength: 12 },
+}
+
+export const DOC_ORDER: DocType[] = ['dni', 'pp', 'ce']
+
+/** Limpia lo que se escribe en el campo de documento según su tipo. */
+export function cleanDocument(type: DocType, raw: string): string {
+  const max = DOC_TYPES[type].maxLength
+  return type === 'dni' ? raw.replace(/\D/g, '').slice(0, max) : raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, max)
+}
+
+export function validateDocument(type: DocType, value: string): string | null {
+  if (type === 'dni') return validateDni(value)
+  if (!value) return type === 'pp' ? 'Ingresa tu número de pasaporte' : 'Ingresa tu número de carné de extranjería'
+  if (type === 'pp' && !/^[A-Z0-9]{6,12}$/.test(value)) return 'El pasaporte tiene entre 6 y 12 caracteres'
+  if (type === 'ce' && !/^[A-Z0-9]{9,12}$/.test(value)) return 'El carné de extranjería tiene entre 9 y 12 caracteres'
+  return null
+}
+
+/** Escribir una fecha: "03101987" → "03/10/1987" (dd/MM/yyyy). */
+export function formatBirthInput(raw: string): string {
+  const d = raw.replace(/\D/g, '').slice(0, 8)
+  return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('/')
+}
+
+/** "03/10/1987" → "1987-10-03"; vacío mientras la fecha esté incompleta. */
+export function birthToIso(text: string): string {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text)
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : ''
+}
+
 export function validateEmail(value: string): string | null {
   const v = value.trim()
   if (!v) return 'Ingresa tu correo electrónico'

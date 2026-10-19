@@ -4,6 +4,7 @@ import type { Ledger } from '../data/ledger'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
+import type { DocType } from '../lib/validation'
 
 export type SheetName = 'notifications' | 'account' | 'businesses' | null
 
@@ -22,6 +23,9 @@ export interface Profile {
 }
 
 export interface PersonalData {
+  /** Tipo de documento con el que se registra */
+  tipoDoc: DocType
+  /** Número del documento (DNI, pasaporte o carné de extranjería) */
   dni: string
   nombres: string
   apellidos: string
