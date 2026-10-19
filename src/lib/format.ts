@@ -75,11 +75,11 @@ export function formatLongDate(iso: string): string {
 }
 
 /**
- * Oculta los datos que llegan de una consulta (RENIEC): de cada palabra se ven los 3 primeros
- * caracteres y el resto pasa a asteriscos. "Patricia Lucía" → "Pat****** Luc***".
+ * Oculta los datos que llegan de una consulta (RENIEC): de cada palabra se ven los 2 primeros
+ * caracteres y el resto pasa a asteriscos. "Patricia Lucía" → "Pa******* Lu***".
  */
 export function maskWords(text: string): string {
-  return text.replace(/[\p{L}\p{N}]+/gu, (word) => (word.length <= 3 ? word : word.slice(0, 3) + '*'.repeat(word.length - 3)))
+  return text.replace(/[\p{L}\p{N}]+/gu, (word) => (word.length <= 2 ? word : word.slice(0, 2) + '*'.repeat(word.length - 2)))
 }
 
 /** Enmascara un número de cuenta: "1910898773626893" → "•••• 6893" */
