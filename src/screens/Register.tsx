@@ -20,7 +20,7 @@ import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
 import { consultarDni, type ReniecPerson } from '../data/registry'
 import { rerUnavailable } from '../data/sire'
-import { formatLongDate } from '../lib/format'
+import { formatLongDate, maskWords } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
 import { useRucLookup } from '../lib/useRucLookup'
@@ -266,8 +266,8 @@ export function RegisterPersonal() {
                 <IdentityVerified person={person} />
               </motion.div>
               <motion.div className={styles.row} variants={fadeUp}>
-                <TextField id="personal-nombres" label="Nombres" icon="person" locked autofilled={autofilled} value={values.nombres} error={show('nombres')} />
-                <TextField id="personal-apellidos" label="Apellidos" icon="badge" locked autofilled={autofilled} value={values.apellidos} error={show('apellidos')} />
+                <TextField id="personal-nombres" label="Nombres" icon="person" locked autofilled={autofilled} value={maskWords(values.nombres)} error={show('nombres')} />
+                <TextField id="personal-apellidos" label="Apellidos" icon="badge" locked autofilled={autofilled} value={maskWords(values.apellidos)} error={show('apellidos')} />
               </motion.div>
               <motion.div variants={fadeUp}>
                 <TextField
@@ -276,7 +276,7 @@ export function RegisterPersonal() {
                   icon="cake"
                   locked
                   autofilled={autofilled}
-                  value={values.nacimiento ? `${formatLongDate(values.nacimiento)} · ${ageFrom(values.nacimiento)} años` : ''}
+                  value={values.nacimiento ? maskWords(`${formatLongDate(values.nacimiento)} · ${ageFrom(values.nacimiento)} años`) : ''}
                   error={show('nacimiento')}
                 />
               </motion.div>
@@ -301,11 +301,11 @@ export function RegisterPersonal() {
                 <TextField
                   label="Dirección"
                   icon="location_on"
-                  autoComplete="street-address"
-                  maxLength={120}
+                  locked
                   autofilled={autofilled}
                   {...field('direccion')}
-                  helper={show('direccion') ? undefined : 'Domicilio según tu DNI. Actualízalo si cambió.'}
+                  value={maskWords(values.direccion)}
+                  helper={show('direccion') ? undefined : 'Domicilio según tu DNI, protegido.'}
                 />
               </motion.div>
             </motion.div>
@@ -432,7 +432,7 @@ export function RegisterCompany() {
         </span>
         <span className={styles.summaryText}>
           <strong>
-            {personal.nombres} {personal.apellidos}
+            {maskWords(`${personal.nombres} ${personal.apellidos}`)}
           </strong>
           <span>
             DNI {personal.dni} · {personal.email}
