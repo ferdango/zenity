@@ -6,6 +6,7 @@ import { Aurora } from '../components/Aurora'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
+import { DocTypeSelect } from '../components/DocTypeSelect'
 import { IconButton } from '../components/IconButton'
 import { RegimenPicker } from '../components/RegimenPicker'
 import {
@@ -16,7 +17,6 @@ import {
   type LookupState,
   LookupStatus,
 } from '../components/Registry'
-import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
 import { consultarDni, type ReniecPerson } from '../data/registry'
@@ -29,7 +29,6 @@ import { useTimeouts } from '../lib/useTimeouts'
 import {
   birthToIso,
   cleanDocument,
-  DOC_ORDER,
   DOC_TYPES,
   type DocType,
   formatAmountInput,
@@ -278,17 +277,8 @@ export function RegisterPersonal() {
       backTo="/login?modo=registro"
     >
       <motion.form id="register-personal" className={styles.form} onSubmit={onSubmit} noValidate variants={staggerContainer(0.05)}>
-        <motion.div variants={fadeUp}>
-          <SegmentedTabs<DocType>
-            label="Tipo de documento"
-            stretch
-            value={tipoDoc}
-            onChange={onTipoDocChange}
-            tabs={DOC_ORDER.map((id) => ({ id, label: DOC_TYPES[id].short }))}
-          />
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
+        <motion.div className={styles.docRow} variants={fadeUp}>
+          <DocTypeSelect value={tipoDoc} onChange={onTipoDocChange} />
           <TextField
             {...field('dni')}
             label={DOC_TYPES[tipoDoc].label}
