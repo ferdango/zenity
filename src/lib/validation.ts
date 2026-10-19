@@ -39,9 +39,9 @@ export type DocType = 'dni' | 'pp' | 'ce'
 
 /** Documentos de identidad con los que se puede registrar una persona. */
 export const DOC_TYPES: Record<DocType, { short: string; label: string; helper: string; maxLength: number }> = {
-  dni: { short: 'DNI', label: 'DNI', helper: 'Documento Nacional de Identidad (8 dígitos)', maxLength: 8 },
-  pp: { short: 'PP', label: 'Pasaporte (PP)', helper: 'Número de pasaporte (6 a 12 letras o números)', maxLength: 12 },
-  ce: { short: 'CE', label: 'Carné de extranjería (CE)', helper: 'Número de carné de extranjería (9 a 12 caracteres)', maxLength: 12 },
+  dni: { short: 'DNI', label: 'N° de DNI', helper: 'Documento Nacional de Identidad (8 dígitos)', maxLength: 8 },
+  pp: { short: 'PP', label: 'N° de pasaporte', helper: 'Número de pasaporte (6 a 12 letras o números)', maxLength: 12 },
+  ce: { short: 'CE', label: 'N° de carné', helper: 'Número de carné de extranjería (9 a 12 caracteres)', maxLength: 12 },
 }
 
 export const DOC_ORDER: DocType[] = ['dni', 'pp', 'ce']
