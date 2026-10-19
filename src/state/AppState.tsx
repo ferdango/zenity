@@ -15,7 +15,7 @@ const BUSINESSES_KEY = 'zenity.businesses'
 const ACTIVE_BUSINESS_KEY = 'zenity.business'
 
 const EMPTY_REGISTRATION: Registration = {
-  personal: { dni: '', nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
+  personal: { tipoDoc: 'dni', dni: '', nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
   company: { ruc: '', razonSocial: '', nombreComercial: '', ingresoMinimo: '', regimen: '' },
   reniec: null,
   sunat: null,
