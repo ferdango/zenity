@@ -11,6 +11,7 @@ import { TopBar } from '../components/TopBar'
 import { maskEmail, maskPhone } from '../lib/format'
 import { ease, fadeUp, spring, staggerContainer } from '../lib/motion'
 import { useBack } from '../lib/useBack'
+import { track } from '../lib/analytics'
 import { useTimeouts } from '../lib/useTimeouts'
 import { useApp } from '../state/context'
 import styles from './VerifyOtp.module.css'
@@ -113,6 +114,7 @@ function OtpVerification(props: VerifyState) {
     schedule(() => {
       if (value === expected) {
         setStatus('success')
+        track('login_completado', { canal: props.via })
         schedule(() => navigate('/notificaciones', { replace: true }), 1200)
         return
       }

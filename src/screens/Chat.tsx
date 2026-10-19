@@ -12,6 +12,7 @@ import { businessName } from '../data/businesses'
 import { answer, type ChatBlock, fileAnswer, SUGGESTIONS } from '../data/chat'
 import { streamDuration, toSegments } from '../lib/richText'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { track } from '../lib/analytics'
 import { useSire } from '../lib/useSire'
 import { useApp } from '../state/context'
 import styles from './Chat.module.css'
@@ -240,9 +241,11 @@ export function Chat() {
   )
 
   const send = useCallback(
-    (text: string) => {
+    (text: string, origen: 'escrita' | 'sugerencia' | 'enlace' = 'escrita') => {
       const value = text.trim()
       if (!value) return
+      // Solo el origen: el texto de la pregunta puede tener datos del negocio
+      track('chat_pregunta_enviada', { origen })
       setMessages((list) => [...list, { id: nextId.current++, role: 'user', text: value, status: 'done' }])
       setInput('')
       respond(answer(value, context))
@@ -256,7 +259,7 @@ export function Chat() {
     if (q && consumedQuery.current !== q) {
       consumedQuery.current = q
       setParams({}, { replace: true })
-      send(q)
+      send(q, 'enlace')
     }
   }, [params, setParams, send])
 
@@ -380,7 +383,7 @@ export function Chat() {
                       type="button"
                       className={styles.suggestion}
                       data-ripple=""
-                      onClick={() => ('upload' in s ? fileRef.current?.click() : send(s.label))}
+                      onClick={() => ('upload' in s ? fileRef.current?.click() : send(s.label, 'sugerencia'))}
                     >
                       <Icon name={s.icon} size={20} />
                       {s.label}
