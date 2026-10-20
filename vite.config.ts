@@ -18,6 +18,7 @@ export default defineConfig({
             { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
             { name: 'router', test: /node_modules[\\/]react-router/ },
             { name: 'motion', test: /node_modules[\\/](motion|framer-motion|motion-dom|motion-utils)[\\/]/ },
+            { name: 'posthog', test: /node_modules[\\/](posthog-js|@posthog)[\\/]/ },
           ],
         },
       },

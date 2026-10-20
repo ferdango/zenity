@@ -5,6 +5,7 @@ import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, 
 import type { SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
 import { getSource } from '../data/sources'
+import { track } from '../lib/analytics'
 import { readStorage, writeStorage } from '../lib/storage'
 import { type AppState, AppStateContext, type Profile, type Registration, type SheetName, type Toast } from './context'
 
@@ -100,12 +101,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const switchBusiness = useCallback((id: string) => {
     setActiveId(id)
     setCategorized({})
+    track('negocio_cambiado')
   }, [])
 
   const addBusiness = useCallback(
     (company: SunatCompany, nombreComercial: string, regimen: Regimen) => {
       const created = businessFromCompany(company, nombreComercial, regimen, businesses.length)
       setBusinesses((list) => (list.some((b) => b.id === created.id) ? list : [...list, created]))
+      track('negocio_agregado', { regimen, tipo_contribuyente: company.tipoContribuyente, negocios: businesses.length + 1 })
       setActiveId(created.id)
       setCategorized({})
       return created
@@ -148,6 +151,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         sourceId,
       }
       updateConnections((list) => [...list, connection])
+      track('conexion_agregada', { fuente: sourceId, tipo: source.kind })
       return connection
     },
     [updateConnections],
@@ -181,6 +185,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const ids = Object.keys(categorized)
     setReviewed((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...ids] }))
     setCategorized({})
+    track('movimientos_revisados', { cantidad: ids.length })
     return ids.length
   }, [categorized, businessId])
 

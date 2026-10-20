@@ -25,6 +25,7 @@ import { formatDate, maskWords } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
 import { useRucLookup } from '../lib/useRucLookup'
+import { track } from '../lib/analytics'
 import { useTimeouts } from '../lib/useTimeouts'
 import {
   birthToIso,
@@ -480,6 +481,7 @@ export function RegisterCompany() {
     updateRegistration('company', { ...values, nombreComercial })
     setLookup('sunat', company)
     if (company) registerBusiness(company, nombreComercial, values.regimen)
+    track('registro_completado', { tipo_documento: personal.tipoDoc, regimen: values.regimen })
     const firstName = personal.nombres.split(' ')[0]
     const firstSurname = personal.apellidos.split(' ')[0]
     schedule(() => {

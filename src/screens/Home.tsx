@@ -21,6 +21,7 @@ import { TOUR_STEPS } from '../data/tour'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useSire } from '../lib/useSire'
+import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
 import styles from './Home.module.css'
 
@@ -139,6 +140,7 @@ export function Home() {
 
   const finishTour = (completed: boolean) => {
     endTour()
+    track('tutorial_finalizado', { completado: completed })
     toast(
       completed ? '¡Listo! Ya conoces Zenity' : 'Puedes ver el tutorial cuando quieras desde el menú',
       completed ? 'celebration' : 'tour',
@@ -148,6 +150,7 @@ export function Home() {
   const generateReport = () => {
     if (generating) return
     setGenerating(true)
+    track('reporte_generado')
     window.setTimeout(() => {
       toast(`Tu reporte de ${month.toLowerCase()} está listo`, 'auto_awesome')
       navigate('/resumen')

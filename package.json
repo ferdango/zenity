@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@posthog/react": "^1.11.3",
     "motion": "^14.0.0",
+    "posthog-js": "^1.438.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.4.0"
