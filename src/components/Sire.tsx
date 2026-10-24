@@ -1,17 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import { type IgvCalc, IGV_RATE, SIN_CREDITO, type SireRecord, TIPOS_CPE } from '../data/sire'
-import { formatDate, MONTHS_SHORT } from '../lib/format'
+import { formatDate, formatDayMonthShort } from '../lib/format'
 import { ease } from '../lib/motion'
 import { Amount } from './Amount'
 import { Icon } from './Icon'
 import styles from './Sire.module.css'
-
-/** "2026-03-20" → "20 mar" (sin pasar por Date, para no correr el día por la zona horaria). */
-function dayMonth(iso: string) {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${d} ${MONTHS_SHORT[m - 1].toLowerCase()}`
-}
 
 function Detail({ label, children, strong }: { label: string; children: ReactNode; strong?: boolean }) {
   return (
@@ -45,7 +39,7 @@ export function SireRecordRow({ record, open, onToggle }: { record: SireRecord; 
         <span className={styles.recordText}>
           <span className={styles.recordTitle}>{record.contraparte.nombre}</span>
           <span className={styles.recordSub}>
-            {record.serie}-{record.numero} · {tipo.label} · {dayMonth(record.fecha)}
+            {record.serie}-{record.numero} · {tipo.label} · {formatDayMonthShort(record.fecha)}
           </span>
         </span>
         <span className={styles.recordEnd}>

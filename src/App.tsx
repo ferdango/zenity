@@ -11,6 +11,7 @@ import { Analyzing } from './screens/Analyzing'
 import { Chat } from './screens/Chat'
 import { ConnectionDetail } from './screens/ConnectionDetail'
 import { ConnectionResult } from './screens/ConnectionResult'
+import { Cuentas } from './screens/Cuentas'
 import { Home } from './screens/Home'
 import { Login } from './screens/Login'
 import { Movements } from './screens/Movements'
@@ -34,6 +35,7 @@ function isShellPath(path: string) {
     path === '/negocios/nuevo' ||
     path.startsWith('/movimientos/') ||
     path.startsWith('/sunat/') ||
+    path.startsWith('/cuentas/') ||
     path.startsWith('/conexion/')
   )
 }
@@ -74,6 +76,7 @@ function AnimatedRoutes() {
           <Route path="/movimientos/:tab" element={<Movements />} />
           <Route path="/resumen" element={<Summary />} />
           <Route path="/sunat/:tab" element={<Sunat />} />
+          <Route path="/cuentas/:tipo" element={<Cuentas />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/revisar" element={<Review />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
@@ -82,6 +85,7 @@ function AnimatedRoutes() {
         </Route>
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />
         <Route path="/sunat" element={<Navigate to="/sunat/balance" replace />} />
+        <Route path="/cuentas" element={<Navigate to="/cuentas/cobrar" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
