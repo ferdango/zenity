@@ -9,12 +9,12 @@ import { AccountCard } from '../components/Cards'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { InsightList, SectionHeader } from '../components/Insights'
-import { SummaryTile } from '../components/Metrics'
+import { SecondaryTile, SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
 import { businessName } from '../data/businesses'
-import { contrapartesLabel, corte, plural, type Corte } from '../data/cuentas'
+import { corte, plural, type Corte } from '../data/cuentas'
 import { movementInsights } from '../data/insights'
 import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
 import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
@@ -98,10 +98,10 @@ function Carousel() {
   )
 }
 
-/** Píldora de estado de las cuentas por cobrar o por pagar: cuántas facturas vencieron. */
+/** Estado de las cuentas por cobrar o por pagar: cuántas facturas vencieron. */
 function cuentasStatus(c: Corte) {
-  if (c.vencidas > 0) return { icon: 'warning', label: plural(c.vencidas, 'vencida'), negative: true }
-  return c.total > 0 ? { icon: 'check_circle', label: 'Al día' } : undefined
+  if (c.vencidas > 0) return { label: plural(c.vencidas, 'vencida'), negative: true }
+  return { label: c.total > 0 ? 'Al día' : 'Nada pendiente' }
 }
 
 /** Inicio / billetera (Figma: Home). */
@@ -170,8 +170,8 @@ export function Home() {
     }, 1800)
   }
 
-  // Las 5 preguntas del dueño, respondidas de un vistazo: cuánto entró, cuánto salió,
-  // cuánto queda, cuánto te deben y cuánto debes
+  // Las 5 preguntas del dueño, de un vistazo: cuánto entró, cuánto salió y cuánto queda
+  // (lo principal) y, más discretos, cuánto te deben y cuánto debes
   const tiles = (
     <motion.div
       className={styles.tiles}
@@ -210,26 +210,6 @@ export function Home() {
           status={margen === null ? undefined : { label: `Margen ${margen}%`, negative: neto < 0 }}
         />
       </motion.div>
-      <motion.div variants={fadeUp}>
-        <SummaryTile
-          kind="receivable"
-          label="Por cobrar"
-          value={cobrar.total}
-          caption={ledger.empty ? 'Sin cuentas conectadas' : cobrar.total > 0 ? `Te deben ${contrapartesLabel(cobrar)}` : 'Nadie te debe'}
-          to="/cuentas/cobrar"
-          status={cuentasStatus(cobrar)}
-        />
-      </motion.div>
-      <motion.div variants={fadeUp}>
-        <SummaryTile
-          kind="payable"
-          label="Por pagar"
-          value={pagar.total}
-          caption={ledger.empty ? 'Sin cuentas conectadas' : pagar.total > 0 ? `Debes a ${contrapartesLabel(pagar)}` : 'No debes nada'}
-          to="/cuentas/pagar"
-          status={cuentasStatus(pagar)}
-        />
-      </motion.div>
       {FEATURES.sunatSire && (
         <motion.div variants={fadeUp}>
           <SummaryTile
@@ -239,6 +219,12 @@ export function Home() {
             caption={`IGV + Renta · vence el ${formatDue(vencimiento(taxPeriod.key, business.ruc))}`}
             to="/sunat/impuestos"
           />
+        </motion.div>
+      )}
+      {!ledger.empty && (
+        <motion.div className={styles.pending} variants={fadeUp}>
+          <SecondaryTile kind="receivable" label="Por cobrar" value={cobrar.total} to="/cuentas/cobrar" status={cuentasStatus(cobrar)} />
+          <SecondaryTile kind="payable" label="Por pagar" value={pagar.total} to="/cuentas/pagar" status={cuentasStatus(pagar)} />
         </motion.div>
       )}
     </motion.div>
@@ -319,7 +305,6 @@ export function Home() {
             </>
           ) : (
             <>
-              {tiles}
               <motion.div variants={fadeUp} data-tour="accounts">
                 <Carousel />
               </motion.div>
@@ -329,6 +314,7 @@ export function Home() {
                   Agregar una conexión
                 </Button>
               </motion.div>
+              {tiles}
             </>
           )}
         </motion.div>

@@ -5,29 +5,22 @@ import { Icon } from './Icon'
 import styles from './Metrics.module.css'
 
 interface SummaryTileProps {
-  kind: 'income' | 'expense' | 'total' | 'receivable' | 'payable' | 'tax'
+  kind: 'income' | 'expense' | 'total' | 'tax'
   label: string
   value: number
-  /** Respuesta en palabras simples: "Entró en marzo", "Te deben 4 clientes" */
+  /** Respuesta en palabras simples: "Entró en marzo", "Te queda en marzo" */
   caption: string
   to: string
   delta?: number | null
-  /** Píldora junto al monto: "Margen 53%", "2 vencidas", "Al día" */
+  /** Píldora junto al monto: "Margen 53%" */
   status?: { label: string; icon?: string; negative?: boolean }
 }
 
-const ICONS = {
-  income: 'trending_up',
-  expense: 'trending_down',
-  total: 'savings',
-  receivable: 'call_received',
-  payable: 'call_made',
-  tax: 'account_balance',
-} as const
+const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings', tax: 'account_balance' } as const
 
 /**
- * Tiles del Inicio: ingresos, egresos, utilidad, por cobrar y por pagar (e impuestos SUNAT).
- * Dos líneas por tile para que las cinco respuestas entren juntas en la pantalla del celular.
+ * Tiles principales del Inicio: ingresos, egresos y utilidad (e impuestos SUNAT).
+ * Dos líneas por tile para que se lean de un vistazo.
  */
 export function SummaryTile({ kind, label, value, caption, to, delta, status }: SummaryTileProps) {
   return (
@@ -57,6 +50,32 @@ export function SummaryTile({ kind, label, value, caption, to, delta, status }: 
         </span>
       </span>
       <Icon name="chevron_right" size={20} className={styles.summaryArrow} />
+    </Link>
+  )
+}
+
+interface SecondaryTileProps {
+  kind: 'receivable' | 'payable'
+  label: string
+  value: number
+  to: string
+  /** Una línea de estado: "2 vencidas", "Al día" */
+  status: { label: string; negative?: boolean }
+}
+
+/** Tiles secundarios del Inicio (por cobrar y por pagar): más discretos que los principales. */
+export function SecondaryTile({ kind, label, value, to, status }: SecondaryTileProps) {
+  return (
+    <Link to={to} className={styles.secondary} data-ripple="">
+      <span className={styles.secondaryHead}>
+        <Icon name={kind === 'receivable' ? 'call_received' : 'call_made'} size={18} className={styles.secondaryIcon} />
+        {label}
+        <Icon name="chevron_right" size={18} className={styles.secondaryArrow} />
+      </span>
+      <Amount value={value} className={styles.secondaryValue} />
+      <span className={styles.secondaryStatus} data-negative={Boolean(status.negative)}>
+        {status.label}
+      </span>
     </Link>
   )
 }
