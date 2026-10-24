@@ -182,6 +182,13 @@
   padding: 16px var(--z-gutter) 8px;
 }
 
+/* Por cobrar y por pagar: secundarios, uno al lado del otro */
+.pending {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .report {
   padding: 16px var(--z-gutter) 24px;
 }

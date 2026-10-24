@@ -18,11 +18,6 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Cambia el mes y el año para ver los números de otro periodo en toda la app.',
   },
   {
-    target: 'summary',
-    title: 'Tu negocio en 5 segundos',
-    body: 'Cuánto entró, cuánto salió, cuánto te queda, cuánto te deben y cuánto debes. Toca cualquiera para ver el detalle.',
-  },
-  {
     target: 'accounts',
     title: 'Tus cuentas conectadas',
     body: 'Desliza para ver cada cuenta, tarjeta, API o Excel. Toca una para ver su detalle y movimientos.',
@@ -31,6 +26,11 @@ export const TOUR_STEPS: TourStep[] = [
     target: 'add-account',
     title: 'Agregar una conexión',
     body: 'Conecta bancos, APIs, bases de datos o archivos para consolidar todo en un solo lugar.',
+  },
+  {
+    target: 'summary',
+    title: 'Tu negocio en 5 segundos',
+    body: 'Cuánto entró, cuánto salió y cuánto te queda. Debajo, cuánto te deben y cuánto debes. Toca cualquiera para ver el detalle.',
   },
   {
     target: 'insights',
