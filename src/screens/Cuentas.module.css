@@ -1,0 +1,300 @@
+.top {
+  padding: 4px var(--z-gutter) 8px;
+}
+
+.content {
+  display: grid;
+  gap: 8px;
+}
+
+/* ── Total y antigüedad ───────────────────────────────────── */
+.hero {
+  display: grid;
+  gap: 2px;
+  padding: 12px var(--z-gutter) 8px;
+}
+
+.heroLabel {
+  font-size: 1rem;
+  color: var(--z-on-surface-variant);
+}
+
+.heroAmount {
+  font-size: clamp(2.5rem, 2rem + 3vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 420;
+  letter-spacing: -0.03em;
+}
+
+.heroMeta {
+  font-size: 0.875rem;
+  color: var(--z-on-surface-low);
+}
+
+.aging {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.agingTrack {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  overflow: hidden;
+}
+
+.agingSegment {
+  height: 100%;
+  border-radius: var(--z-radius-full);
+}
+
+.agingSegment[data-tramo='por-vencer'],
+.legendDot[data-tramo='por-vencer'] {
+  background: var(--z-primary);
+}
+
+.agingSegment[data-tramo='1-30'],
+.legendDot[data-tramo='1-30'] {
+  background: var(--z-warning);
+}
+
+.agingSegment[data-tramo='31-60'],
+.legendDot[data-tramo='31-60'] {
+  background: color-mix(in srgb, var(--z-warning) 45%, var(--z-negative));
+}
+
+.agingSegment[data-tramo='mas-60'],
+.legendDot[data-tramo='mas-60'] {
+  background: var(--z-negative);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.75rem;
+  color: var(--z-on-surface-variant);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legendValue {
+  color: var(--z-on-surface);
+  font-weight: 500;
+}
+
+/* ── Vencido / por vencer ─────────────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 var(--z-gutter) 4px;
+}
+
+.splitItem {
+  --split-accent: var(--z-primary);
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+}
+
+.splitItem[data-tone='negative'] {
+  --split-accent: var(--z-negative);
+  background: var(--z-negative-container);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-negative) 30%, transparent);
+}
+
+.splitItem[data-tone='positive'] {
+  --split-accent: var(--z-positive);
+}
+
+.splitLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.splitIcon {
+  color: var(--split-accent);
+}
+
+.splitValue {
+  font-size: 1.375rem;
+  line-height: 1.875rem;
+  font-weight: 450;
+}
+
+.splitCaption {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+/* ── Clientes / proveedores ───────────────────────────────── */
+.list {
+  display: grid;
+  margin: 0 var(--z-gutter);
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  overflow: hidden;
+}
+
+.saldo + .saldo {
+  border-top: 1px solid var(--z-divider);
+}
+
+.saldoHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 12px 14px 16px;
+  text-align: left;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--z-surface-highest);
+  color: var(--z-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.avatar[data-tone='negative'] {
+  background: var(--z-negative-container);
+  color: var(--z-negative);
+}
+
+.avatar[data-tone='warning'] {
+  background: color-mix(in srgb, var(--z-warning) 14%, transparent);
+  color: var(--z-warning);
+}
+
+.saldoText,
+.docText {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.saldoName {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  text-wrap: pretty;
+}
+
+.saldoSub,
+.docSub {
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+.saldoEnd {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.saldoAmount {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.chevron {
+  color: var(--z-on-surface-low);
+  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
+}
+
+.saldo[data-open='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+.badge {
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface-variant);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+}
+
+.badge[data-tone='negative'] {
+  background: var(--z-negative-container);
+  color: var(--z-negative);
+}
+
+.badge[data-tone='warning'] {
+  background: color-mix(in srgb, var(--z-warning) 14%, transparent);
+  color: var(--z-warning);
+}
+
+.docs {
+  display: grid;
+  overflow: hidden;
+  background: var(--z-surface-low);
+}
+
+.doc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 12px 16px 12px 26px;
+  border-top: 1px solid var(--z-divider);
+}
+
+.docIcon {
+  margin-top: 1px;
+  color: var(--z-on-surface-low);
+}
+
+.docTitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.docAmount {
+  font-size: 0.875rem;
+}
+
+.ask {
+  display: flex;
+  justify-content: center;
+  padding: 16px var(--z-gutter) 32px;
+}
+
+@media (min-width: 720px) {
+  .split {
+    grid-template-columns: repeat(2, minmax(0, 260px));
+  }
+}

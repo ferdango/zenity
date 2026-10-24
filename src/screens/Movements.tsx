@@ -118,7 +118,7 @@ export function Movements() {
             {tab === 'todo' && (
               <>
                 <div className={styles.metrics}>
-                  <MetricCard label="Balance del mes" value={t.neto} tone="auto" sign="always" caption={month} />
+                  <MetricCard label="Utilidad del mes" value={t.neto} tone="auto" sign="always" caption={month} />
                   <div className={styles.pair}>
                     <MetricCard label="Ingresos" value={t.ingresos} icon="up" caption={month} outlined />
                     <MetricCard label="Egresos" value={t.egresos} icon="down" caption={month} outlined />

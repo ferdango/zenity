@@ -177,6 +177,16 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
             ),
           )}
           {row(
+            'cuentas',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="request_quote" size={20} />
+              </span>
+              <span>Por cobrar y por pagar</span>
+            </>,
+            { to: '/cuentas/cobrar', active: pathname.startsWith('/cuentas/') },
+          )}
+          {row(
             'review',
             <>
               <span className={styles.itemIcon}>

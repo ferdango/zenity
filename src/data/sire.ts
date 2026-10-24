@@ -1,4 +1,4 @@
-import { formatAxis, formatMoney, MONTHS } from '../lib/format'
+import { formatAxis, formatDayMonth, formatMoney } from '../lib/format'
 import { rucCheckDigit } from '../lib/validation'
 import type { Business } from './businesses'
 import type { Ledger } from './ledger'
@@ -483,10 +483,7 @@ export function vencimiento(periodKey: string, ruc: string): string {
 }
 
 /** "2026-04-16" → "16 de abril" */
-export function formatDue(iso: string): string {
-  const [, m, d] = iso.split('-').map(Number)
-  return `${d} de ${MONTHS[m - 1].toLowerCase()}`
-}
+export const formatDue = formatDayMonth
 
 // ── Insights ──────────────────────────────────────────────────
 

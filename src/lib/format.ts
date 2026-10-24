@@ -68,6 +68,18 @@ export function formatDate(iso: string): string {
   return `${d}/${m}/${y}`
 }
 
+/** "2026-03-31" → "31 de marzo" (sin pasar por Date, para no correr el día por la zona horaria). */
+export function formatDayMonth(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} de ${MONTHS[m - 1].toLowerCase()}`
+}
+
+/** "2026-03-20" → "20 mar" */
+export function formatDayMonthShort(iso: string): string {
+  const [, m, d] = iso.split('-').map(Number)
+  return `${d} ${MONTHS_SHORT[m - 1].toLowerCase()}`
+}
+
 /** "1988-05-12" → "12 de mayo de 1988" */
 export function formatLongDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number)

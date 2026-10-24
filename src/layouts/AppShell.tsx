@@ -45,8 +45,8 @@ export function AppShell() {
   const { business } = useApp()
   const transition = useRouteTransition(location)
   const withBottomNav = showsBottomNav(location.pathname)
-  // Las pestañas de Movimientos y de SUNAT comparten pantalla: solo cambia su contenido.
-  const tabbed = location.pathname.match(/^\/(movimientos|sunat)\//)
+  // Las pestañas de Movimientos, SUNAT y Cuentas comparten pantalla: solo cambia su contenido.
+  const tabbed = location.pathname.match(/^\/(movimientos|sunat|cuentas)\//)
   const pageKey = tabbed ? tabbed[0] : location.pathname
   const previousKey = useRef(location.key)
 

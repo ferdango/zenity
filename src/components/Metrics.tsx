@@ -5,39 +5,58 @@ import { Icon } from './Icon'
 import styles from './Metrics.module.css'
 
 interface SummaryTileProps {
-  kind: 'income' | 'expense' | 'total' | 'tax'
+  kind: 'income' | 'expense' | 'total' | 'receivable' | 'payable' | 'tax'
   label: string
   value: number
+  /** Respuesta en palabras simples: "Entró en marzo", "Te deben 4 clientes" */
   caption: string
   to: string
   delta?: number | null
+  /** Píldora junto al monto: "Margen 53%", "2 vencidas", "Al día" */
+  status?: { label: string; icon?: string; negative?: boolean }
 }
 
-const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings', tax: 'account_balance' } as const
+const ICONS = {
+  income: 'trending_up',
+  expense: 'trending_down',
+  total: 'savings',
+  receivable: 'call_received',
+  payable: 'call_made',
+  tax: 'account_balance',
+} as const
 
-/** Tiles "Ingresos / Egresos / Total / Impuestos SUNAT" del Inicio. */
-export function SummaryTile({ kind, label, value, caption, to, delta }: SummaryTileProps) {
+/**
+ * Tiles del Inicio: ingresos, egresos, utilidad, por cobrar y por pagar (e impuestos SUNAT).
+ * Dos líneas por tile para que las cinco respuestas entren juntas en la pantalla del celular.
+ */
+export function SummaryTile({ kind, label, value, caption, to, delta, status }: SummaryTileProps) {
   return (
     <Link to={to} className={cn(styles.summary, styles[kind])} data-ripple="">
       <span className={styles.summaryIcon} aria-hidden>
-        <Icon name={ICONS[kind]} size={26} weight={500} />
+        <Icon name={ICONS[kind]} size={22} weight={500} />
       </span>
       <span className={styles.summaryText}>
-        <span className={styles.summaryLabel}>{label}</span>
-        <Amount value={value} className={styles.summaryValue} sign={kind === 'total' ? 'always' : 'never'} />
-        <span className={styles.summaryCaption}>
-          {caption}
+        <span className={styles.summaryHead}>
+          <span className={styles.summaryLabel}>{label}</span>
+          <span className={styles.summaryCaption}>{caption}</span>
+        </span>
+        <span className={styles.summaryLine}>
+          <Amount value={value} className={styles.summaryValue} sign={kind === 'total' ? 'always' : 'never'} />
           {delta !== undefined && delta !== null && (
             <span className={styles.delta} data-negative={kind === 'expense' ? delta > 0 : delta < 0}>
               <Icon name={delta >= 0 ? 'arrow_upward' : 'arrow_downward'} size={13} weight={600} />
-              {Math.abs(delta)}% vs. mes anterior
+              {Math.abs(delta)}%<span className="visually-hidden"> vs. mes anterior</span>
+            </span>
+          )}
+          {status && (
+            <span className={cn(styles.delta, !status.icon && styles.deltaPlain)} data-negative={Boolean(status.negative)}>
+              {status.icon && <Icon name={status.icon} size={13} weight={600} />}
+              {status.label}
             </span>
           )}
         </span>
       </span>
-      <span className={styles.summaryArrow} aria-hidden>
-        <Icon name="arrow_forward" size={22} />
-      </span>
+      <Icon name="chevron_right" size={20} className={styles.summaryArrow} />
     </Link>
   )
 }

@@ -18,6 +18,11 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Cambia el mes y el año para ver los números de otro periodo en toda la app.',
   },
   {
+    target: 'summary',
+    title: 'Tu negocio en 5 segundos',
+    body: 'Cuánto entró, cuánto salió, cuánto te queda, cuánto te deben y cuánto debes. Toca cualquiera para ver el detalle.',
+  },
+  {
     target: 'accounts',
     title: 'Tus cuentas conectadas',
     body: 'Desliza para ver cada cuenta, tarjeta, API o Excel. Toca una para ver su detalle y movimientos.',
@@ -26,11 +31,6 @@ export const TOUR_STEPS: TourStep[] = [
     target: 'add-account',
     title: 'Agregar una conexión',
     body: 'Conecta bancos, APIs, bases de datos o archivos para consolidar todo en un solo lugar.',
-  },
-  {
-    target: 'summary',
-    title: 'Ingresos, egresos y total',
-    body: 'Lo que entró y salió en el mes, tu resultado neto y cómo cambió frente al mes anterior.',
   },
   {
     target: 'insights',
@@ -50,7 +50,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'menu',
     title: 'Menú',
-    body: 'Tus negocios, los movimientos por revisar, SUNAT y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
+    body: 'Tus negocios, lo que te deben y lo que debes, los movimientos por revisar y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
   },
   {
     target: 'nav-wallet',
@@ -75,6 +75,6 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'nav-chat',
     title: 'Habla con Zenity',
-    body: 'Pregúntale lo que quieras a tu asistente: balances, comparaciones o un consolidado.',
+    body: 'Pregúntale lo que quieras a tu asistente: cuánto te queda, cuánto te deben, comparaciones o un consolidado.',
   },
 ]
