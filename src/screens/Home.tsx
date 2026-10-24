@@ -18,6 +18,7 @@ import { movementInsights } from '../data/insights'
 import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
 import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
 import { TOUR_STEPS } from '../data/tour'
+import { FEATURES } from '../lib/features'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useSire } from '../lib/useSire'
@@ -265,15 +266,17 @@ export function Home() {
             <motion.div variants={fadeUp}>
               <SummaryTile kind="total" label="Total" value={neto} caption={month} to="/movimientos/todo" />
             </motion.div>
-            <motion.div variants={fadeUp}>
-              <SummaryTile
-                kind="tax"
-                label="Impuestos SUNAT"
-                value={totalAPagar(taxPeriod, sire.regimen)}
-                caption={`IGV + Renta · vence el ${formatDue(vencimiento(taxPeriod.key, business.ruc))}`}
-                to="/sunat/impuestos"
-              />
-            </motion.div>
+            {FEATURES.sunatSire && (
+              <motion.div variants={fadeUp}>
+                <SummaryTile
+                  kind="tax"
+                  label="Impuestos SUNAT"
+                  value={totalAPagar(taxPeriod, sire.regimen)}
+                  caption={`IGV + Renta · vence el ${formatDue(vencimiento(taxPeriod.key, business.ruc))}`}
+                  to="/sunat/impuestos"
+                />
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
 
