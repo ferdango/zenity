@@ -73,7 +73,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const business = businesses.find((b) => b.id === activeId) ?? businesses[0]
   const businessId = business.id
   const connections = business.connections
-  const ledger = useMemo(() => buildLedger(business, matchOverrides[business.id]), [business, matchOverrides])
+  const ledger = useMemo(
+    () => buildLedger(business, matchOverrides[business.id], categoryOverrides[business.id]),
+    [business, matchOverrides, categoryOverrides],
+  )
   // Piloto automático: cada movimiento lleva la categoría recomendada y cada par la decisión de
   // Zenity, salvo que el usuario las haya cambiado. Nada queda esperando una respuesta.
   const classified = useMemo<ClassifiedMovement[]>(() => {

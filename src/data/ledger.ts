@@ -2,6 +2,7 @@ import type { Business } from './businesses'
 import { BASE_MATCHES, type MatchCandidate, type MatchChoice, matchTransactions, walletMatches } from './matches'
 import {
   BASE_TRANSACTIONS,
+  type CategoryId,
   HOME_INSIGHTS,
   type Insight,
   PENDING_TRANSACTIONS,
@@ -34,12 +35,28 @@ const BASE_ACCOUNTS = ['negocio-retail', 'tarjeta-1789', 'tinbet', 'locales-naci
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 /**
- * Libro del negocio con los pares por conciliar aplicados: cada par suma su lado de dinero una
- * vez, o los dos lados si son movimientos distintos (lo decide Zenity; el usuario puede corregirlo).
+ * Movimientos que llegaron sin categoría, ya clasificados: con la categoría de Zenity o la que
+ * eligió el usuario. Son dinero que entró o salió, así que suman en los totales del mes.
  */
-export function buildLedger(business: Business, decisions: Record<string, MatchChoice> = {}): Ledger {
+function classifiedTransactions(pending: PendingTransaction[], categories: Record<string, CategoryId>): Transaction[] {
+  return pending.map(({ recommended, confidence: _confidence, reason: _reason, ...tx }) => ({
+    ...tx,
+    category: categories[tx.id] ?? recommended,
+  }))
+}
+
+/**
+ * Libro del negocio con lo que Zenity resolvió sola: los movimientos sin categoría ya
+ * clasificados y los pares conciliados (cada par suma su lado de dinero una vez, o los dos
+ * lados si son movimientos distintos). El usuario puede corregir ambas decisiones.
+ */
+export function buildLedger(
+  business: Business,
+  decisions: Record<string, MatchChoice> = {},
+  categories: Record<string, CategoryId> = {},
+): Ledger {
   const ledger = baseLedger(business)
-  const extra = matchTransactions(ledger.matches, decisions)
+  const extra = [...classifiedTransactions(ledger.pending, categories), ...matchTransactions(ledger.matches, decisions)]
   if (extra.length === 0) return ledger
 
   const ingresos = extra.reduce((acc, t) => (t.amount > 0 ? acc + t.amount : acc), 0)

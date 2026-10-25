@@ -2,9 +2,15 @@ import { formatMoney } from '../lib/format'
 import type { QuickInsight } from '../components/Insights'
 import type { Ledger } from './ledger'
 import type { Connection, Insight, Transaction } from './mock'
-import { accountTotals, categoryTotals, getTransactions, totals, variation } from './selectors'
+import { accountTotals, categoryTotals, getTransactions, periodLabel, totals, variation } from './selectors'
 
 const money = (n: number) => formatMoney(n)
+
+/** "febrero": el mes anterior al periodo, o null si es el primero. */
+function previousMonth(ledger: Ledger, periodKey: string): string | null {
+  const index = ledger.periods.findIndex((p) => p.key === periodKey)
+  return index > 0 ? periodLabel(ledger.periods[index - 1]).toLowerCase() : null
+}
 
 /** Insights "Resumen de hoy" generados a partir de los datos filtrados. */
 export function movementInsights(
@@ -83,6 +89,8 @@ export function incomeQuickInsights(txs: Transaction[], connections: Connection[
   const [top] = categoryTotals(txs, 'income')
   const [bestAccount] = accountTotals(txs, connections, 'income')
   const delta = variation(ledger, periodKey, 'ingresos')
+  // Zenity concilia sola: los pares de cobros del mes ya están resueltos
+  const pairs = ledger.matches.filter((m) => m.legs[0].amount > 0 && m.legs[0].date.startsWith(periodKey)).length
   return [
     {
       id: 'source',
@@ -105,11 +113,20 @@ export function incomeQuickInsights(txs: Transaction[], connections: Connection[
       value: delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta}%`,
       hint: 'Variación de ingresos',
     },
-    { id: 'reconciled', label: 'Cobros conciliados', icon: 'task_alt', value: '82%', hint: '18% pendientes' },
+    {
+      id: 'reconciled',
+      label: 'Cobros conciliados',
+      icon: 'task_alt',
+      value: pairs ? `${pairs} ${pairs === 1 ? 'par' : 'pares'}` : 'Al día',
+      hint: 'Conciliados por Zenity',
+    },
   ]
 }
 
-export function expenseQuickInsights(txs: Transaction[], connections: Connection[]): QuickInsight[] {
+export function expenseQuickInsights(txs: Transaction[], connections: Connection[], ledger: Ledger, periodKey: string): QuickInsight[] {
+  const delta = variation(ledger, periodKey, 'egresos')
+  const previous = previousMonth(ledger, periodKey)
+  const rising = delta !== null && delta > 0
   const cats = categoryTotals(txs, 'expense')
   const [top] = cats
   const [worstAccount] = accountTotals(txs, connections, 'expense')
@@ -120,11 +137,11 @@ export function expenseQuickInsights(txs: Transaction[], connections: Connection
   return [
     {
       id: 'alert',
-      label: 'Alerta',
-      icon: 'warning',
-      value: `${top?.label ?? 'Comercial'} subió 32%`,
-      hint: 'Respecto a febrero',
-      warning: true,
+      label: rising ? 'Alerta' : 'Egresos',
+      icon: rising ? 'warning' : 'trending_down',
+      value: delta === null ? '—' : `Egresos ${rising ? 'subieron' : 'bajaron'} ${Math.abs(delta)}%`,
+      hint: previous ? `Respecto a ${previous}` : 'Sin mes anterior',
+      warning: rising,
     },
     {
       id: 'dominant',

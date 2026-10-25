@@ -132,6 +132,7 @@ export const BASE_TRANSACTIONS: Transaction[] = [
 ]
 
 /* ── Periodos (los 6 meses con datos) ─────────────────────────── */
+// Marzo cuenta solo los movimientos de arriba: el libro le suma los que Zenity clasifica y concilia
 
 export interface Period {
   key: string
@@ -217,9 +218,9 @@ export const HOME_INSIGHTS: Insight[] = [
       'En marzo la cuenta ',
       { b: 'API Negocio Retail' },
       ' recibió ',
-      { pos: 'S/ 1,120.00' },
-      ' (+18% vs. febrero), pero sus egresos subieron a ',
-      { neg: 'S/ 410.50' },
+      { pos: 'S/ 1,332.80' },
+      ' (+60% vs. febrero), pero sus egresos subieron a ',
+      { neg: 'S/ 475.00' },
       ' por la compra de insumos.',
     ],
   },
@@ -266,7 +267,7 @@ export const NOTIFICATIONS = [
   { id: 'n1', icon: 'auto_awesome', title: 'Zenity clasificó 8 movimientos por ti', time: 'Hace 2 min', tone: 'ai' as const },
   { id: 'n2', icon: 'task_alt', title: 'El cobro de Andina SAC fue conciliado', time: 'Hace 1 h', tone: 'positive' as const },
   { id: 'n5', icon: 'summarize', title: 'Tu reporte de marzo está listo', time: 'Hace 3 h', tone: 'ai' as const },
-  { id: 'n3', icon: 'warning', title: 'Comercial subió 32% vs. febrero', time: 'Ayer', tone: 'warning' as const },
+  { id: 'n3', icon: 'warning', title: 'Tus egresos de marzo subieron 70% vs. febrero', time: 'Ayer', tone: 'warning' as const },
   { id: 'n4', icon: 'account_balance', title: 'Ya puedes conectar BBVA Perú', time: 'Hace 2 días', tone: 'neutral' as const },
 ]
 

@@ -192,7 +192,7 @@ export function Movements() {
                 <div className={styles.metrics}>
                   <MetricCard label="Egresos" value={t.egresos} icon="down" size="lg" caption={month} />
                 </div>
-                <QuickInsights items={expenseQuickInsights(txs, connections)} />
+                <QuickInsights items={expenseQuickInsights(txs, connections, ledger, periodKey)} />
                 <InsightList insights={insights} title="Resumen de hoy" />
                 <SectionHeader title="Categorías con mayor impacto" />
                 {categoryList('expense')}
