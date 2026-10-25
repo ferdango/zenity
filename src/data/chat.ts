@@ -177,13 +177,13 @@ export function answer(question: string, { connections, periodKey, ledger, busin
         text: [
           'Hoy puedes conectar ',
           { b: 'bancos' },
-          ' (BCP, BBVA y Pichincha), ',
+          ' (BCP, BBVA, Scotiabank y Pichincha), ',
+          { b: 'billeteras' },
+          ' (Yape y Plin), ',
           { b: 'APIs' },
-          ', ',
-          { b: 'bases de datos' },
-          ' (MySQL, SQL Server y PostgreSQL) y ',
+          ' y ',
           { b: 'archivos' },
-          ' (Excel y XML).',
+          ' (Excel, Google Sheets y PDF).',
         ],
       },
       {
@@ -202,7 +202,7 @@ export function answer(question: string, { connections, periodKey, ledger, busin
       },
       {
         type: 'p',
-        text: 'Conecta un banco, una API, una base de datos o un Excel de este RUC y te explico sus ingresos, egresos y balance.',
+        text: 'Conecta un banco, una billetera, una API o un Excel de este RUC y te explico sus ingresos, egresos y balance.',
       },
       { type: 'actions', items: [{ label: 'Conectar cuenta', to: '/conexiones/nueva', icon: 'add' }] },
     ]

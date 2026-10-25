@@ -294,7 +294,7 @@ export function Home() {
                   </span>
                   <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
                   <p className={styles.emptyText}>
-                    Bancos, APIs, bases de datos o Excel. Aquí solo verás los movimientos de este RUC.
+                    Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.
                   </p>
                   <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
                     Conectar cuenta

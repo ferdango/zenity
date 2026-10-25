@@ -2,6 +2,25 @@
   padding: 16px var(--z-gutter) 8px;
 }
 
+/* Aviso de conciliación con la cuenta de abono (billeteras) */
+.settlement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px var(--z-gutter) 0;
+  padding: 12px 14px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface);
+  color: var(--z-on-surface-variant);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.settlement > :first-child {
+  flex-shrink: 0;
+  color: var(--z-primary);
+}
+
 .pair {
   display: grid;
   grid-template-columns: 1fr 1fr;

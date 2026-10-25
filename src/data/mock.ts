@@ -3,8 +3,8 @@
  * los totales de cada mes se calculan a partir de las transacciones.
  */
 
-export type AvatarKind = 'visa' | 'mastercard' | 'sheet' | 'api' | 'bank'
-export type CardTheme = 'purple' | 'indigo' | 'light' | 'green' | 'blue' | 'navy' | 'yellow' | 'slate'
+export type AvatarKind = 'visa' | 'mastercard' | 'sheet' | 'pdf' | 'api' | 'bank' | 'yape' | 'plin'
+export type CardTheme = 'purple' | 'indigo' | 'light' | 'green' | 'blue' | 'navy' | 'yellow' | 'slate' | 'grape' | 'teal' | 'red'
 export type TxType = 'income' | 'expense'
 
 export interface Connection {
@@ -15,6 +15,8 @@ export interface Connection {
   shortName: string
   last4?: string
   holder?: string
+  /** Últimos 3 dígitos del celular del negocio (billeteras Yape y Plin) */
+  phone?: string
   balance: number
   theme: CardTheme
   avatar: AvatarKind
@@ -215,7 +217,7 @@ export const HOME_INSIGHTS: Insight[] = [
 
 /* ── Fuentes de conexión ────────────────────────────────────── */
 
-export type SourceKind = 'bank' | 'api' | 'database' | 'file'
+export type SourceKind = 'bank' | 'wallet' | 'api' | 'file'
 
 export interface Source {
   id: string
@@ -225,8 +227,14 @@ export interface Source {
   badge?: { label: string; tone: 'pink' | 'orange' | 'blue' }
   logo:
     | { type: 'image'; src: string; tile?: string }
-    | { type: 'monogram'; text: string; theme: 'bcp' | 'bbva' | 'pichincha' }
+    | { type: 'monogram'; text: string; theme: 'bcp' | 'bbva' | 'pichincha' | 'scotiabank' | 'yape' | 'plin' }
     | { type: 'icon'; icon: string; tile: string }
+  /** Avatar de las conexiones creadas desde esta fuente (por defecto, el de su tipo) */
+  avatar?: AvatarKind
+  /** Cuenta donde se abonan los cobros de la billetera */
+  settlesIn?: string
+  /** Archivo que se importa desde el detalle de la conexión (Excel, PDF) */
+  upload?: { label: string; accept: string }
   /** Simula credenciales inválidas para mostrar el estado de error */
   simulateError?: boolean
   theme: CardTheme
@@ -235,8 +243,8 @@ export interface Source {
 export const SOURCE_FILTERS: Array<{ id: 'all' | SourceKind; label: string }> = [
   { id: 'all', label: 'Todos' },
   { id: 'bank', label: 'Bancos' },
+  { id: 'wallet', label: 'Billeteras' },
   { id: 'api', label: 'APIs' },
-  { id: 'database', label: 'Bases de datos' },
   { id: 'file', label: 'Archivos' },
 ]
 
@@ -259,7 +267,7 @@ export const FAQ = [
     a: 'Analiza el comercio, el monto y tu historial. Cuando no está segura, te pide revisar y aprende de tus correcciones.',
   },
   {
-    q: '¿Puedo conectar un Excel o una base de datos?',
-    a: 'Sí. Puedes importar Excel, XML o conectar MySQL, SQL Server y PostgreSQL desde «Nueva cuenta».',
+    q: '¿Puedo conectar un Excel o un PDF?',
+    a: 'Sí. Puedes importar Excel o PDF, o sincronizar Google Sheets desde «Nueva cuenta».',
   },
 ]

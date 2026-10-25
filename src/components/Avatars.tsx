@@ -25,8 +25,10 @@ export function BrandAvatar({ kind, size = 40, verified, className }: BrandAvata
         styles.avatar,
         (kind === 'visa' || kind === 'mastercard') && styles.white,
         kind === 'sheet' && styles.sheet,
+        kind === 'pdf' && styles.pdf,
         kind === 'api' && styles.api,
         kind === 'bank' && styles.bank,
+        (kind === 'yape' || kind === 'plin') && styles[kind],
         className,
       )}
       style={style}
@@ -35,8 +37,10 @@ export function BrandAvatar({ kind, size = 40, verified, className }: BrandAvata
       {kind === 'visa' && <img src={visa} alt="" />}
       {kind === 'mastercard' && <img src={mastercard} alt="" style={{ width: '60%' }} />}
       {kind === 'sheet' && <SheetGlyph size={glyph} />}
+      {kind === 'pdf' && <Icon name="picture_as_pdf" size={glyph} />}
       {kind === 'api' && <ApiGlyph size={glyph} />}
       {kind === 'bank' && <Icon name="account_balance" size={glyph} />}
+      {(kind === 'yape' || kind === 'plin') && <span className={styles.wordmark}>{kind}</span>}
       {verified && (
         <span className={styles.check}>
           <Icon name="check" size={12} weight={700} />
@@ -58,7 +62,7 @@ export function InitialsAvatar({ initials, size = 44 }: { initials: string; size
   )
 }
 
-/** Logo de una fuente de conexión (bancos, APIs, bases de datos, archivos). */
+/** Logo de una fuente de conexión (bancos, billeteras, APIs, archivos). */
 export function SourceLogo({ source, size = 56 }: { source: Source; size?: number }) {
   const style = { '--logo-size': `${size}px` } as CSSProperties
   const { logo } = source
@@ -74,7 +78,7 @@ export function SourceLogo({ source, size = 56 }: { source: Source; size?: numbe
   if (logo.type === 'icon') {
     return (
       <span className={cn(styles.logo, styles.iconTile)} style={{ ...style, background: logo.tile }} aria-hidden>
-        <ApiGlyph size={Math.round(size * 0.55)} />
+        {logo.icon === 'api' ? <ApiGlyph size={Math.round(size * 0.55)} /> : <Icon name={logo.icon} size={Math.round(size * 0.55)} />}
       </span>
     )
   }

@@ -39,6 +39,21 @@
   --card-fg: #fff;
   --card-fg-2: rgb(255 255 255 / 0.8);
 }
+.grape {
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #b65ad0 0%, #742284 48%, #4a1263 100%);
+  --card-fg: #fff;
+  --card-fg-2: rgb(255 255 255 / 0.82);
+}
+.red {
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #ff6b6f 0%, #ec111a 45%, #9e0b10 100%);
+  --card-fg: #fff;
+  --card-fg-2: rgb(255 255 255 / 0.85);
+}
+.teal {
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #3fd3c9 0%, #0a9fb8 45%, #06607f 100%);
+  --card-fg: #fff;
+  --card-fg-2: rgb(255 255 255 / 0.88);
+}
 
 /* ── Tarjeta del carrusel (Home) ──────────────────────────── */
 .accountCard {
@@ -184,6 +199,14 @@
   width: auto;
 }
 
+/* Wordmark de Yape y Plin en la esquina de la tarjeta */
+.wordmark {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--card-fg);
+}
+
 .status {
   display: inline-flex;
   align-items: center;
@@ -251,4 +274,15 @@
   background: linear-gradient(135deg, #f6e27a, #c9a94a);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
   opacity: 0.85;
+}
+
+/* QR del negocio en lugar del chip (billeteras) */
+.qr {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.16);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.4);
 }

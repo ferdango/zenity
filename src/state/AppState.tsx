@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Business, DEMO_BUSINESSES, businessFromCompany, withRegimen } from '../data/businesses'
 import { buildLedger } from '../data/ledger'
-import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, USER } from '../data/mock'
+import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, type SourceKind, USER } from '../data/mock'
 import type { SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
 import { getSource } from '../data/sources'
@@ -14,6 +14,14 @@ const PROFILE_KEY = 'zenity.profile'
 const TOUR_KEY = 'zenity.tourDone'
 const BUSINESSES_KEY = 'zenity.businesses'
 const ACTIVE_BUSINESS_KEY = 'zenity.business'
+
+/** Etiqueta de la tarjeta según el tipo de fuente conectada. */
+const KIND_LABELS: Record<SourceKind, string> = {
+  bank: 'Cuenta bancaria',
+  wallet: 'Billetera digital',
+  api: 'Conexión API',
+  file: 'Archivo',
+}
 
 const EMPTY_REGISTRATION: Registration = {
   personal: { tipoDoc: 'dni', dni: '', nombres: '', apellidos: '', nacimiento: '', email: '', celular: '', direccion: '' },
@@ -138,16 +146,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       const source = getSource(sourceId)
       if (!source) return null
       const last4 = String(1000 + ((sourceId.length * 7919) % 9000)).slice(-4)
+      const seed = [...sourceId].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
       const connection: Connection = {
         id: `${sourceId}-${Date.now().toString(36)}`,
-        label:
-          source.kind === 'bank' ? 'Cuenta bancaria' : source.kind === 'api' ? 'Conexión API' : source.kind === 'database' ? 'Base de datos' : 'Archivo',
-        name: source.name.replace('Base de datos en ', '').replace(' como base de datos', ''),
+        label: KIND_LABELS[source.kind],
+        name: source.name.replace(' como base de datos', ''),
         shortName: source.name,
         last4: source.kind === 'bank' ? last4 : undefined,
+        phone: source.kind === 'wallet' ? String(100 + ((seed * 37) % 900)) : undefined,
         balance: 0,
         theme: source.theme,
-        avatar: source.kind === 'bank' ? 'bank' : source.kind === 'file' ? 'sheet' : 'api',
+        avatar: source.avatar ?? (source.kind === 'bank' ? 'bank' : source.kind === 'file' ? 'sheet' : 'api'),
         sourceId,
       }
       updateConnections((list) => [...list, connection])
