@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Business, DEMO_BUSINESSES, businessFromCompany, withRegimen } from '../data/businesses'
 import { buildLedger } from '../data/ledger'
+import type { MatchChoice } from '../data/matches'
 import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, type SourceKind, USER } from '../data/mock'
 import type { SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
@@ -51,6 +52,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   /** Movimientos ya categorizados, por negocio */
   const [reviewed, setReviewed] = useState<Record<string, string[]>>({})
   const [categorized, setCategorized] = useState<Record<string, CategoryId>>({})
+  /** Pares ya conciliados o separados, por negocio */
+  const [resolved, setResolved] = useState<Record<string, string[]>>({})
+  const [matchChoices, setMatchChoices] = useState<Record<string, MatchChoice>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sheet, setSheet] = useState<SheetName>(null)
@@ -66,6 +70,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const done = reviewed[businessId] ?? []
     return ledger.pending.filter((p) => !done.includes(p.id))
   }, [ledger, reviewed, businessId])
+  const matches = useMemo(() => {
+    const done = resolved[businessId] ?? []
+    return ledger.matches.filter((m) => !done.includes(m.id))
+  }, [ledger, resolved, businessId])
 
   useEffect(() => writeStorage(BUSINESSES_KEY, businesses), [businesses])
   useEffect(() => writeStorage(ACTIVE_BUSINESS_KEY, businessId), [businessId])
@@ -109,6 +117,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const switchBusiness = useCallback((id: string) => {
     setActiveId(id)
     setCategorized({})
+    setMatchChoices({})
     track('negocio_cambiado')
   }, [])
 
@@ -119,6 +128,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       track('negocio_agregado', { regimen, tipo_contribuyente: company.tipoContribuyente, negocios: businesses.length + 1 })
       setActiveId(created.id)
       setCategorized({})
+      setMatchChoices({})
       return created
     },
     [businesses.length],
@@ -131,6 +141,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setActiveId(registered.id)
     setReviewed({})
     setCategorized({})
+    setResolved({})
+    setMatchChoices({})
   }, [])
 
   /** Cambia las conexiones del negocio activo. */
@@ -190,13 +202,27 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const setMatchChoice = useCallback((matchId: string, choice: MatchChoice | null) => {
+    setMatchChoices((prev) => {
+      const next = { ...prev }
+      if (choice) next[matchId] = choice
+      else delete next[matchId]
+      return next
+    })
+  }, [])
+
   const applyReview = useCallback(() => {
     const ids = Object.keys(categorized)
+    const matchIds = Object.keys(matchChoices)
+    const same = matchIds.filter((id) => matchChoices[id] === 'same').length
+    const different = matchIds.length - same
     setReviewed((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...ids] }))
+    setResolved((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...matchIds] }))
     setCategorized({})
-    track('movimientos_revisados', { cantidad: ids.length })
-    return ids.length
-  }, [categorized, businessId])
+    setMatchChoices({})
+    track('movimientos_revisados', { cantidad: ids.length, unidos: same, separados: different })
+    return { categorized: ids.length, same, different }
+  }, [categorized, matchChoices, businessId])
 
   const openSheet = useCallback((next: SheetName) => setSheet(next), [])
 
@@ -232,6 +258,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       pending,
       categorized,
       setCategory,
+      matches,
+      matchChoices,
+      setMatchChoice,
       applyReview,
       toasts,
       toast,
@@ -267,6 +296,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       pending,
       categorized,
       setCategory,
+      matches,
+      matchChoices,
+      setMatchChoice,
       applyReview,
       toasts,
       toast,

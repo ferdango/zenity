@@ -7,13 +7,14 @@ import { BrandAvatar } from '../components/Avatars'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
+import { MatchCard } from '../components/MatchCard'
 import { Spark, SparkCluster } from '../components/Spark'
 import { TopBar } from '../components/TopBar'
 import { CATEGORIES, type CategoryId, EXPENSE_CATEGORIES, INCOME_CATEGORIES, type PendingTransaction } from '../data/mock'
 import { avatarFor, connectionName } from '../data/selectors'
 import { formatShortDate, maskNumber } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
-import { useApp } from '../state/context'
+import { type ReviewResult, useApp } from '../state/context'
 import styles from './Review.module.css'
 
 type Filter = 'all' | 'income' | 'expense'
@@ -22,6 +23,16 @@ const FILTER_LABEL: Record<Filter, string> = { all: 'Todos', income: 'Ingresos',
 function suggestionsFor(tx: PendingTransaction): CategoryId[] {
   const base: CategoryId[] = tx.amount > 0 ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
   return [tx.recommended, ...base.filter((c) => c !== tx.recommended)]
+}
+
+/** «2 movimientos categorizados, 1 par unido y 1 separado» */
+function reviewMessage({ categorized, same, different }: ReviewResult): string {
+  const parts = [
+    categorized && `${categorized} ${categorized === 1 ? 'movimiento categorizado' : 'movimientos categorizados'}`,
+    same && `${same} ${same === 1 ? 'par unido' : 'pares unidos'}`,
+    different && `${different} ${different === 1 ? 'par separado' : 'pares separados'}`,
+  ].filter((part): part is string => Boolean(part))
+  return parts.length > 1 ? `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}` : (parts[0] ?? '')
 }
 
 function Teach({ onSave }: { onSave: (rule: string) => void }) {
@@ -80,20 +91,25 @@ function Teach({ onSave }: { onSave: (rule: string) => void }) {
   )
 }
 
-/** Movimientos sin categoría con sugerencias de IA (Figma: No-categorized ×4). */
+/**
+ * Movimientos sin categoría con sugerencias de IA (Figma: No-categorized ×4) y pares de
+ * movimientos de distintas conexiones por conciliar («¿Es el mismo movimiento?»).
+ */
 export function Review() {
   const navigate = useNavigate()
-  const { pending, categorized, setCategory, applyReview, connections, toast } = useApp()
+  const { pending, categorized, setCategory, matches, matchChoices, setMatchChoice, applyReview, connections, toast } = useApp()
   const [open, setOpen] = useState<string | null>(pending[0]?.id ?? null)
   const [filter, setFilter] = useState<Filter>('all')
   const [menu, setMenu] = useState(false)
-  const count = Object.keys(categorized).length
+  const count = Object.keys(categorized).length + Object.keys(matchChoices).length
+  const total = pending.length + matches.length
 
-  const visible = pending.filter((p) => filter === 'all' || (filter === 'income' ? p.amount > 0 : p.amount < 0))
+  const inFilter = (amount: number) => filter === 'all' || (filter === 'income' ? amount > 0 : amount < 0)
+  const visible = pending.filter((p) => inFilter(p.amount))
+  const visibleMatches = matches.filter((m) => inFilter(m.legs[0].amount))
 
   const apply = () => {
-    const n = applyReview()
-    toast(`${n} ${n === 1 ? 'movimiento categorizado' : 'movimientos categorizados'}`, 'task_alt')
+    toast(reviewMessage(applyReview()), 'task_alt')
     navigate('/inicio')
   }
 
@@ -113,7 +129,7 @@ export function Review() {
               <span className={styles.filterLabel}>
                 {FILTER_LABEL[filter]} <Icon name="arrow_drop_down" size={18} />
               </span>
-              <span className={styles.title}>Por revisar ({pending.length})</span>
+              <span className={styles.title}>Por revisar ({total})</span>
             </button>
             <AnimatePresence>
               {menu && (
@@ -149,7 +165,7 @@ export function Review() {
       />
 
       <div className="z-container" style={{ flex: 1 }}>
-        {pending.length === 0 ? (
+        {total === 0 ? (
           <motion.div className={styles.allDone} variants={staggerContainer(0.08)} initial="hidden" animate="show">
             <motion.div variants={fadeUp}>
               <Spark size={56} animateIn />
@@ -168,10 +184,40 @@ export function Review() {
           </motion.div>
         ) : (
           <>
-            <motion.p className={styles.intro} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-              <SparkCluster size={22} />
-              Zenity no pudo clasificar estos movimientos con seguridad. Elige una sugerencia y aprenderá de ti.
-            </motion.p>
+            {visibleMatches.length > 0 && (
+              <section className={styles.matches} aria-labelledby="mismo-movimiento">
+                <h2 id="mismo-movimiento" className={styles.sectionTitle}>
+                  <Icon name="link" size={20} />
+                  ¿Es el mismo movimiento? ({visibleMatches.length})
+                </h2>
+                <p className={styles.sectionText}>
+                  Encontramos movimientos parecidos en distintas conexiones. Si son el mismo, Zenity los cuenta una sola vez.
+                </p>
+                <motion.ul className={styles.matchList} variants={staggerContainer(0.06)} initial="hidden" animate="show">
+                  {visibleMatches.map((match) => (
+                    <MatchCard
+                      key={match.id}
+                      match={match}
+                      choice={matchChoices[match.id]}
+                      connections={connections}
+                      onChoose={(choice) => setMatchChoice(match.id, choice)}
+                    />
+                  ))}
+                </motion.ul>
+              </section>
+            )}
+            {visibleMatches.length > 0 && visible.length > 0 && (
+              <h2 className={styles.sectionTitle}>
+                <Icon name="category" size={20} />
+                Sin categoría ({visible.length})
+              </h2>
+            )}
+            {visible.length > 0 && (
+              <motion.p className={styles.intro} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                <SparkCluster size={22} />
+                Zenity no pudo clasificar estos movimientos con seguridad. Elige una sugerencia y aprenderá de ti.
+              </motion.p>
+            )}
             <motion.ul className={styles.list} variants={staggerContainer(0.04)} initial="hidden" animate="show">
               {visible.map((tx) => {
                 const isOpen = open === tx.id
@@ -291,7 +337,7 @@ export function Review() {
         )}
       </div>
 
-      {pending.length > 0 && (
+      {total > 0 && (
         <div className="z-action-bar">
           <div className="z-container z-stack">
             <Button size="lg" fullWidth disabled={count === 0} onClick={apply}>

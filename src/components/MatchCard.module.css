@@ -1,0 +1,144 @@
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  box-shadow: inset 0 0 0 1px var(--z-divider);
+  transition: box-shadow var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.card[data-choice='same'] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-positive) 55%, transparent);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface-variant);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.score[data-level='high'] {
+  background: var(--z-positive-container);
+  color: var(--z-on-positive-container);
+}
+
+.score[data-level='medium'] {
+  background: color-mix(in srgb, var(--z-warning) 16%, transparent);
+  color: var(--z-warning);
+}
+
+/* Dos movimientos unidos por una línea entre sus avatares */
+.legs {
+  display: grid;
+  gap: 14px;
+}
+
+.leg:first-child::after {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: -10px;
+  border-left: 2px dashed var(--z-outline-variant);
+  transition: opacity var(--z-dur-medium) var(--z-ease-standard);
+}
+
+.card[data-choice='same'] .leg:first-child::after {
+  border-left-style: solid;
+  border-color: var(--z-positive);
+}
+
+.card[data-choice='different'] .leg:first-child::after {
+  opacity: 0;
+}
+
+.leg {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.legText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.legTitle {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legSub,
+.legRef {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legRef {
+  white-space: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.legAmount {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reasons li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 3px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface-variant);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+  gap: 8px;
+}
+
+.outcome {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.card[data-choice='same'] .outcome {
+  color: var(--z-positive);
+}
