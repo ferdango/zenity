@@ -193,7 +193,7 @@ export function Review() {
                 <strong className={styles.introTitle}>{summary(classified.length, reconciled.length)}</strong>
                 {changed > 0
                   ? ` Cambiaste ${changed === 1 ? '1 decisión' : `${changed} decisiones`}: Zenity aprende de tus cambios.`
-                  : ' No tienes que hacer nada: ya cuentan en tus reportes. Si algo no te cuadra, cámbialo y Zenity aprenderá.'}
+                  : ' No tienes que hacer nada. Si algo no te cuadra, cámbialo y Zenity aprenderá.'}
               </span>
             </motion.div>
 
