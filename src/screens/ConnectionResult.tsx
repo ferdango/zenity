@@ -105,7 +105,7 @@ export function ConnectionResult() {
       >
         {ok ? (
           <>
-            <Button size="lg" fullWidth to="/analizando" replace icon="auto_awesome">
+            <Button size="lg" fullWidth to={`/analizando?cuenta=${params.get('cuenta') ?? ''}`} replace icon="auto_awesome">
               Ver cuenta
             </Button>
             <Button size="lg" fullWidth variant="text" to="/conexiones/nueva" replace>

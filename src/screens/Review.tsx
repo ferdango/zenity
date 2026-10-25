@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { type KeyboardEvent, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
 import { GradientText } from '../components/AiText'
 import { Amount } from '../components/Amount'
 import { BrandAvatar } from '../components/Avatars'
@@ -99,7 +100,12 @@ function Teach({ onSave }: { onSave: (rule: string) => void }) {
  * movimiento?»): nada espera al usuario. Aquí ve qué decidió, por qué, y puede cambiarlo.
  */
 export function Review() {
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
   const { classified, setCategory, reconciled, setMatchChoice, connections, toast } = useApp()
+  // Si llega del análisis de una cuenta, el flujo sigue hacia esa cuenta
+  const account = connections.find((c) => c.id === params.get('cuenta'))
+  const exit = (to: string) => navigate(to, { replace: true })
   const [open, setOpen] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>('all')
   const [menu, setMenu] = useState(false)
@@ -180,9 +186,15 @@ export function Review() {
               No llegaron movimientos nuevos para clasificar ni conciliar.
             </motion.p>
             <motion.div variants={fadeUp}>
-              <Button to="/inicio" icon="account_balance_wallet">
-                Ir a mi billetera
-              </Button>
+              {account ? (
+                <Button icon="arrow_forward" onClick={() => exit(`/conexion/${account.id}`)}>
+                  Ver {account.name}
+                </Button>
+              ) : (
+                <Button icon="account_balance_wallet" onClick={() => exit('/inicio')}>
+                  Ir a mi billetera
+                </Button>
+              )}
             </motion.div>
           </motion.div>
         ) : (
@@ -351,6 +363,27 @@ export function Review() {
           </>
         )}
       </div>
+
+      {total > 0 && (
+        <div className="z-action-bar">
+          <div className="z-container z-stack">
+            {account ? (
+              <>
+                <Button size="lg" fullWidth trailingIcon="arrow_forward" onClick={() => exit(`/conexion/${account.id}`)}>
+                  Ver {account.name}
+                </Button>
+                <Button size="lg" fullWidth variant="text" onClick={() => exit('/inicio')}>
+                  Ir a mi billetera
+                </Button>
+              </>
+            ) : (
+              <Button size="lg" fullWidth icon="check" onClick={() => exit('/inicio')}>
+                Listo
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

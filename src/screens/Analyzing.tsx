@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { SkeletonLines } from '../components/AiText'
 import { Aurora } from '../components/Aurora'
 import { Button } from '../components/Button'
@@ -13,26 +13,32 @@ import styles from './Analyzing.module.css'
 const STEPS = ['Analizando tu información', 'Leyendo movimientos', 'Clasificando transacciones', 'Generando balances']
 const STEP_MS = 1500
 
-/** Análisis con IA en 4 pasos (Figma: Loading ×4) y paso a "Por revisar". */
+/**
+ * Análisis con IA en 4 pasos (Figma: Loading ×4) y paso a lo que Zenity revisó. Lleva la cuenta
+ * analizada para que, al terminar, el usuario siga hacia ella.
+ */
 export function Analyzing() {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const { finishSync } = useApp()
   const [step, setStep] = useState(0)
+  const cuenta = params.get('cuenta')
+  const next = cuenta ? `/revisar?cuenta=${cuenta}` : '/revisar'
 
   useEffect(() => {
     const timers = STEPS.map((_, i) => window.setTimeout(() => setStep(i), i * STEP_MS))
     timers.push(
       window.setTimeout(() => {
         finishSync()
-        navigate('/revisar', { replace: true })
+        navigate(next, { replace: true })
       }, STEPS.length * STEP_MS + 400),
     )
     return () => timers.forEach(window.clearTimeout)
-  }, [navigate, finishSync])
+  }, [navigate, finishSync, next])
 
   const skip = () => {
     finishSync()
-    navigate('/revisar', { replace: true })
+    navigate(next, { replace: true })
   }
 
   return (
