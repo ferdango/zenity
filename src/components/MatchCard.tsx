@@ -26,6 +26,7 @@ function scoreLevel(score: number) {
 export function MatchCard({ match, choice, connections, onChoose }: MatchCardProps) {
   const [first] = match.legs
   const flow = first.amount > 0 ? 'ingresos' : 'egresos'
+  const amount = Math.abs(first.amount)
   const toggle = (next: MatchChoice) => onChoose(choice === next ? null : next)
 
   return (
@@ -97,8 +98,8 @@ export function MatchCard({ match, choice, connections, onChoose }: MatchCardPro
           >
             <span>
               {choice === 'same'
-                ? `Zenity los unirá: ${formatMoney(Math.abs(first.amount))} contará una sola vez en tus ${flow}.`
-                : 'Quedarán como dos movimientos separados y Zenity no volverá a sugerir este par.'}
+                ? `Zenity los unirá: ${formatMoney(amount)} contará una sola vez en tus ${flow}.`
+                : `Quedarán como dos movimientos: tus ${flow} sumarán ${formatMoney(amount * 2)} en lugar de ${formatMoney(amount)}.`}
             </span>
           </motion.p>
         )}

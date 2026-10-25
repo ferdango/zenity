@@ -1,4 +1,4 @@
-import type { Connection } from './mock'
+import type { CategoryId, Connection, Transaction } from './mock'
 
 /** Un movimiento tal como llega de una conexión, antes de conciliarlo. */
 export interface MatchLeg {
@@ -10,6 +10,8 @@ export interface MatchLeg {
   reference: string
   /** El origen no trae hora (filas de Excel) */
   dateOnly?: boolean
+  /** Movimiento del libro que ya es este lado: no se vuelve a sumar */
+  txId?: string
 }
 
 /** Por qué Zenity cree que dos movimientos son el mismo. */
@@ -28,6 +30,9 @@ export interface MatchCandidate {
   /** Puntaje de coincidencia (0–100) */
   score: number
   reasons: MatchReason[]
+  /** Lado que representa el dinero: es el que cuenta cuando el par es un solo movimiento */
+  primary: 0 | 1
+  category: CategoryId
 }
 
 export type MatchChoice = 'same' | 'different'
@@ -40,6 +45,8 @@ export const BASE_MATCHES: MatchCandidate[] = [
   {
     id: 'm-andina',
     score: 98,
+    primary: 0,
+    category: 'cobros',
     legs: [
       {
         accountId: 'negocio-retail',
@@ -47,6 +54,7 @@ export const BASE_MATCHES: MatchCandidate[] = [
         date: '2026-03-20T22:15',
         amount: 389.5,
         reference: 'Op. 0097872881',
+        txId: 't3',
       },
       {
         accountId: 'locales-nacional',
@@ -62,6 +70,8 @@ export const BASE_MATCHES: MatchCandidate[] = [
   {
     id: 'm-miraflores',
     score: 91,
+    primary: 0,
+    category: 'ventas',
     legs: [
       {
         accountId: 'negocio-retail',
@@ -69,6 +79,7 @@ export const BASE_MATCHES: MatchCandidate[] = [
         date: '2026-03-28T19:42',
         amount: 420,
         reference: 'Op. 0097873323',
+        txId: 't1',
       },
       {
         accountId: 'locales-nacional',
@@ -84,6 +95,8 @@ export const BASE_MATCHES: MatchCandidate[] = [
   {
     id: 'm-tinbet',
     score: 76,
+    primary: 0,
+    category: 'cobros',
     legs: [
       {
         accountId: 'tinbet',
@@ -91,6 +104,7 @@ export const BASE_MATCHES: MatchCandidate[] = [
         date: '2026-03-26T16:20',
         amount: 350,
         reference: 'Op. 0097873001',
+        txId: 't6',
       },
       {
         accountId: 'locales-nacional',
@@ -142,8 +156,37 @@ export function walletMatches(connections: Connection[], scale: number): MatchCa
       return {
         id: `m-${wallet.id}`,
         score: bank ? 97 : 89,
+        // El dinero está en el banco; sin banco, en la billetera (el Excel solo anota la venta)
+        primary: bank ? 1 : 0,
+        category: 'ventas',
         legs,
         reasons: [SAME_AMOUNT, bank ? { icon: 'calendar_month', label: 'Misma hora' } : SAME_DAY, { icon: 'person', label: 'Mismo cliente' }],
       }
     })
+}
+
+/**
+ * Movimientos que los pares agregan al libro. Mientras no se responda, y si son el mismo,
+ * el par cuenta una vez (su lado de dinero); si son distintos, cuentan los dos.
+ */
+export function matchTransactions(matches: MatchCandidate[], decisions: Record<string, MatchChoice>): Transaction[] {
+  return matches.flatMap((m) =>
+    m.legs.flatMap((leg, i) =>
+      !leg.txId && (i === m.primary || decisions[m.id] === 'different')
+        ? [
+            {
+              id: `${m.id}-${i}`,
+              accountId: leg.accountId,
+              title: leg.title,
+              amount: leg.amount,
+              date: leg.date,
+              category: m.category,
+              operation: leg.reference,
+              origin: '—',
+              destination: '—',
+            },
+          ]
+        : [],
+    ),
+  )
 }

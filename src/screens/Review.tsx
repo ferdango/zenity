@@ -191,7 +191,8 @@ export function Review() {
                   ¿Es el mismo movimiento? ({visibleMatches.length})
                 </h2>
                 <p className={styles.sectionText}>
-                  Encontramos movimientos parecidos en distintas conexiones. Si son el mismo, Zenity los cuenta una sola vez.
+                  Encontramos movimientos parecidos en distintas conexiones. Mientras no respondas, Zenity los cuenta una sola
+                  vez; si son distintos, sumará los dos.
                 </p>
                 <motion.ul className={styles.matchList} variants={staggerContainer(0.06)} initial="hidden" animate="show">
                   {visibleMatches.map((match) => (
