@@ -31,7 +31,8 @@ function ItemIcon({ icon }: { icon: string }) {
 /** Contenido del menú lateral (Figma: Menu). Se usa en el drawer móvil y en la barra lateral de escritorio. */
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
-  const { pending, openSheet, profile, business, businesses } = useApp()
+  const { pending, matches, openSheet, profile, business, businesses } = useApp()
+  const toReview = pending.length + matches.length
   const switchTo = useSwitchBusiness()
   const others = businesses.filter((b) => b.id !== business.id)
   const layoutId = `nav-active-${variant}`
@@ -197,7 +198,7 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
             {
               to: '/revisar',
               active: pathname === '/revisar',
-              end: pending.length > 0 ? <span className={styles.count}>{pending.length}</span> : undefined,
+              end: toReview > 0 ? <span className={styles.count}>{toReview}</span> : undefined,
             },
           )}
           {FEATURES.sunatSire &&

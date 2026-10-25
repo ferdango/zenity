@@ -1,4 +1,5 @@
 import type { Business } from './businesses'
+import { BASE_MATCHES, type MatchCandidate, walletMatches } from './matches'
 import {
   BASE_TRANSACTIONS,
   HOME_INSIGHTS,
@@ -21,6 +22,8 @@ export interface Ledger {
   pending: PendingTransaction[]
   /** Insights fijos del inicio; null = se generan a partir de los datos */
   insights: Insight[] | null
+  /** Movimientos de distintas conexiones que podrían ser el mismo */
+  matches: MatchCandidate[]
   /** El negocio todavía no tiene conexiones */
   empty: boolean
 }
@@ -38,6 +41,7 @@ export function buildLedger(business: Business): Ledger {
       base: [],
       pending: [],
       insights: [],
+      matches: [],
       empty: true,
     }
   }
@@ -45,7 +49,14 @@ export function buildLedger(business: Business): Ledger {
   // El negocio del Figma conserva exactamente los datos base
   const ids = new Set(connections.map((c) => c.id))
   if (business.scale === 1 && BASE_ACCOUNTS.every((id) => ids.has(id))) {
-    return { periods: PERIODS, base: BASE_TRANSACTIONS, pending: PENDING_TRANSACTIONS, insights: HOME_INSIGHTS, empty: false }
+    return {
+      periods: PERIODS,
+      base: BASE_TRANSACTIONS,
+      pending: PENDING_TRANSACTIONS,
+      insights: HOME_INSIGHTS,
+      matches: [...BASE_MATCHES, ...walletMatches(connections, 1)],
+      empty: false,
+    }
   }
 
   // Otros negocios: los datos base escalados y repartidos entre sus propias cuentas
@@ -77,5 +88,21 @@ export function buildLedger(business: Business): Ledger {
     amount: round2(p.amount * k),
   }))
 
-  return { periods, base, pending, insights: null, empty: false }
+  // Los pares van a las cuentas equivalentes: la fila de Excel a la hoja del negocio y el resto
+  // como sus movimientos. Si no hay hoja, o un lado cae en la misma cuenta o en una billetera, no aplica.
+  const sheet = connections.find((c) => c.avatar === 'sheet')
+  const wallets = new Set(connections.filter((c) => c.avatar === 'yape' || c.avatar === 'plin').map((c) => c.id))
+  const baseMatches = sheet
+    ? BASE_MATCHES.map((m) => ({
+        ...m,
+        legs: m.legs.map((leg) => ({
+          ...leg,
+          accountId: leg.accountId === 'locales-nacional' ? sheet.id : accountFor(leg.accountId),
+          amount: round2(leg.amount * k),
+        })) as MatchCandidate['legs'],
+      })).filter((m) => m.legs[0].accountId !== m.legs[1].accountId && !m.legs.some((leg) => wallets.has(leg.accountId)))
+    : []
+  const matches = [...baseMatches, ...walletMatches(connections, k)]
+
+  return { periods, base, pending, insights: null, matches, empty: false }
 }

@@ -1,6 +1,7 @@
 import { createContext, use } from 'react'
 import type { Business } from '../data/businesses'
 import type { Ledger } from '../data/ledger'
+import type { MatchCandidate, MatchChoice } from '../data/matches'
 import type { CategoryId, Connection, PendingTransaction } from '../data/mock'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
@@ -86,8 +87,14 @@ export interface AppState {
   finishSync: () => void
   pending: PendingTransaction[]
   categorized: Record<string, CategoryId>
+  /** Pares por conciliar del negocio activo («¿Es el mismo movimiento?») */
+  matches: MatchCandidate[]
+  /** Respuestas elegidas en Por revisar, aún sin aplicar */
+  matchChoices: Record<string, MatchChoice>
+  setMatchChoice: (matchId: string, choice: MatchChoice | null) => void
   setCategory: (pendingId: string, category: CategoryId | null) => void
-  applyReview: () => number
+  /** Guarda las categorías y las conciliaciones elegidas */
+  applyReview: () => ReviewResult
   toasts: Toast[]
   toast: (message: string, icon?: string) => void
   dismissToast: (id: number) => void
@@ -100,6 +107,14 @@ export interface AppState {
   tourActive: boolean
   startTour: () => void
   endTour: () => void
+}
+
+export interface ReviewResult {
+  categorized: number
+  /** Pares unidos: cuentan una sola vez */
+  same: number
+  /** Pares que quedan como movimientos separados */
+  different: number
 }
 
 export const AppStateContext = createContext<AppState | null>(null)

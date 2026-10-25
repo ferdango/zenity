@@ -65,6 +65,40 @@
   color: var(--z-on-surface-variant);
 }
 
+/* «¿Es el mismo movimiento?» */
+.matches {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 16px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px var(--z-gutter) 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.sectionTitle > :first-child {
+  color: var(--z-primary);
+}
+
+.sectionText {
+  margin: 0 var(--z-gutter) 8px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.matchList {
+  display: grid;
+  gap: 12px;
+  padding: 0 var(--z-gutter);
+}
+
 .list {
   display: grid;
 }
