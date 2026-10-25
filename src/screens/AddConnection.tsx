@@ -18,6 +18,7 @@ import { useApp } from '../state/context'
 import styles from './AddConnection.module.css'
 
 const STEPS = ['Estableciendo conexión segura', 'Validando credenciales', 'Sincronizando cuentas']
+const WALLET_STEPS = ['Estableciendo conexión segura', 'Validando el celular del negocio', 'Sincronizando cobros']
 
 /** Fuentes que ya mostraron el error simulado: el reintento sí conecta. */
 const failedOnce = new Set<string>()
@@ -71,7 +72,7 @@ function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: 
           <h2 className="t-headline-s">Conectando con {source.name}</h2>
           <ShimmerText className="t-body-m">Zenity está preparando tu consolidado…</ShimmerText>
           <ul className={styles.steps} aria-live="polite">
-            {STEPS.map((label, i) => {
+            {(source.kind === 'wallet' ? WALLET_STEPS : STEPS).map((label, i) => {
               const state = i < step ? 'done' : i === step ? 'active' : 'pending'
               return (
                 <li key={label} className={styles.step} data-state={state}>

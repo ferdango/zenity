@@ -27,9 +27,31 @@
   background: var(--z-card-purple);
 }
 
+.pdf {
+  background: #e5322d;
+}
+
 .bank {
   background: var(--z-primary-container);
   color: var(--z-on-primary-container);
+}
+
+/* Billeteras: wordmark en minúsculas sobre el color de la marca */
+.yape {
+  background: linear-gradient(150deg, #a23dbb, #742284 55%, #4f1568);
+  color: #fff;
+}
+
+.plin {
+  background: linear-gradient(150deg, #2fd0c6, #0aa2bb 55%, #076a8c);
+  color: #fff;
+}
+
+.wordmark {
+  font-size: calc(var(--av-size) * 0.3);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .initials {
@@ -121,6 +143,18 @@
   border-radius: 3px;
   background: #0f265c;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 55% 100%, 55% 45%, 0 45%);
+}
+
+.scotiabank {
+  background: linear-gradient(150deg, #ff4b4f, #ec111a 55%, #b00d13);
+  color: #fff;
+  font-size: calc(var(--logo-size) * 0.52);
+}
+
+.mono.yape,
+.mono.plin {
+  font-size: calc(var(--logo-size) * 0.3);
+  letter-spacing: -0.03em;
 }
 
 .iconTile {

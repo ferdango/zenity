@@ -3,6 +3,7 @@ import type { PointerEvent } from 'react'
 import { Link } from 'react-router'
 import mastercard from '../assets/brands/mastercard.svg'
 import visa from '../assets/brands/visa.svg'
+import { businessName } from '../data/businesses'
 import type { Connection } from '../data/mock'
 import { cn } from '../lib/cn'
 import { useApp } from '../state/context'
@@ -21,8 +22,17 @@ function BrandMark({ connection, size = 26 }: { connection: Connection; size?: n
       return <img src={mastercard} alt="" style={{ height: size }} />
     case 'sheet':
       return <SheetGlyph size={size + 2} />
+    case 'pdf':
+      return <Icon name="picture_as_pdf" size={size} />
     case 'api':
       return <ApiGlyph size={size} />
+    case 'yape':
+    case 'plin':
+      return (
+        <span className={styles.wordmark} style={{ fontSize: size * 0.85 }}>
+          {connection.avatar}
+        </span>
+      )
     default:
       return <Icon name="account_balance" size={size} />
   }
@@ -39,9 +49,28 @@ function Digits({ last4 }: { last4: string }) {
   )
 }
 
+/** Celular del negocio en Yape o Plin, enmascarado como los dígitos de una tarjeta. */
+function PhoneDigits({ phone }: { phone: string }) {
+  return (
+    <span className={styles.cardDigits} aria-label={`Celular terminado en ${phone}`}>
+      <span aria-hidden>+51</span>
+      <span aria-hidden>•••</span>
+      <span aria-hidden>•••</span>
+      <span>{phone}</span>
+    </span>
+  )
+}
+
+/** Titular que se muestra en la tarjeta: la persona en tarjetas, el negocio en billeteras. */
+function useHolder(connection: Connection): string | null {
+  const { profile, business } = useApp()
+  if (connection.phone) return businessName(business)
+  return connection.last4 && connection.holder ? profile.fullName : null
+}
+
 /** Tarjeta del carrusel de cuentas en Inicio. */
 export function AccountCard({ connection }: { connection: Connection }) {
-  const holder = useApp().profile.fullName
+  const holder = useHolder(connection)
   const isCard = Boolean(connection.last4 && connection.holder)
   const isNew = Boolean(connection.sourceId)
   return (
@@ -52,7 +81,13 @@ export function AccountCard({ connection }: { connection: Connection }) {
     >
       <div>
         <p className={styles.cardLabel}>{connection.label}</p>
-        {isCard ? <Digits last4={connection.last4!} /> : <p className={styles.cardName}>{connection.name}</p>}
+        {isCard ? (
+          <Digits last4={connection.last4!} />
+        ) : connection.phone ? (
+          <PhoneDigits phone={connection.phone} />
+        ) : (
+          <p className={styles.cardName}>{connection.name}</p>
+        )}
       </div>
       <span className={styles.openBadge} aria-hidden>
         <Icon name="arrow_outward" size={20} />
@@ -66,7 +101,7 @@ export function AccountCard({ connection }: { connection: Connection }) {
           ) : (
             <Amount value={connection.balance} className={styles.cardAmount} />
           )}
-          {isCard && <p className={styles.cardHolder}>{holder}</p>}
+          {holder && <p className={styles.cardHolder}>{holder}</p>}
         </div>
         <span className={styles.brand}>
           <BrandMark connection={connection} />
@@ -99,7 +134,7 @@ export function CreditCard({ connection }: { connection: Connection }) {
   }
 
   const isCard = Boolean(connection.last4 && connection.holder)
-  const holder = useApp().profile.fullName
+  const holder = useHolder(connection)
 
   return (
     <div className={styles.creditWrap}>
@@ -116,13 +151,24 @@ export function CreditCard({ connection }: { connection: Connection }) {
         <motion.span className={styles.glare} style={{ background: glare }} aria-hidden />
         <div>
           <p className={styles.cardLabel}>{connection.label}</p>
-          {isCard ? <Digits last4={connection.last4!} /> : <p className="t-title-l">{connection.name}</p>}
+          {isCard ? (
+            <Digits last4={connection.last4!} />
+          ) : connection.phone ? (
+            <PhoneDigits phone={connection.phone} />
+          ) : (
+            <p className="t-title-l">{connection.name}</p>
+          )}
         </div>
         {isCard && <span className={styles.chip} aria-hidden />}
+        {connection.phone && (
+          <span className={styles.qr} aria-hidden>
+            <Icon name="qr_code_2" size={24} />
+          </span>
+        )}
         <div className={styles.cardBottom}>
           <div>
             <Amount value={connection.balance} className={styles.creditAmount} />
-            {isCard && <p className={styles.cardHolder}>{holder}</p>}
+            {holder && <p className={styles.cardHolder}>{holder}</p>}
           </div>
           <span className={styles.brand} style={{ height: 32 }}>
             <BrandMark connection={connection} size={32} />

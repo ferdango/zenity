@@ -12,6 +12,7 @@ import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TopBar } from '../components/TopBar'
 import { TransactionRow } from '../components/Transactions'
 import { movementInsights } from '../data/insights'
+import { getSource } from '../data/sources'
 import { filterByAccount, getPeriod, getTransactions, periodLabel, totals } from '../data/selectors'
 import { formatDateTime } from '../lib/format'
 import { ease } from '../lib/motion'
@@ -41,6 +42,10 @@ export function ConnectionDetail() {
   const t = totals(all)
   const list = all.filter((tx) => (tab === 'todo' ? true : tab === 'ingresos' ? tx.amount > 0 : tx.amount < 0))
   const empty = all.length === 0
+  const source = getSource(connection.sourceId)
+  const settlesIn = source?.settlesIn
+  // Las cuentas de ejemplo en Excel no vienen de una fuente, pero también se importan como Excel
+  const upload = (source ?? (connection.avatar === 'sheet' ? getSource('excel') : undefined))?.upload
   const [summary] = movementInsights(all, connections, connection.id, month, 'all')
   const insights = summary
     ? [{ ...summary, title: connection.id === 'tinbet' ? 'Cuenta Tinbet: ingresos estables de acuerdo a tu histórico' : summary.title }]
@@ -58,6 +63,16 @@ export function ConnectionDetail() {
       <TopBar title={connection.name} subtitle={connection.label} />
       <div className="z-container">
         <CreditCard connection={connection} />
+
+        {settlesIn && (
+          <p className={styles.settlement}>
+            <Icon name="swap_horiz" size={20} />
+            <span>
+              Los cobros de {connection.name} se abonan en {settlesIn}. Si también la conectas, Zenity concilia ambos
+              movimientos para no contarlos dos veces.
+            </span>
+          </p>
+        )}
 
         <div className={styles.tabs}>
           <SegmentedTabs<Tab>
@@ -78,19 +93,19 @@ export function ConnectionDetail() {
               title="No encontramos datos"
               description="La cuenta aún no tiene movimientos disponibles"
               action={
-                connection.avatar === 'sheet' ? (
+                upload ? (
                   <>
                     <input
                       ref={fileRef}
                       type="file"
                       hidden
-                      accept=".xlsx,.xls,.csv"
+                      accept={upload.accept}
                       onChange={(event) => {
                         if (event.target.files?.length) navigate('/analizando')
                       }}
                     />
                     <Button icon="upload_file" onClick={() => fileRef.current?.click()}>
-                      Importar Excel
+                      {upload.label}
                     </Button>
                   </>
                 ) : (

@@ -1,9 +1,5 @@
 import excel from '../assets/brands/excel.svg'
-import googleCloud from '../assets/brands/google-cloud.svg'
-import mysql from '../assets/brands/mysql.svg'
-import postgresql from '../assets/brands/postgresql.svg'
-import sqlserver from '../assets/brands/sqlserver.svg'
-import xml from '../assets/brands/xml.svg'
+import googleSheets from '../assets/brands/google-sheets.svg'
 import type { Source } from './mock'
 
 const BANK_COPY = 'Conecta tu cuenta bancaria con Zenity para consolidar tu balance'
@@ -37,13 +33,35 @@ export const SOURCES: Source[] = [
     theme: 'yellow',
   },
   {
-    id: 'google-cloud',
-    name: 'Google Cloud Platform',
-    description: 'Conecta tu cuenta de Google para acceder a los servicios de Google',
-    kind: 'api',
-    badge: { label: 'Más usado', tone: 'blue' },
-    logo: { type: 'image', src: googleCloud },
-    theme: 'blue',
+    id: 'scotiabank',
+    name: 'Scotiabank Perú',
+    description: BANK_COPY,
+    kind: 'bank',
+    badge: { label: 'Nuevo', tone: 'pink' },
+    logo: { type: 'monogram', text: 'S', theme: 'scotiabank' },
+    theme: 'red',
+  },
+  {
+    id: 'yape',
+    name: 'Yape',
+    description: 'Consolida los cobros con QR y celular de tu negocio',
+    kind: 'wallet',
+    badge: { label: 'Nuevo', tone: 'pink' },
+    logo: { type: 'monogram', text: 'yape', theme: 'yape' },
+    avatar: 'yape',
+    settlesIn: 'tu cuenta BCP',
+    theme: 'grape',
+  },
+  {
+    id: 'plin',
+    name: 'Plin',
+    description: 'Consolida los cobros con Plin que llegan a tu banco',
+    kind: 'wallet',
+    badge: { label: 'Nuevo', tone: 'pink' },
+    logo: { type: 'monogram', text: 'plin', theme: 'plin' },
+    avatar: 'plin',
+    settlesIn: 'tu cuenta BBVA, Interbank o Scotiabank',
+    theme: 'teal',
   },
   {
     id: 'api',
@@ -51,6 +69,7 @@ export const SOURCES: Source[] = [
     description: 'Conecta una API a tu consolidado financiero para el seguimiento diario',
     kind: 'api',
     logo: { type: 'icon', icon: 'api', tile: 'var(--z-card-purple)' },
+    simulateError: true,
     theme: 'purple',
   },
   {
@@ -59,40 +78,26 @@ export const SOURCES: Source[] = [
     description: 'Importa tus hojas de cálculo y mantén tu balance al día',
     kind: 'file',
     logo: { type: 'image', src: excel },
+    upload: { label: 'Importar Excel', accept: '.xlsx,.xls,.csv' },
     theme: 'green',
   },
   {
-    id: 'mysql',
-    name: 'Base de datos en MySQL',
-    description: 'Sincroniza tus tablas de ventas y gastos con Zenity',
-    kind: 'database',
-    logo: { type: 'image', src: mysql },
-    theme: 'slate',
-  },
-  {
-    id: 'sqlserver',
-    name: 'Base de datos en SQL Server',
-    description: 'Sincroniza tus tablas de ventas y gastos con Zenity',
-    kind: 'database',
-    logo: { type: 'image', src: sqlserver, tile: '#ffffff' },
-    simulateError: true,
-    theme: 'slate',
-  },
-  {
-    id: 'postgresql',
-    name: 'Base de datos en PostgreSQL',
-    description: 'Sincroniza tus tablas de ventas y gastos con Zenity',
-    kind: 'database',
-    logo: { type: 'image', src: postgresql },
-    theme: 'blue',
-  },
-  {
-    id: 'xml',
-    name: 'XML como base de datos',
-    description: 'Carga facturas y comprobantes electrónicos en XML',
+    id: 'google-sheets',
+    name: 'Google Sheets',
+    description: 'Sincroniza tus hojas de cálculo de Google con Zenity',
     kind: 'file',
-    logo: { type: 'image', src: xml },
+    logo: { type: 'image', src: googleSheets },
     theme: 'green',
+  },
+  {
+    id: 'pdf',
+    name: 'Archivo PDF',
+    description: 'Carga estados de cuenta y comprobantes en PDF',
+    kind: 'file',
+    logo: { type: 'icon', icon: 'picture_as_pdf', tile: '#e5322d' },
+    avatar: 'pdf',
+    upload: { label: 'Importar PDF', accept: '.pdf' },
+    theme: 'slate',
   },
 ]
 
