@@ -41,6 +41,7 @@ export function AddBusiness() {
     blocked: existing ? `Este RUC ya está en tus negocios como ${businessName(existing)}` : null,
     onFound: (found) => {
       setNombreComercial(found.nombreComercial ?? '')
+      setRegimen(found.regimen)
       setAutofilled(true)
     },
   })
@@ -159,6 +160,7 @@ export function AddBusiness() {
                 <motion.div variants={fadeUp}>
                   <RegimenPicker
                     id="business-regimen"
+                    detected={company.regimen}
                     value={regimen}
                     error={regimenTouched && !regimen ? 'Elige el régimen tributario del negocio' : null}
                     onChange={setRegimen}

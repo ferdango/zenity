@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import type { ReactNode } from 'react'
 import type { ReniecPerson, SunatCompany } from '../data/registry'
+import { REGIMENES } from '../data/sire'
 import { cn } from '../lib/cn'
 import { formatDate } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
@@ -148,6 +149,9 @@ export function CompanyProfile({ company }: { company: SunatCompany }) {
       <dl className={styles.facts}>
         <Fact label="Nombre comercial">{company.nombreComercial ?? '—'}</Fact>
         <Fact label="Trabajadores">{company.trabajadores === 0 ? 'Sin trabajadores' : company.trabajadores}</Fact>
+        <Fact label="Régimen tributario" wide>
+          {REGIMENES[company.regimen].label}
+        </Fact>
         <Fact label="Actividad económica principal" wide>
           <span className={styles.ciiu}>CIIU {company.actividadPrincipal.ciiu}</span> {company.actividadPrincipal.descripcion}
         </Fact>

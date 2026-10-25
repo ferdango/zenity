@@ -11,10 +11,12 @@ interface RegimenPickerProps {
   error?: string | null
   /** Regímenes que no aplican, con el motivo que se muestra en su lugar */
   unavailable?: Partial<Record<Regimen, string>>
+  /** Régimen de la ficha RUC: llega ya elegido y el usuario solo lo cambia si no coincide */
+  detected?: Regimen
 }
 
 /** Selector del régimen tributario del RUC (General, RMT o RER) con la tasa de Renta de cada uno. */
-export function RegimenPicker({ id, value, onChange, error, unavailable }: RegimenPickerProps) {
+export function RegimenPicker({ id, value, onChange, error, unavailable, detected }: RegimenPickerProps) {
   const errorId = `${id}-error`
   return (
     <fieldset className={styles.picker} aria-describedby={error ? errorId : `${id}-help`} aria-invalid={Boolean(error)}>
@@ -56,6 +58,12 @@ export function RegimenPicker({ id, value, onChange, error, unavailable }: Regim
               <span className={styles.desc} data-warning={Boolean(reason)}>
                 {reason ?? info.requisito}
               </span>
+              {detected === regimen && (
+                <span className={styles.detected}>
+                  <Icon name="verified" size={14} fill />
+                  Tu régimen según SUNAT
+                </span>
+              )}
             </span>
           </label>
         )
@@ -67,7 +75,9 @@ export function RegimenPicker({ id, value, onChange, error, unavailable }: Regim
         </p>
       ) : (
         <p id={`${id}-help`} className={styles.help}>
-          En los tres pagas IGV de 18%. Si no sabes cuál es el tuyo, revísalo en SUNAT con tu Clave SOL o con tu contador.
+          {detected
+            ? 'Lo tomamos de tu ficha RUC en SUNAT: no tienes que elegirlo. Cámbialo solo si no coincide.'
+            : 'En los tres pagas IGV de 18%. Si no sabes cuál es el tuyo, revísalo en SUNAT con tu Clave SOL o con tu contador.'}
         </p>
       )}
     </fieldset>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
+import { ShimmerText } from '../components/AiText'
 import { Button } from '../components/Button'
 import { CreditCard } from '../components/Cards'
 import { Dialog } from '../components/Dialog'
@@ -14,12 +15,29 @@ import { TransactionRow } from '../components/Transactions'
 import { movementInsights } from '../data/insights'
 import { getSource } from '../data/sources'
 import { filterByAccount, getPeriod, getTransactions, periodLabel, totals } from '../data/selectors'
-import { formatDateTime } from '../lib/format'
+import { SYNC_EVERY_HOURS } from '../data/sync'
+import { formatAgo, formatDateTime } from '../lib/format'
 import { ease } from '../lib/motion'
 import { useApp } from '../state/context'
 import styles from './ConnectionDetail.module.css'
 
 type Tab = 'todo' | 'ingresos' | 'egresos'
+
+/** Hora actual que se renueva cada medio minuto (para "hace 5 min"). */
+function useNow(): number {
+  const [now, setNow] = useState(Date.now)
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 30_000)
+    return () => window.clearInterval(interval)
+  }, [])
+  return now
+}
+
+const AUTO_SYNC = {
+  icon: 'sync',
+  title: 'Sincronización automática',
+  detail: `Zenity lee esta cuenta cada ${SYNC_EVERY_HOURS} horas, sin que se lo pidas.`,
+}
 
 /** Detalle de una conexión (Figma: Single conection / Empty data). */
 export function ConnectionDetail() {
@@ -29,6 +47,7 @@ export function ConnectionDetail() {
   const [tab, setTab] = useState<Tab>('todo')
   const [confirm, setConfirm] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const now = useNow()
   const found = connections.find((c) => c.id === id)
   // Conserva la última conexión vista para que la pantalla salga animada tras eliminarla.
   const [lastSeen, setLastSeen] = useState(found)
@@ -45,7 +64,10 @@ export function ConnectionDetail() {
   const source = getSource(connection.sourceId)
   const settlesIn = source?.settlesIn
   // Las cuentas de ejemplo en Excel no vienen de una fuente, pero también se importan como Excel
-  const upload = (source ?? (connection.avatar === 'sheet' ? getSource('excel') : undefined))?.upload
+  const fileSource = source ?? (connection.avatar === 'sheet' ? getSource('excel') : undefined)
+  const upload = fileSource?.upload
+  const auto = fileSource?.autoImport ?? AUTO_SYNC
+  const syncing = !connection.syncedAt
   const [summary] = movementInsights(all, connections, connection.id, month, 'all')
   const insights = summary
     ? [{ ...summary, title: connection.id === 'tinbet' ? 'Cuenta Tinbet: ingresos estables de acuerdo a tu histórico' : summary.title }]
@@ -74,6 +96,26 @@ export function ConnectionDetail() {
           </p>
         )}
 
+        <section className={styles.autoSync} aria-label="Actualización automática">
+          <span className={styles.autoIcon}>
+            <Icon name={auto.icon} size={22} />
+          </span>
+          <span className={styles.autoText}>
+            <strong>{auto.title}</strong>
+            <span>{auto.detail}</span>
+            <span className={styles.autoStatus} aria-live="polite">
+              {connection.syncedAt ? (
+                <>
+                  <span className="fx-live-dot" aria-hidden />
+                  Actualizada {formatAgo(connection.syncedAt, now)}
+                </>
+              ) : (
+                <ShimmerText>Leyendo por primera vez…</ShimmerText>
+              )}
+            </span>
+          </span>
+        </section>
+
         <div className={styles.tabs}>
           <SegmentedTabs<Tab>
             label="Filtrar movimientos"
@@ -90,9 +132,10 @@ export function ConnectionDetail() {
         {empty ? (
           <div className={styles.empty}>
             <EmptyState
-              title="No encontramos datos"
-              description="La cuenta aún no tiene movimientos disponibles"
+              title={syncing ? 'Leyendo la cuenta…' : 'Aún no hay movimientos'}
+              description={syncing ? 'Zenity está trayendo tus movimientos' : 'Zenity los traerá sola en cuanto lleguen'}
               action={
+                // Opcional: Zenity no depende de esto, pero se puede adelantar
                 upload ? (
                   <>
                     <input
@@ -104,12 +147,12 @@ export function ConnectionDetail() {
                         if (event.target.files?.length) navigate('/analizando')
                       }}
                     />
-                    <Button icon="upload_file" onClick={() => fileRef.current?.click()}>
-                      {upload.label}
+                    <Button variant="text" icon="upload_file" onClick={() => fileRef.current?.click()}>
+                      Subir un archivo ahora
                     </Button>
                   </>
                 ) : (
-                  <Button icon="sync" to="/analizando">
+                  <Button variant="text" icon="sync" to="/analizando">
                     Sincronizar ahora
                   </Button>
                 )

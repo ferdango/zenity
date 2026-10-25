@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { ShimmerText } from '../components/AiText'
 import { Aurora } from '../components/Aurora'
@@ -24,6 +24,8 @@ const MAX_ATTEMPTS = 3
 const RESEND_SECONDS = 30
 /** Demora simulada hasta que llega el SMS o el correo */
 const ARRIVAL_MS = 1600
+/** Lo que se ve la notificación antes de que el código se escriba solo */
+const AUTOFILL_MS = 900
 const BANNER_MS = 6000
 const VERIFY_MS = 1100
 /** Celular de ejemplo si no se registró uno en esta sesión */
@@ -149,6 +151,32 @@ function OtpVerification(props: VerifyState) {
       verify(value)
     }, CODE_LENGTH * 110 + 220)
   }
+
+  // El código que llega se escribe solo, sin tocar nada: en producción lo lee el navegador (WebOTP)
+  const autofillOnArrival = useEffectEvent(autofill)
+  useEffect(() => {
+    if (!delivered) return
+    const timer = window.setTimeout(autofillOnArrival, AUTOFILL_MS)
+    return () => window.clearTimeout(timer)
+  }, [delivered, expected])
+
+  // WebOTP: en Android, Chrome entrega el código del SMS apenas llega (el SMS termina en
+  // "@dominio #código"). En el prototipo no llega un SMS real: el código simulado sigue el camino de arriba.
+  const receiveSms = useEffectEvent((otp: string) => onCodeChange(otp.slice(0, CODE_LENGTH)))
+  useEffect(() => {
+    if (via !== 'google' || !('OTPCredential' in window)) return
+    const abort = new AbortController()
+    navigator.credentials
+      .get({ otp: { transport: ['sms'] }, signal: abort.signal } as CredentialRequestOptions)
+      .then((credential) => {
+        const otp = (credential as { code?: string } | null)?.code
+        if (otp) receiveSms(otp)
+      })
+      .catch(() => {
+        /* cancelado o no disponible: queda el código simulado o el teclado */
+      })
+    return () => abort.abort()
+  }, [via])
 
   const resend = () => {
     if (resending || busy) return
@@ -321,7 +349,7 @@ function OtpVerification(props: VerifyState) {
         </motion.div>
 
         <motion.p className={styles.legal} variants={fadeUp}>
-          Prototipo de demostración: el código llega en una notificación simulada.
+          Prototipo de demostración: el código llega en una notificación simulada y se completa solo.
         </motion.p>
       </motion.div>
 

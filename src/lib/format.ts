@@ -80,6 +80,17 @@ export function formatDayMonthShort(iso: string): string {
   return `${d} ${MONTHS_SHORT[m - 1].toLowerCase()}`
 }
 
+/** Tiempo desde una fecha ISO: "hace un momento", "hace 5 min", "hace 2 h", "hace 3 días". */
+export function formatAgo(iso: string, now: number): string {
+  const minutes = Math.max(0, Math.floor((now - Date.parse(iso)) / 60_000))
+  if (minutes < 1) return 'hace un momento'
+  if (minutes < 60) return `hace ${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `hace ${hours} h`
+  const days = Math.floor(hours / 24)
+  return days === 1 ? 'ayer' : `hace ${days} días`
+}
+
 /** "1988-05-12" → "12 de mayo de 1988" */
 export function formatLongDate(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number)

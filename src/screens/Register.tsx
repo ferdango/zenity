@@ -19,8 +19,9 @@ import {
 } from '../components/Registry'
 import { TextField } from '../components/TextField'
 import { TopBar } from '../components/TopBar'
-import { consultarDni, type ReniecPerson } from '../data/registry'
-import { rerUnavailable } from '../data/sire'
+import { businessFromCompany } from '../data/businesses'
+import { consultarDni, type ReniecPerson, type SunatCompany } from '../data/registry'
+import { buildSire, ingresoMinimoMensual, rerUnavailable } from '../data/sire'
 import { formatDate, maskWords } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useFocusOnEnter } from '../lib/useFocusOnEnter'
@@ -416,6 +417,12 @@ export function RegisterPersonal() {
 
 const INCOME_PRESETS = [5000, 10000, 30000, 50000, 100000]
 
+/** Ingreso mínimo según las ventas del SIRE del RUC (con la escala con la que quedará registrado). */
+function ingresoDesdeSire(company: SunatCompany): string {
+  const business = { ...businessFromCompany(company, '', company.regimen, 0), scale: 1 }
+  return formatAmountInput(String(ingresoMinimoMensual(buildSire(business))))
+}
+
 /** Paso 2: RUC (consulta a SUNAT) y datos de la empresa. */
 export function RegisterCompany() {
   const navigate = useNavigate()
@@ -425,12 +432,22 @@ export function RegisterCompany() {
   const [values, setValues] = useState<CompanyData>(registration.company)
   const [touched, setTouched] = useState<Touched<CompanyData>>({})
   const [autofilled, setAutofilled] = useState(false)
+  /** El ingreso mínimo sigue siendo el calculado con el SIRE (no lo cambió el usuario) */
+  const [incomeFromSire, setIncomeFromSire] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const { company, verified, searching, notFound, error: rucError, state: lookup } = useRucLookup(values.ruc, {
     initial: registration.sunat,
+    // SUNAT también trae el régimen y las ventas: el usuario no tiene que escribirlos
     onFound: (found) => {
       setAutofilled(true)
-      setValues((v) => ({ ...v, razonSocial: found.razonSocial, nombreComercial: found.nombreComercial ?? '' }))
+      setIncomeFromSire(true)
+      setValues((v) => ({
+        ...v,
+        razonSocial: found.razonSocial,
+        nombreComercial: found.nombreComercial ?? '',
+        ingresoMinimo: ingresoDesdeSire(found),
+        regimen: found.regimen,
+      }))
     },
   })
 
@@ -587,10 +604,20 @@ export function RegisterCompany() {
                   inputMode="numeric"
                   prefix="S/"
                   value={values.ingresoMinimo}
+                  autofilled={incomeFromSire}
                   error={show('ingresoMinimo')}
                   valid={touched.ingresoMinimo && !errors.ingresoMinimo}
-                  helper={show('ingresoMinimo') ? undefined : 'Lo mínimo que factura tu empresa en un mes'}
-                  onChange={(event) => setValues((v) => ({ ...v, ingresoMinimo: formatAmountInput(event.target.value) }))}
+                  helper={
+                    show('ingresoMinimo')
+                      ? undefined
+                      : incomeFromSire
+                        ? 'Tu mes con menos ventas en el SIRE (últimos 6 meses)'
+                        : 'Lo mínimo que factura tu empresa en un mes'
+                  }
+                  onChange={(event) => {
+                    setIncomeFromSire(false)
+                    setValues((v) => ({ ...v, ingresoMinimo: formatAmountInput(event.target.value) }))
+                  }}
                   onBlur={() => setTouched((t) => ({ ...t, ingresoMinimo: true }))}
                 />
               </motion.div>
@@ -603,6 +630,7 @@ export function RegisterCompany() {
                       selected={values.ingresoMinimo === formatted}
                       showCheck
                       onClick={() => {
+                        setIncomeFromSire(false)
                         setValues((v) => ({ ...v, ingresoMinimo: formatted }))
                         setTouched((t) => ({ ...t, ingresoMinimo: true }))
                       }}
@@ -620,6 +648,7 @@ export function RegisterCompany() {
               <motion.div variants={fadeUp}>
                 <RegimenPicker
                   id="company-regimen"
+                  detected={company.regimen}
                   value={values.regimen}
                   error={show('regimen')}
                   unavailable={rerReason ? { rer: rerReason } : undefined}

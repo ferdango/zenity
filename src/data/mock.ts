@@ -22,6 +22,8 @@ export interface Connection {
   avatar: AvatarKind
   /** Fuente de conexión (para conexiones creadas desde "Nueva cuenta") */
   sourceId?: string
+  /** Última sincronización automática (ISO); sin valor, todavía no se sincroniza */
+  syncedAt?: string
 }
 
 export const USER = {
@@ -154,19 +156,27 @@ export const DEFAULT_PERIOD = '2026-03'
 
 /* ── Movimientos por revisar (sin categoría) ──────────────────── */
 
+/**
+ * Movimiento que llegó sin categoría. Zenity aplica sola su recomendación, sin esperar al
+ * usuario; la confianza y el motivo quedan a la vista por si quiere cambiarla.
+ */
 export interface PendingTransaction extends Omit<Transaction, 'category'> {
   recommended: CategoryId
+  /** Confianza de la IA en la recomendación (0–100) */
+  confidence: number
+  /** Por qué la eligió */
+  reason: string
 }
 
 export const PENDING_TRANSACTIONS: PendingTransaction[] = [
-  { id: 'p1', accountId: 'tarjeta-1789', title: 'Transferencia · J. Ramírez', amount: 385, date: '2026-03-29T10:12', recommended: 'recurrentes', operation: '0097873323', origin: '1910898773626893', destination: '4557880011221789' },
-  { id: 'p2', accountId: 'negocio-retail', title: 'Pago con QR · Bodega San Martín', amount: -64.5, date: '2026-03-29T08:40', recommended: 'operaciones', operation: '0097873360', origin: '1910455120983317', destination: '1910700012345678' },
-  { id: 'p3', accountId: 'negocio-retail', title: 'Abono · PedidosYa', amount: 212.8, date: '2026-03-28T23:05', recommended: 'ventas', operation: '0097873349', origin: '1910123498761234', destination: '1910455120983317' },
-  { id: 'p4', accountId: 'locales-nacional', title: 'Fila 214 · Proveedor sin nombre', amount: -480, date: '2026-03-28T12:00', recommended: 'operaciones', operation: 'XLS-000214', origin: 'Hoja «Compras»', destination: 'Proveedor desconocido' },
-  { id: 'p5', accountId: 'tarjeta-1789', title: 'Cargo recurrente · Spotify', amount: -22.9, date: '2026-03-27T07:00', recommended: 'personal', operation: '0097873280', origin: '4557880011221789', destination: '4000111122223333' },
-  { id: 'p6', accountId: 'tinbet', title: 'Compra · Plaza Vea', amount: -156.3, date: '2026-03-26T19:18', recommended: 'gastos', operation: '0097873050', origin: '5412750033445032', destination: '1910555566667777' },
-  { id: 'p7', accountId: 'tinbet', title: 'Compra · Sodimac', amount: -389.9, date: '2026-03-25T17:44', recommended: 'operaciones', operation: '0097872980', origin: '5412750033445032', destination: '1910888899990000' },
-  { id: 'p8', accountId: 'tarjeta-1789', title: 'Abono · Mercado Pago', amount: 145, date: '2026-03-24T15:31', recommended: 'cobros', operation: '0097872911', origin: '1910246813579135', destination: '4557880011221789' },
+  { id: 'p1', accountId: 'tarjeta-1789', title: 'Transferencia · J. Ramírez', amount: 385, date: '2026-03-29T10:12', recommended: 'recurrentes', confidence: 64, reason: 'Mismo monto que recibes de J. Ramírez cada mes', operation: '0097873323', origin: '1910898773626893', destination: '4557880011221789' },
+  { id: 'p2', accountId: 'negocio-retail', title: 'Pago con QR · Bodega San Martín', amount: -64.5, date: '2026-03-29T08:40', recommended: 'operaciones', confidence: 82, reason: 'Pagos con QR a bodegas: compras del negocio', operation: '0097873360', origin: '1910455120983317', destination: '1910700012345678' },
+  { id: 'p3', accountId: 'negocio-retail', title: 'Abono · PedidosYa', amount: 212.8, date: '2026-03-28T23:05', recommended: 'ventas', confidence: 95, reason: 'PedidosYa abona tus ventas por delivery', operation: '0097873349', origin: '1910123498761234', destination: '1910455120983317' },
+  { id: 'p4', accountId: 'locales-nacional', title: 'Fila 214 · Proveedor sin nombre', amount: -480, date: '2026-03-28T12:00', recommended: 'operaciones', confidence: 58, reason: 'La fila está en la hoja «Compras», sin proveedor', operation: 'XLS-000214', origin: 'Hoja «Compras»', destination: 'Proveedor desconocido' },
+  { id: 'p5', accountId: 'tarjeta-1789', title: 'Cargo recurrente · Spotify', amount: -22.9, date: '2026-03-27T07:00', recommended: 'personal', confidence: 97, reason: 'Cargo de Spotify igual al de cada mes', operation: '0097873280', origin: '4557880011221789', destination: '4000111122223333' },
+  { id: 'p6', accountId: 'tinbet', title: 'Compra · Plaza Vea', amount: -156.3, date: '2026-03-26T19:18', recommended: 'gastos', confidence: 86, reason: 'Compras en supermercados van a gastos', operation: '0097873050', origin: '5412750033445032', destination: '1910555566667777' },
+  { id: 'p7', accountId: 'tinbet', title: 'Compra · Sodimac', amount: -389.9, date: '2026-03-25T17:44', recommended: 'operaciones', confidence: 79, reason: 'Ferretería: insumos y mantenimiento del local', operation: '0097872980', origin: '5412750033445032', destination: '1910888899990000' },
+  { id: 'p8', accountId: 'tarjeta-1789', title: 'Abono · Mercado Pago', amount: 145, date: '2026-03-24T15:31', recommended: 'cobros', confidence: 91, reason: 'Mercado Pago abona cobros de tus clientes', operation: '0097872911', origin: '1910246813579135', destination: '4557880011221789' },
 ]
 
 /* ── Insights de IA ─────────────────────────────────────────── */
@@ -197,7 +207,7 @@ export const HOME_INSIGHTS: Insight[] = [
       { neg: 'S/ 3,895' },
       ' en egresos.',
     ],
-    note: 'Para ver un balance actualizado, importa el Excel al día de hoy.',
+    note: 'Zenity vuelve a leer el Excel cada vez que lo guardas: el balance siempre está al día.',
   },
   {
     id: 'i-api',
@@ -233,9 +243,11 @@ export interface Source {
   avatar?: AvatarKind
   /** Cuenta donde se abonan los cobros de la billetera */
   settlesIn?: string
-  /** Archivo que se importa desde el detalle de la conexión (Excel, PDF) */
+  /** Archivo que se puede subir a mano desde el detalle de la conexión (Excel, PDF) */
   upload?: { label: string; accept: string }
-  /** Simula credenciales inválidas para mostrar el estado de error */
+  /** Cómo Zenity trae el archivo sola, sin que el usuario lo vuelva a subir */
+  autoImport?: { icon: string; title: string; detail: string }
+  /** Simula una falla pasajera: el primer intento falla y Zenity reintenta sola */
   simulateError?: boolean
   theme: CardTheme
 }
@@ -251,8 +263,9 @@ export const SOURCE_FILTERS: Array<{ id: 'all' | SourceKind; label: string }> = 
 /* ── Notificaciones ─────────────────────────────────────────── */
 
 export const NOTIFICATIONS = [
-  { id: 'n1', icon: 'auto_awesome', title: 'Tienes 8 movimientos por revisar', time: 'Hace 2 min', tone: 'ai' as const },
+  { id: 'n1', icon: 'auto_awesome', title: 'Zenity clasificó 8 movimientos por ti', time: 'Hace 2 min', tone: 'ai' as const },
   { id: 'n2', icon: 'task_alt', title: 'El cobro de Andina SAC fue conciliado', time: 'Hace 1 h', tone: 'positive' as const },
+  { id: 'n5', icon: 'summarize', title: 'Tu reporte de marzo está listo', time: 'Hace 3 h', tone: 'ai' as const },
   { id: 'n3', icon: 'warning', title: 'Comercial subió 32% vs. febrero', time: 'Ayer', tone: 'warning' as const },
   { id: 'n4', icon: 'account_balance', title: 'Ya puedes conectar BBVA Perú', time: 'Hace 2 días', tone: 'neutral' as const },
 ]
@@ -264,10 +277,10 @@ export const FAQ = [
   },
   {
     q: '¿Cómo clasifica la IA mis transacciones?',
-    a: 'Analiza el comercio, el monto y tu historial. Cuando no está segura, te pide revisar y aprende de tus correcciones.',
+    a: 'Analiza el comercio, el monto y tu historial, y clasifica todo sin que hagas nada. Si no está segura, igual aplica su mejor opción y te deja cambiarla; aprende de cada cambio.',
   },
   {
     q: '¿Puedo conectar un Excel o un PDF?',
-    a: 'Sí. Puedes importar Excel o PDF, o sincronizar Google Sheets desde «Nueva cuenta».',
+    a: 'Sí, desde «Nueva cuenta». Zenity vuelve a leer tu Excel o tu Google Sheets cada vez que cambian, y toma de tu correo los estados de cuenta en PDF que te envía el banco.',
   },
 ]

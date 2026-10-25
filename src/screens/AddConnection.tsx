@@ -19,14 +19,17 @@ import styles from './AddConnection.module.css'
 
 const STEPS = ['Estableciendo conexión segura', 'Validando credenciales', 'Sincronizando cuentas']
 const WALLET_STEPS = ['Estableciendo conexión segura', 'Validando el celular del negocio', 'Sincronizando cobros']
+const RETRY_STEP = 'Falló el primer intento: Zenity reintenta sola'
+const RETRY_MS = 1800
 
-/** Fuentes que ya mostraron el error simulado: el reintento sí conecta. */
+/** Fuentes que ya simularon su falla pasajera: las siguientes conexiones salen al primer intento. */
 const failedOnce = new Set<string>()
 
 function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: () => void }) {
   const navigate = useNavigate()
   const { addConnection } = useApp()
   const [step, setStep] = useState(0)
+  const [retrying, setRetrying] = useState(false)
   const [current, setCurrent] = useState(source)
   const cancelled = useRef(false)
 
@@ -34,25 +37,30 @@ function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: 
   if (source !== current) {
     setCurrent(source)
     setStep(0)
+    setRetrying(false)
   }
 
   useEffect(() => {
     if (!source) return
     cancelled.current = false
+    // Una falla pasajera no llega al usuario: Zenity reintenta sola antes de mostrar un error
+    const fails = Boolean(source.simulateError) && !failedOnce.has(source.id)
+    const connect = () => {
+      if (cancelled.current) return
+      const connection = addConnection(source.id)
+      navigate(`/conexiones/resultado?estado=exito&fuente=${source.id}&cuenta=${connection?.id ?? ''}`)
+    }
     const timers = [
       window.setTimeout(() => setStep(1), 900),
       window.setTimeout(() => setStep(2), 1800),
       window.setTimeout(() => {
-        if (cancelled.current) return
-        if (source.simulateError && !failedOnce.has(source.id)) {
-          failedOnce.add(source.id)
-          navigate(`/conexiones/resultado?estado=error&fuente=${source.id}`)
-          return
-        }
-        const connection = addConnection(source.id)
-        navigate(`/conexiones/resultado?estado=exito&fuente=${source.id}&cuenta=${connection?.id ?? ''}`)
+        if (!fails) return connect()
+        failedOnce.add(source.id)
+        setRetrying(true)
+        setStep(3)
       }, 2800),
     ]
+    if (fails) timers.push(window.setTimeout(connect, 2800 + RETRY_MS))
     return () => timers.forEach(window.clearTimeout)
   }, [source, navigate, addConnection])
 
@@ -72,7 +80,7 @@ function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: 
           <h2 className="t-headline-s">Conectando con {source.name}</h2>
           <ShimmerText className="t-body-m">Zenity está preparando tu consolidado…</ShimmerText>
           <ul className={styles.steps} aria-live="polite">
-            {(source.kind === 'wallet' ? WALLET_STEPS : STEPS).map((label, i) => {
+            {[...(source.kind === 'wallet' ? WALLET_STEPS : STEPS), ...(retrying ? [RETRY_STEP] : [])].map((label, i) => {
               const state = i < step ? 'done' : i === step ? 'active' : 'pending'
               return (
                 <li key={label} className={styles.step} data-state={state}>

@@ -54,15 +54,24 @@
 
 .intro {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  margin: 4px var(--z-gutter) 8px;
+  margin: 4px var(--z-gutter) 16px;
   padding: 12px 16px;
   border-radius: var(--z-radius-xl);
   background: color-mix(in srgb, var(--z-purple) 12%, var(--z-surface));
   font-size: 0.875rem;
   line-height: 1.25rem;
   color: var(--z-on-surface-variant);
+}
+
+.intro > :first-child {
+  flex-shrink: 0;
+}
+
+.introTitle {
+  font-weight: 500;
+  color: var(--z-on-surface);
 }
 
 /* «¿Es el mismo movimiento?» */
@@ -144,6 +153,7 @@
   font-size: 0.8125rem;
   color: var(--z-on-surface-low);
   min-width: 0;
+  overflow: hidden;
 }
 
 .tag {
@@ -162,6 +172,41 @@
 .amount {
   font-size: 1rem;
   font-weight: 500;
+}
+
+/* Quién eligió la categoría: Zenity (con su confianza) o el usuario */
+.decidedBy {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.decidedBy[data-tone='low'] {
+  color: var(--z-warning);
+}
+
+.decidedBy[data-tone='user'] {
+  color: var(--z-primary);
+}
+
+/* Por qué Zenity eligió la categoría */
+.why {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.why > :first-child {
+  flex-shrink: 0;
+}
+
+.why strong {
+  font-weight: 500;
+  color: var(--z-on-surface);
 }
 
 .panel {
@@ -205,14 +250,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-}
-
-.suggestHead {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
 }
 
 .chips {

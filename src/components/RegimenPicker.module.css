@@ -115,6 +115,15 @@
   color: var(--z-warning);
 }
 
+.detected {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--z-primary);
+}
+
 .help,
 .error {
   display: flex;

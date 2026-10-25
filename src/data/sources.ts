@@ -79,6 +79,11 @@ export const SOURCES: Source[] = [
     kind: 'file',
     logo: { type: 'image', src: excel },
     upload: { label: 'Importar Excel', accept: '.xlsx,.xls,.csv' },
+    autoImport: {
+      icon: 'cloud_sync',
+      title: 'Se lee desde tu nube',
+      detail: 'Zenity abre el Excel desde OneDrive o Google Drive cada vez que lo guardas.',
+    },
     theme: 'green',
   },
   {
@@ -87,6 +92,11 @@ export const SOURCES: Source[] = [
     description: 'Sincroniza tus hojas de cálculo de Google con Zenity',
     kind: 'file',
     logo: { type: 'image', src: googleSheets },
+    autoImport: {
+      icon: 'sync',
+      title: 'Sincronizada con Google',
+      detail: 'Cada cambio en la hoja llega a Zenity en minutos.',
+    },
     theme: 'green',
   },
   {
@@ -97,6 +107,11 @@ export const SOURCES: Source[] = [
     logo: { type: 'icon', icon: 'picture_as_pdf', tile: '#e5322d' },
     avatar: 'pdf',
     upload: { label: 'Importar PDF', accept: '.pdf' },
+    autoImport: {
+      icon: 'forward_to_inbox',
+      title: 'Se toma de tu correo',
+      detail: 'Zenity busca los estados de cuenta que te envía tu banco y los importa apenas llegan.',
+    },
     theme: 'slate',
   },
 ]
