@@ -52,8 +52,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   /** Movimientos ya categorizados, por negocio */
   const [reviewed, setReviewed] = useState<Record<string, string[]>>({})
   const [categorized, setCategorized] = useState<Record<string, CategoryId>>({})
-  /** Pares ya conciliados o separados, por negocio */
-  const [resolved, setResolved] = useState<Record<string, string[]>>({})
+  /** Respuestas aplicadas a los pares por conciliar, por negocio */
+  const [resolved, setResolved] = useState<Record<string, Record<string, MatchChoice>>>({})
   const [matchChoices, setMatchChoices] = useState<Record<string, MatchChoice>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -65,14 +65,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const business = businesses.find((b) => b.id === activeId) ?? businesses[0]
   const businessId = business.id
   const connections = business.connections
-  const ledger = useMemo(() => buildLedger(business), [business])
+  const ledger = useMemo(() => buildLedger(business, resolved[business.id]), [business, resolved])
   const pending = useMemo(() => {
     const done = reviewed[businessId] ?? []
     return ledger.pending.filter((p) => !done.includes(p.id))
   }, [ledger, reviewed, businessId])
   const matches = useMemo(() => {
-    const done = resolved[businessId] ?? []
-    return ledger.matches.filter((m) => !done.includes(m.id))
+    const done = resolved[businessId] ?? {}
+    return ledger.matches.filter((m) => !(m.id in done))
   }, [ledger, resolved, businessId])
 
   useEffect(() => writeStorage(BUSINESSES_KEY, businesses), [businesses])
@@ -217,7 +217,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const same = matchIds.filter((id) => matchChoices[id] === 'same').length
     const different = matchIds.length - same
     setReviewed((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...ids] }))
-    setResolved((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...matchIds] }))
+    setResolved((prev) => ({ ...prev, [businessId]: { ...prev[businessId], ...matchChoices } }))
     setCategorized({})
     setMatchChoices({})
     track('movimientos_revisados', { cantidad: ids.length, unidos: same, separados: different })

@@ -1,5 +1,5 @@
 import type { Business } from './businesses'
-import { BASE_MATCHES, type MatchCandidate, walletMatches } from './matches'
+import { BASE_MATCHES, type MatchCandidate, type MatchChoice, matchTransactions, walletMatches } from './matches'
 import {
   BASE_TRANSACTIONS,
   HOME_INSIGHTS,
@@ -33,7 +33,28 @@ const BASE_ACCOUNTS = ['negocio-retail', 'tarjeta-1789', 'tinbet', 'locales-naci
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
-export function buildLedger(business: Business): Ledger {
+/**
+ * Libro del negocio con los pares por conciliar aplicados: cada par suma su lado de dinero una
+ * vez, o los dos lados si el usuario respondió que son movimientos distintos.
+ */
+export function buildLedger(business: Business, decisions: Record<string, MatchChoice> = {}): Ledger {
+  const ledger = baseLedger(business)
+  const extra = matchTransactions(ledger.matches, decisions)
+  if (extra.length === 0) return ledger
+
+  const ingresos = extra.reduce((acc, t) => (t.amount > 0 ? acc + t.amount : acc), 0)
+  const egresos = extra.reduce((acc, t) => (t.amount < 0 ? acc - t.amount : acc), 0)
+  const last = ledger.periods.length - 1
+  return {
+    ...ledger,
+    base: [...ledger.base, ...extra],
+    periods: ledger.periods.map((p, i) =>
+      i === last ? { ...p, ingresos: round2(p.ingresos + ingresos), egresos: round2(p.egresos + egresos) } : p,
+    ),
+  }
+}
+
+function baseLedger(business: Business): Ledger {
   const { connections } = business
   if (connections.length === 0) {
     return {
