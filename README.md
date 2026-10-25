@@ -50,7 +50,7 @@ npm run lint      # oxlint
 | Add new connection | `/conexiones/nueva` | Búsqueda, filtros y conexión animada a bancos, APIs, bases de datos y archivos |
 | Conection added / error | `/conexiones/resultado` | Éxito o error con nube animada. *API externa* falla la primera vez y Zenity **reintenta sola**: el error solo se muestra si fallan los reintentos |
 | Loading (×4) | `/analizando` | Análisis con IA en 4 pasos con progreso |
-| No-categorized (×4) | `/revisar` | **Revisado por Zenity**: los movimientos que Zenity clasificó y los pares que concilió sola, con su confianza y su motivo. Se puede cambiar cualquier decisión con un toque (se aplica al instante) y "Enséñame cómo identificarlo" |
+| No-categorized (×4) | `/revisar` | **Revisado por Zenity**: los movimientos que Zenity clasificó y los pares que concilió sola, con su confianza y su motivo. Ya suman en los totales del mes. Se puede cambiar cualquier decisión con un toque (se aplica al instante) y "Enséñame cómo identificarlo" |
 | Single account / Incomes / Expenses | `/movimientos/todo` · `/ingresos` · `/egresos` | Selector de cuenta, métricas, insights, categorías con transacciones y búsqueda |
 | Resume | `/resumen` | Balance total y gráfico de barras interactivo por mes |
 | Chat | `/chat` | Chat con Zenity: sugerencias, respuestas que se escriben en vivo, tablas, adjuntos y dictado por voz |
@@ -71,7 +71,7 @@ Zenity no espera a que el usuario actúe para que sus números estén bien. Esto
 
 | # | Paso manual (antes) | Dónde | Qué hace Zenity ahora (prototipo) | Cómo sería en producción |
 | --- | --- | --- | --- | --- |
-| 1 | Elegir la categoría de cada movimiento "Sin categoría" y tocar **Aplicar** | `/revisar` | Aplica sola la categoría recomendada, con su **confianza** y su **motivo**. Las de confianza baja (menos de 70 %) se marcan, pero igual se aplican. Cambiar una categoría se aplica al instante | Cascada reglas del RUC → similitud con `pgvector` → Claude Haiku/Sonnet: todo se clasifica en el worker de ingesta; las correcciones alimentan las reglas |
+| 1 | Elegir la categoría de cada movimiento "Sin categoría" y tocar **Aplicar** | `/revisar` | Aplica sola la categoría recomendada, con su **confianza** y su **motivo**, y el movimiento **suma en los totales del mes**. Las de confianza baja (menos de 70 %) se marcan, pero igual se aplican. Cambiar una categoría se aplica al instante | Cascada reglas del RUC → similitud con `pgvector` → Claude Haiku/Sonnet: todo se clasifica en el worker de ingesta; las correcciones alimentan las reglas |
 | 2 | Responder "¿Es el mismo movimiento?" para cada par | `/revisar` | Concilia sola: desde **75 % de coincidencia** une el par (cuenta una vez); por debajo, los deja separados. Se puede corregir con un toque | Mismo umbral en el worker de conciliación, con mismo comprobante, monto, fecha (±1 día) y contraparte |
 | 3 | Tocar **Ver cuenta** o **Sincronizar ahora** para que una cuenta nueva tenga saldo | Resultado de conexión, `/conexion/:id` | Toda conexión se **sincroniza sola** apenas se agrega y vuelve a leerse **cada 6 horas** (al abrir la app y mientras está abierta), en todos los negocios. El detalle muestra "Actualizada hace…" | EventBridge Scheduler + SQS: una tarea por conexión cada 6 h (y webhooks del banco o agregador cuando existan) |
 | 4 | Volver a subir el Excel o el PDF para tener el balance al día | `/conexion/:id`, insight del inicio | Cada archivo tiene su **importación automática**: Excel desde OneDrive/Google Drive, Google Sheets sincronizado y PDF tomado del correo. Subir a mano queda como opción | Microsoft Graph / Google Drive con notificaciones de cambios; lectura del correo (solo lectura) filtrando los estados de cuenta del banco |
@@ -117,6 +117,7 @@ El fondo gris neutro (`#131314`) con tiles verde y naranja al 18 % producía ton
 ## Cambios respecto al Figma
 
 - Números de ejemplo consistentes: los totales se calculan desde las transacciones (en el Figma, por ejemplo, Ingresos 1,890.20 − Egresos 890.20 mostraba Total 890.20).
+- Marzo suma los 8 movimientos que Zenity clasificó sola: Andes Market cierra con ingresos de S/ 2,633.00, egresos de S/ 2,003.80 y utilidad de S/ 629.20 (sin ellos eran S/ 1,890.20, S/ 890.20 y S/ 1,000.00). Los insights fijos del Figma se actualizaron con esas cifras y la alerta de egresos y los cobros conciliados se calculan con los datos.
 - Moneda unificada en soles (`S/`) y ortografía corregida («¿No tienes una cuenta?», «Regístrate», «¡Genial!», «¿Por dónde empezamos?»…). El texto «Carty» de las fuentes de conexión pasó a «Zenity».
 - Se implementaron las notas del diseño: insights rápidos de **Ingresos** (fuente principal, cuenta con más ingresos, variación, cobros conciliados) y de **Egresos** (alerta, categoría dominante, cuenta con más salidas, operativo vs. comercial, devoluciones).
 - Vista de escritorio con barra lateral y contenido en columnas.
