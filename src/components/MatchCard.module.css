@@ -40,6 +40,20 @@
   color: var(--z-warning);
 }
 
+/* Quién decidió: Zenity (automático) o el usuario */
+.decidedBy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--z-on-surface-variant);
+}
+
+.decidedBy[data-auto='false'] {
+  color: var(--z-primary);
+}
+
 /* Dos movimientos unidos por una línea entre sus avatares */
 .legs {
   display: grid;

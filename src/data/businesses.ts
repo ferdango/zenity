@@ -1,5 +1,5 @@
 import { type Connection, INITIAL_CONNECTIONS } from './mock'
-import { type SunatCompany, seeded } from './registry'
+import { regimenFromRuc, type SunatCompany, seeded } from './registry'
 import type { Regimen } from './sire'
 
 /**
@@ -122,11 +122,10 @@ export function businessFromCompany(company: SunatCompany, nombreComercial: stri
 const REGIMENES_VALIDOS: readonly string[] = ['general', 'rmt', 'rer']
 
 /**
- * Negocios guardados antes de que el registro pidiera el régimen: se les asigna el que
- * ya mostraba el demo para ese RUC, así sus impuestos no cambian.
+ * Negocios guardados antes de que el registro pidiera el régimen: se les asigna el de su
+ * ficha RUC (el mismo que ya mostraba el demo), así sus impuestos no cambian.
  */
 export function withRegimen(business: Business): Business {
   if (REGIMENES_VALIDOS.includes(business.regimen)) return business
-  const r = seeded(`regimen-tributario:${business.ruc}`)()
-  return { ...business, regimen: r < 0.6 ? 'rmt' : r < 0.85 ? 'rer' : 'general' }
+  return { ...business, regimen: regimenFromRuc(business.ruc) }
 }

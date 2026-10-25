@@ -1,14 +1,24 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Business, DEMO_BUSINESSES, businessFromCompany, withRegimen } from '../data/businesses'
 import { buildLedger } from '../data/ledger'
-import type { MatchChoice } from '../data/matches'
+import { autoChoice, type MatchChoice } from '../data/matches'
 import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, type SourceKind, USER } from '../data/mock'
 import type { SunatCompany } from '../data/registry'
 import type { Regimen } from '../data/sire'
 import { getSource } from '../data/sources'
+import { FIRST_SYNC_MS, isNew, isStale, SYNC_CHECK_MS, synced } from '../data/sync'
 import { track } from '../lib/analytics'
 import { readStorage, writeStorage } from '../lib/storage'
-import { type AppState, AppStateContext, type Profile, type Registration, type SheetName, type Toast } from './context'
+import {
+  type AppState,
+  AppStateContext,
+  type ClassifiedMovement,
+  type Profile,
+  type ReconciledMatch,
+  type Registration,
+  type SheetName,
+  type Toast,
+} from './context'
 
 const HIDE_KEY = 'zenity.hideBalances'
 const PROFILE_KEY = 'zenity.profile'
@@ -49,12 +59,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [periodKey, setPeriodKey] = useState(DEFAULT_PERIOD)
   const [businesses, setBusinesses] = useState<Business[]>(loadBusinesses)
   const [activeId, setActiveId] = useState(() => readStorage(ACTIVE_BUSINESS_KEY, ''))
-  /** Movimientos ya categorizados, por negocio */
-  const [reviewed, setReviewed] = useState<Record<string, string[]>>({})
-  const [categorized, setCategorized] = useState<Record<string, CategoryId>>({})
-  /** Respuestas aplicadas a los pares por conciliar, por negocio */
-  const [resolved, setResolved] = useState<Record<string, Record<string, MatchChoice>>>({})
-  const [matchChoices, setMatchChoices] = useState<Record<string, MatchChoice>>({})
+  /** Categorías que el usuario cambió, por negocio (las demás las decide Zenity) */
+  const [categoryOverrides, setCategoryOverrides] = useState<Record<string, Record<string, CategoryId>>>({})
+  /** Pares que el usuario corrigió, por negocio (los demás los concilia Zenity) */
+  const [matchOverrides, setMatchOverrides] = useState<Record<string, Record<string, MatchChoice>>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sheet, setSheet] = useState<SheetName>(null)
@@ -65,18 +73,48 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const business = businesses.find((b) => b.id === activeId) ?? businesses[0]
   const businessId = business.id
   const connections = business.connections
-  const ledger = useMemo(() => buildLedger(business, resolved[business.id]), [business, resolved])
-  const pending = useMemo(() => {
-    const done = reviewed[businessId] ?? []
-    return ledger.pending.filter((p) => !done.includes(p.id))
-  }, [ledger, reviewed, businessId])
-  const matches = useMemo(() => {
-    const done = resolved[businessId] ?? {}
-    return ledger.matches.filter((m) => !(m.id in done))
-  }, [ledger, resolved, businessId])
+  const ledger = useMemo(() => buildLedger(business, matchOverrides[business.id]), [business, matchOverrides])
+  // Piloto automático: cada movimiento lleva la categoría recomendada y cada par la decisión de
+  // Zenity, salvo que el usuario las haya cambiado. Nada queda esperando una respuesta.
+  const classified = useMemo<ClassifiedMovement[]>(() => {
+    const own = categoryOverrides[businessId] ?? {}
+    return ledger.pending.map((p) => ({ ...p, category: own[p.id] ?? p.recommended, auto: !(p.id in own) }))
+  }, [ledger, categoryOverrides, businessId])
+  const reconciled = useMemo<ReconciledMatch[]>(() => {
+    const own = matchOverrides[businessId] ?? {}
+    return ledger.matches.map((match) => ({ match, choice: own[match.id] ?? autoChoice(match), auto: !(match.id in own) }))
+  }, [ledger, matchOverrides, businessId])
 
   useEffect(() => writeStorage(BUSINESSES_KEY, businesses), [businesses])
   useEffect(() => writeStorage(ACTIVE_BUSINESS_KEY, businessId), [businessId])
+
+  /** Lee las conexiones que cumplen `due`, en todos los negocios. */
+  const syncWhere = useCallback((due: (connection: Connection, now: number) => boolean) => {
+    const now = Date.now()
+    setBusinesses((list) =>
+      list.some((b) => b.connections.some((c) => due(c, now)))
+        ? list.map((b) => ({ ...b, connections: b.connections.map((c) => (due(c, now) ? synced(c, now) : c)) }))
+        : list,
+    )
+  }, [])
+
+  // Sincronización automática: una conexión nueva se lee apenas se agrega...
+  const unsynced = businesses.flatMap((b) => b.connections.filter(isNew).map((c) => c.id)).join()
+  useEffect(() => {
+    if (!unsynced) return
+    const timer = window.setTimeout(() => syncWhere(isNew), FIRST_SYNC_MS)
+    return () => window.clearTimeout(timer)
+  }, [unsynced, syncWhere])
+
+  // ...y todas vuelven a leerse cada 6 horas: al abrir la app y mientras sigue abierta
+  useEffect(() => {
+    const onOpen = window.setTimeout(() => syncWhere(isStale), FIRST_SYNC_MS)
+    const interval = window.setInterval(() => syncWhere(isStale), SYNC_CHECK_MS)
+    return () => {
+      window.clearTimeout(onOpen)
+      window.clearInterval(interval)
+    }
+  }, [syncWhere])
 
   const setProfile = useCallback((next: Profile) => {
     setProfileState(next)
@@ -116,8 +154,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const switchBusiness = useCallback((id: string) => {
     setActiveId(id)
-    setCategorized({})
-    setMatchChoices({})
     track('negocio_cambiado')
   }, [])
 
@@ -127,8 +163,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setBusinesses((list) => (list.some((b) => b.id === created.id) ? list : [...list, created]))
       track('negocio_agregado', { regimen, tipo_contribuyente: company.tipoContribuyente, negocios: businesses.length + 1 })
       setActiveId(created.id)
-      setCategorized({})
-      setMatchChoices({})
       return created
     },
     [businesses.length],
@@ -139,10 +173,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const registered = { ...businessFromCompany(company, nombreComercial, regimen, 0), connections: INITIAL_CONNECTIONS, scale: 1 }
     setBusinesses([registered])
     setActiveId(registered.id)
-    setReviewed({})
-    setCategorized({})
-    setResolved({})
-    setMatchChoices({})
+    setCategoryOverrides({})
+    setMatchOverrides({})
   }, [])
 
   /** Cambia las conexiones del negocio activo. */
@@ -183,46 +215,37 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [updateConnections],
   )
 
-  const finishSync = useCallback(() => {
-    updateConnections((list) =>
-      list.map((c) => {
-        if (!c.sourceId || c.balance !== 0) return c
-        const seed = [...c.sourceId].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)
-        return { ...c, balance: 800 + ((seed * 97) % 2400) + 0.45 }
-      }),
-    )
-  }, [updateConnections])
+  const finishSync = useCallback(() => syncWhere(isNew), [syncWhere])
 
-  const setCategory = useCallback((pendingId: string, category: CategoryId | null) => {
-    setCategorized((prev) => {
-      const next = { ...prev }
-      if (category) next[pendingId] = category
-      else delete next[pendingId]
-      return next
-    })
-  }, [])
+  // Volver a la opción de Zenity borra el cambio: el movimiento queda otra vez en automático
+  const setCategory = useCallback(
+    (pendingId: string, category: CategoryId) => {
+      const recommended = ledger.pending.find((p) => p.id === pendingId)?.recommended
+      setCategoryOverrides((prev) => {
+        const own = { ...prev[businessId] }
+        if (category === recommended) delete own[pendingId]
+        else own[pendingId] = category
+        return { ...prev, [businessId]: own }
+      })
+      track('decision_automatica_cambiada', { tipo: 'categoria', a_la_de_zenity: category === recommended })
+    },
+    [ledger, businessId],
+  )
 
-  const setMatchChoice = useCallback((matchId: string, choice: MatchChoice | null) => {
-    setMatchChoices((prev) => {
-      const next = { ...prev }
-      if (choice) next[matchId] = choice
-      else delete next[matchId]
-      return next
-    })
-  }, [])
-
-  const applyReview = useCallback(() => {
-    const ids = Object.keys(categorized)
-    const matchIds = Object.keys(matchChoices)
-    const same = matchIds.filter((id) => matchChoices[id] === 'same').length
-    const different = matchIds.length - same
-    setReviewed((prev) => ({ ...prev, [businessId]: [...(prev[businessId] ?? []), ...ids] }))
-    setResolved((prev) => ({ ...prev, [businessId]: { ...prev[businessId], ...matchChoices } }))
-    setCategorized({})
-    setMatchChoices({})
-    track('movimientos_revisados', { cantidad: ids.length, unidos: same, separados: different })
-    return { categorized: ids.length, same, different }
-  }, [categorized, matchChoices, businessId])
+  const setMatchChoice = useCallback(
+    (matchId: string, choice: MatchChoice) => {
+      const match = ledger.matches.find((m) => m.id === matchId)
+      const isAuto = match ? autoChoice(match) === choice : false
+      setMatchOverrides((prev) => {
+        const own = { ...prev[businessId] }
+        if (isAuto) delete own[matchId]
+        else own[matchId] = choice
+        return { ...prev, [businessId]: own }
+      })
+      track('decision_automatica_cambiada', { tipo: 'conciliacion', a_la_de_zenity: isAuto })
+    },
+    [ledger, businessId],
+  )
 
   const openSheet = useCallback((next: SheetName) => setSheet(next), [])
 
@@ -255,13 +278,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addConnection,
       removeConnection,
       finishSync,
-      pending,
-      categorized,
+      classified,
+      reconciled,
       setCategory,
-      matches,
-      matchChoices,
       setMatchChoice,
-      applyReview,
       toasts,
       toast,
       dismissToast,
@@ -293,13 +313,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addConnection,
       removeConnection,
       finishSync,
-      pending,
-      categorized,
+      classified,
+      reconciled,
       setCategory,
-      matches,
-      matchChoices,
       setMatchChoice,
-      applyReview,
       toasts,
       toast,
       dismissToast,

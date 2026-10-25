@@ -37,6 +37,14 @@ export interface MatchCandidate {
 
 export type MatchChoice = 'same' | 'different'
 
+/** Desde este puntaje Zenity une el par sola; por debajo, los deja como movimientos distintos. */
+export const AUTO_SAME_SCORE = 75
+
+/** Lo que Zenity decide sin esperar al usuario. */
+export function autoChoice(match: MatchCandidate): MatchChoice {
+  return match.score >= AUTO_SAME_SCORE ? 'same' : 'different'
+}
+
 const SAME_AMOUNT: MatchReason = { icon: 'payments', label: 'Mismo monto' }
 const SAME_DAY: MatchReason = { icon: 'calendar_month', label: 'Mismo día' }
 
@@ -166,13 +174,13 @@ export function walletMatches(connections: Connection[], scale: number): MatchCa
 }
 
 /**
- * Movimientos que los pares agregan al libro. Mientras no se responda, y si son el mismo,
- * el par cuenta una vez (su lado de dinero); si son distintos, cuentan los dos.
+ * Movimientos que los pares agregan al libro. Si son el mismo, el par cuenta una vez (su lado
+ * de dinero); si son distintos, cuentan los dos. Sin respuesta del usuario vale la de Zenity.
  */
 export function matchTransactions(matches: MatchCandidate[], decisions: Record<string, MatchChoice>): Transaction[] {
   return matches.flatMap((m) =>
     m.legs.flatMap((leg, i) =>
-      !leg.txId && (i === m.primary || decisions[m.id] === 'different')
+      !leg.txId && (i === m.primary || (decisions[m.id] ?? autoChoice(m)) === 'different')
         ? [
             {
               id: `${m.id}-${i}`,

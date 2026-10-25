@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import sun from '../assets/sun.svg'
-import { GradientText, ShimmerText } from '../components/AiText'
+import { GradientText } from '../components/AiText'
 import { BusinessSwitcher } from '../components/Business'
 import { Button } from '../components/Button'
 import { AccountCard } from '../components/Cards'
@@ -127,7 +127,6 @@ export function Home() {
   const sire = useSire()
   const cuentas = useCuentas()
   const taxPeriod = sirePeriod(sire, periodKey)
-  const [generating, setGenerating] = useState(false)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
   const dayPart = getDayPart()
@@ -160,14 +159,10 @@ export function Home() {
     )
   }
 
-  const generateReport = () => {
-    if (generating) return
-    setGenerating(true)
-    track('reporte_generado')
-    window.setTimeout(() => {
-      toast(`Tu reporte de ${month.toLowerCase()} está listo`, 'auto_awesome')
-      navigate('/resumen')
-    }, 1800)
+  // El reporte de cada mes ya está hecho: Zenity lo genera al cierre y lo mantiene al día
+  const openReport = () => {
+    track('reporte_abierto')
+    navigate('/resumen')
   }
 
   // Las 5 preguntas del dueño, de un vistazo: cuánto entró, cuánto salió y cuánto queda
@@ -336,13 +331,16 @@ export function Home() {
               size="lg"
               fullWidth
               className={styles.reportButton}
-              icon={<Spark size={22} state={generating ? 'thinking' : 'idle'} />}
-              onClick={generateReport}
-              aria-busy={generating}
+              icon={<Spark size={22} />}
+              onClick={openReport}
               data-tour="report"
             >
-              {generating ? <ShimmerText>Generando reporte…</ShimmerText> : 'Generar reporte completo'}
+              Ver reporte de {month.toLowerCase()}
             </Button>
+            <p className={styles.reportNote}>
+              <Icon name="autorenew" size={16} />
+              Zenity lo genera solo cada mes y lo actualiza a diario
+            </p>
           </div>
         </div>
       </div>

@@ -35,9 +35,9 @@ export type AnalyticsEvent =
   | 'negocio_agregado'
   | 'negocio_cambiado'
   | 'conexion_agregada'
-  | 'movimientos_revisados'
+  | 'decision_automatica_cambiada'
   | 'chat_pregunta_enviada'
-  | 'reporte_generado'
+  | 'reporte_abierto'
   | 'tutorial_finalizado'
 
 export function track(event: AnalyticsEvent, properties?: Record<string, string | number | boolean>) {

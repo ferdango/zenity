@@ -8,13 +8,16 @@ import { Amount } from './Amount'
 import { BrandAvatar } from './Avatars'
 import { Button } from './Button'
 import { Icon } from './Icon'
+import { Spark } from './Spark'
 import styles from './MatchCard.module.css'
 
 interface MatchCardProps {
   match: MatchCandidate
-  choice?: MatchChoice
+  choice: MatchChoice
+  /** La decisión es de Zenity (no la corrigió el usuario) */
+  auto: boolean
   connections: Connection[]
-  onChoose: (choice: MatchChoice | null) => void
+  onChoose: (choice: MatchChoice) => void
 }
 
 /** Puntaje alto, medio o bajo (colores verde, ámbar y neutro). */
@@ -22,12 +25,14 @@ function scoreLevel(score: number) {
   return score >= 90 ? 'high' : score >= 75 ? 'medium' : 'low'
 }
 
-/** «¿Es el mismo movimiento?»: dos movimientos de conexiones distintas que pueden ser uno solo. */
-export function MatchCard({ match, choice, connections, onChoose }: MatchCardProps) {
+/**
+ * Dos movimientos de conexiones distintas que pueden ser uno solo. Zenity ya decidió si los
+ * une; la tarjeta muestra por qué y deja corregirlo con un toque.
+ */
+export function MatchCard({ match, choice, auto, connections, onChoose }: MatchCardProps) {
   const [first] = match.legs
   const flow = first.amount > 0 ? 'ingresos' : 'egresos'
   const amount = Math.abs(first.amount)
-  const toggle = (next: MatchChoice) => onChoose(choice === next ? null : next)
 
   return (
     <motion.li className={styles.card} data-choice={choice} variants={fadeUp} layout="position">
@@ -35,6 +40,10 @@ export function MatchCard({ match, choice, connections, onChoose }: MatchCardPro
         <span className={styles.score} data-level={scoreLevel(match.score)}>
           <Icon name="link" size={16} />
           {match.score}% de coincidencia
+        </span>
+        <span className={styles.decidedBy} data-auto={auto}>
+          {auto ? <Spark size={14} /> : <Icon name="person" size={16} />}
+          {auto ? (choice === 'same' ? 'Unido por Zenity' : 'Separado por Zenity') : 'Corregido por ti'}
         </span>
       </div>
 
@@ -72,7 +81,7 @@ export function MatchCard({ match, choice, connections, onChoose }: MatchCardPro
           variant={choice === 'same' ? 'filled' : 'tonal'}
           icon={choice === 'same' ? 'check' : 'link'}
           aria-pressed={choice === 'same'}
-          onClick={() => toggle('same')}
+          onClick={() => onChoose('same')}
         >
           Es el mismo
         </Button>
@@ -81,28 +90,26 @@ export function MatchCard({ match, choice, connections, onChoose }: MatchCardPro
           variant={choice === 'different' ? 'filled' : 'outlined'}
           icon={choice === 'different' ? 'check' : 'link_off'}
           aria-pressed={choice === 'different'}
-          onClick={() => toggle('different')}
+          onClick={() => onChoose('different')}
         >
           Son distintos
         </Button>
       </div>
 
-      <AnimatePresence initial={false}>
-        {choice && (
-          <motion.p
-            key={choice}
-            className={styles.outcome}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1, transition: { duration: 0.35, ease: ease.emphasized } }}
-            exit={{ height: 0, opacity: 0, transition: { duration: 0.2, ease: ease.emphasized } }}
-          >
-            <span>
-              {choice === 'same'
-                ? `Zenity los unirá: ${formatMoney(amount)} contará una sola vez en tus ${flow}.`
-                : `Quedarán como dos movimientos: tus ${flow} sumarán ${formatMoney(amount * 2)} en lugar de ${formatMoney(amount)}.`}
-            </span>
-          </motion.p>
-        )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.p
+          key={choice}
+          className={styles.outcome}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.3, ease: ease.decelerate } }}
+          exit={{ opacity: 0, transition: { duration: 0.12 } }}
+        >
+          <span>
+            {choice === 'same'
+              ? `Unidos: ${formatMoney(amount)} cuenta una sola vez en tus ${flow}.`
+              : `Separados: tus ${flow} suman ${formatMoney(amount * 2)} en lugar de ${formatMoney(amount)}.`}
+          </span>
+        </motion.p>
       </AnimatePresence>
     </motion.li>
   )

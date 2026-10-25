@@ -31,8 +31,7 @@ function ItemIcon({ icon }: { icon: string }) {
 /** Contenido del menú lateral (Figma: Menu). Se usa en el drawer móvil y en la barra lateral de escritorio. */
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
-  const { pending, matches, openSheet, profile, business, businesses } = useApp()
-  const toReview = pending.length + matches.length
+  const { openSheet, profile, business, businesses } = useApp()
   const switchTo = useSwitchBusiness()
   const others = businesses.filter((b) => b.id !== business.id)
   const layoutId = `nav-active-${variant}`
@@ -193,13 +192,9 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
               <span className={styles.itemIcon}>
                 <Icon name="fact_check" size={20} />
               </span>
-              <span>Por revisar</span>
+              <span>Revisado por Zenity</span>
             </>,
-            {
-              to: '/revisar',
-              active: pathname === '/revisar',
-              end: toReview > 0 ? <span className={styles.count}>{toReview}</span> : undefined,
-            },
+            { to: '/revisar', active: pathname === '/revisar' },
           )}
           {FEATURES.sunatSire &&
             row(

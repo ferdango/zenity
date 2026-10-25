@@ -55,6 +55,21 @@ export interface Registration {
   sunat: SunatCompany | null
 }
 
+/** Movimiento sin categoría que Zenity ya clasificó (o que el usuario cambió). */
+export interface ClassifiedMovement extends PendingTransaction {
+  category: CategoryId
+  /** true: la eligió Zenity; false: la cambió el usuario */
+  auto: boolean
+}
+
+/** Par de movimientos que Zenity ya concilió (o que el usuario corrigió). */
+export interface ReconciledMatch {
+  match: MatchCandidate
+  choice: MatchChoice
+  /** true: lo decidió Zenity; false: lo corrigió el usuario */
+  auto: boolean
+}
+
 type RegistrationForm = 'personal' | 'company'
 type RegistrationLookup = 'reniec' | 'sunat'
 
@@ -83,18 +98,16 @@ export interface AppState {
   connections: Connection[]
   addConnection: (sourceId: string) => Connection | null
   removeConnection: (id: string) => void
-  /** Marca como sincronizadas las conexiones nuevas (tras el análisis) */
+  /** Sincroniza ya las conexiones nuevas (sin esperar a la sincronización automática) */
   finishSync: () => void
-  pending: PendingTransaction[]
-  categorized: Record<string, CategoryId>
-  /** Pares por conciliar del negocio activo («¿Es el mismo movimiento?») */
-  matches: MatchCandidate[]
-  /** Respuestas elegidas en Por revisar, aún sin aplicar */
-  matchChoices: Record<string, MatchChoice>
-  setMatchChoice: (matchId: string, choice: MatchChoice | null) => void
-  setCategory: (pendingId: string, category: CategoryId | null) => void
-  /** Guarda las categorías y las conciliaciones elegidas */
-  applyReview: () => ReviewResult
+  /** Movimientos sin categoría del negocio activo, ya clasificados por Zenity */
+  classified: ClassifiedMovement[]
+  /** Pares de distintas conexiones del negocio activo, ya conciliados por Zenity */
+  reconciled: ReconciledMatch[]
+  /** Cambia la categoría que eligió Zenity; se aplica al instante */
+  setCategory: (pendingId: string, category: CategoryId) => void
+  /** Corrige la conciliación que hizo Zenity; se aplica al instante */
+  setMatchChoice: (matchId: string, choice: MatchChoice) => void
   toasts: Toast[]
   toast: (message: string, icon?: string) => void
   dismissToast: (id: number) => void
@@ -107,14 +120,6 @@ export interface AppState {
   tourActive: boolean
   startTour: () => void
   endTour: () => void
-}
-
-export interface ReviewResult {
-  categorized: number
-  /** Pares unidos: cuentan una sola vez */
-  same: number
-  /** Pares que quedan como movimientos separados */
-  different: number
 }
 
 export const AppStateContext = createContext<AppState | null>(null)

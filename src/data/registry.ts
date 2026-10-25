@@ -5,6 +5,8 @@
  * tendría la de un servicio real, para poder reemplazar estas funciones por una API.
  */
 
+import type { Regimen } from './sire'
+
 export interface ReniecPerson {
   dni: string
   nombres: string
@@ -43,9 +45,17 @@ export interface SunatCompany {
   comercioExterior: string
   comprobantes: string[]
   trabajadores: number
+  /** Régimen tributario de la ficha RUC (tributos afectos): Zenity lo usa sin preguntarlo */
+  regimen: Regimen
 }
 
 export type Lookup<T> = { ok: true; data: T } | { ok: false; error: string }
+
+/** Régimen tributario con el que figura un RUC (simulado y estable para cada número). */
+export function regimenFromRuc(ruc: string): Regimen {
+  const r = seeded(`regimen-tributario:${ruc}`)()
+  return r < 0.6 ? 'rmt' : r < 0.85 ? 'rer' : 'general'
+}
 
 export type Rand = () => number
 
@@ -336,6 +346,7 @@ function companyFrom(ruc: string): SunatCompany {
     comercioExterior: sector.comercioExterior && rand() < 0.8 ? sector.comercioExterior : 'Sin actividad',
     comprobantes,
     trabajadores: Math.round(2 + rand() ** 2 * (form.suffix === 'E.I.R.L.' ? 25 : 180)),
+    regimen: regimenFromRuc(ruc),
   }
 }
 
@@ -366,6 +377,7 @@ function naturalPersonBusiness(ruc: string): SunatCompany {
     comercioExterior: 'Sin actividad',
     comprobantes: business.prefix ? ['Boleta de venta', 'Factura'] : ['Recibo por honorarios', 'Factura'],
     trabajadores: business.prefix ? between(rand, 0, 4) : 0,
+    regimen: regimenFromRuc(ruc),
   }
 }
 

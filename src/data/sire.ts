@@ -444,6 +444,12 @@ export function buildSire(business: Business): Sire {
 
 // ── Consultas ─────────────────────────────────────────────────
 
+/** Lo que facturó el RUC en su peor mes del Registro de Ventas, en cientos de soles. */
+export function ingresoMinimoMensual(sire: Sire): number {
+  const ventas = sire.periods.map((p) => p.totalVentas.total)
+  return Math.max(100, Math.floor(Math.min(...ventas) / 100) * 100)
+}
+
 export function sirePeriod(sire: Sire, key: string): SirePeriod {
   return sire.periods.find((p) => p.key === key) ?? sire.periods[sire.periods.length - 1]
 }

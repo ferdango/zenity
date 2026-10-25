@@ -21,6 +21,52 @@
   color: var(--z-primary);
 }
 
+/* Cómo se actualiza la cuenta sin que el usuario haga nada */
+.autoSync {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 12px var(--z-gutter) 0;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface);
+}
+
+.autoIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+}
+
+.autoText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.autoText strong {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--z-on-surface);
+}
+
+.autoStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--z-on-surface-low);
+}
+
 .pair {
   display: grid;
   grid-template-columns: 1fr 1fr;

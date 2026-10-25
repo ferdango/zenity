@@ -40,17 +40,17 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'report',
     title: 'Reporte completo',
-    body: 'Con un toque genera un reporte del mes con gráficos y explicaciones.',
+    body: 'Zenity arma solo el reporte de cada mes, con gráficos y explicaciones. Tócalo para verlo.',
   },
   {
     target: 'notifications',
     title: 'Notificaciones',
-    body: 'Alertas de gasto, cobros conciliados y movimientos que necesitan tu revisión.',
+    body: 'Alertas de gasto, cobros conciliados y lo que Zenity clasificó por ti.',
   },
   {
     target: 'menu',
     title: 'Menú',
-    body: 'Tus negocios, lo que te deben y lo que debes, los movimientos por revisar y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
+    body: 'Tus negocios, lo que te deben y lo que debes, lo que Zenity revisó por ti y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
   },
   {
     target: 'nav-wallet',

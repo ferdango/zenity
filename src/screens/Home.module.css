@@ -197,6 +197,18 @@
   gap: 12px;
 }
 
+.reportNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+  text-align: center;
+}
+
 @media (min-width: 1024px) {
   .menuButton {
     display: none;

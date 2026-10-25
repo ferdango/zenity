@@ -35,7 +35,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100
 
 /**
  * Libro del negocio con los pares por conciliar aplicados: cada par suma su lado de dinero una
- * vez, o los dos lados si el usuario respondió que son movimientos distintos.
+ * vez, o los dos lados si son movimientos distintos (lo decide Zenity; el usuario puede corregirlo).
  */
 export function buildLedger(business: Business, decisions: Record<string, MatchChoice> = {}): Ledger {
   const ledger = baseLedger(business)

@@ -521,8 +521,8 @@ export function fileAnswer(name: string, size: number): ChatBlock[] {
     { type: 'p', text: ['Recibí ', { b: name }, ` (${kb} KB).`] },
     {
       type: 'p',
-      text: 'En la versión final leería sus movimientos, los clasificaría y te mostraría los que necesitan revisión. Este prototipo no procesa archivos reales.',
+      text: 'En la versión final leería sus movimientos y los clasificaría y conciliaría sola, sin que tengas que revisarlos. Este prototipo no procesa archivos reales.',
     },
-    { type: 'actions', items: [{ label: 'Ver por revisar', to: '/revisar', icon: 'fact_check' }] },
+    { type: 'actions', items: [{ label: 'Ver lo que Zenity revisó', to: '/revisar', icon: 'fact_check' }] },
   ]
 }
