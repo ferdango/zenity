@@ -48,7 +48,8 @@ function ConnectingSheet({ source, onClose }: { source: Source | null; onClose: 
     const connect = () => {
       if (cancelled.current) return
       const connection = addConnection(source.id)
-      navigate(`/conexiones/resultado?estado=exito&fuente=${source.id}&cuenta=${connection?.id ?? ''}`)
+      // La cuenta ya está agregada: «Nueva cuenta» sale del historial y volver no regresa al listado
+      navigate(`/conexiones/resultado?estado=exito&fuente=${source.id}&cuenta=${connection?.id ?? ''}`, { replace: true })
     }
     const timers = [
       window.setTimeout(() => setStep(1), 900),

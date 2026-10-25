@@ -144,7 +144,7 @@ export function ConnectionDetail() {
                       hidden
                       accept={upload.accept}
                       onChange={(event) => {
-                        if (event.target.files?.length) navigate('/analizando')
+                        if (event.target.files?.length) navigate(`/analizando?cuenta=${connection.id}`, { replace: true })
                       }}
                     />
                     <Button variant="text" icon="upload_file" onClick={() => fileRef.current?.click()}>
@@ -152,7 +152,7 @@ export function ConnectionDetail() {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="text" icon="sync" to="/analizando">
+                  <Button variant="text" icon="sync" to={`/analizando?cuenta=${connection.id}`} replace>
                     Sincronizar ahora
                   </Button>
                 )

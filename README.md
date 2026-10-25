@@ -50,7 +50,7 @@ npm run lint      # oxlint
 | Add new connection | `/conexiones/nueva` | Búsqueda, filtros y conexión animada a bancos, APIs, bases de datos y archivos |
 | Conection added / error | `/conexiones/resultado` | Éxito o error con nube animada. *API externa* falla la primera vez y Zenity **reintenta sola**: el error solo se muestra si fallan los reintentos |
 | Loading (×4) | `/analizando` | Análisis con IA en 4 pasos con progreso |
-| No-categorized (×4) | `/revisar` | **Revisado por Zenity**: los movimientos que Zenity clasificó y los pares que concilió sola, con su confianza y su motivo. Ya suman en los totales del mes. Se puede cambiar cualquier decisión con un toque (se aplica al instante) y "Enséñame cómo identificarlo" |
+| No-categorized (×4) | `/revisar` | **Revisado por Zenity**: los movimientos que Zenity clasificó y los pares que concilió sola, con su confianza y su motivo. Ya suman en los totales del mes. Se puede cambiar cualquier decisión con un toque (se aplica al instante) y "Enséñame cómo identificarlo". Al terminar, **Ver [cuenta]** lleva a la cuenta recién analizada (o **Listo** al inicio si se abrió desde el menú) |
 | Single account / Incomes / Expenses | `/movimientos/todo` · `/ingresos` · `/egresos` | Selector de cuenta, métricas, insights, categorías con transacciones y búsqueda |
 | Resume | `/resumen` | Balance total y gráfico de barras interactivo por mes |
 | Chat | `/chat` | Chat con Zenity: sugerencias, respuestas que se escriben en vivo, tablas, adjuntos y dictado por voz |
