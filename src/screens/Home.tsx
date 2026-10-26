@@ -9,12 +9,11 @@ import { AccountCard } from '../components/Cards'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { InsightList, SectionHeader } from '../components/Insights'
-import { SecondaryTile, SummaryTile } from '../components/Metrics'
+import { SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
 import { businessName } from '../data/businesses'
-import { corte, plural, type Corte } from '../data/cuentas'
 import { movementInsights } from '../data/insights'
 import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
 import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
@@ -22,7 +21,6 @@ import { TOUR_STEPS } from '../data/tour'
 import { FEATURES } from '../lib/features'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
-import { useCuentas } from '../lib/useCuentas'
 import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
@@ -98,12 +96,6 @@ function Carousel() {
   )
 }
 
-/** Estado de las cuentas por cobrar o por pagar: cuántas facturas vencieron. */
-function cuentasStatus(c: Corte) {
-  if (c.vencidas > 0) return { label: plural(c.vencidas, 'vencida'), negative: true }
-  return { label: c.total > 0 ? 'Al día' : 'Nada pendiente' }
-}
-
 /** Inicio / billetera (Figma: Home). */
 export function Home() {
   const navigate = useNavigate()
@@ -125,7 +117,6 @@ export function Home() {
   } = useApp()
   const scrolled = useScrolled()
   const sire = useSire()
-  const cuentas = useCuentas()
   const taxPeriod = sirePeriod(sire, periodKey)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
@@ -133,8 +124,6 @@ export function Home() {
   const greeting = GREETING[dayPart]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
   const margen = period.ingresos ? Math.round((neto / period.ingresos) * 100) : null
-  const cobrar = corte(cuentas, 'cobrar', periodKey)
-  const pagar = corte(cuentas, 'pagar', periodKey)
   const name = businessName(business)
   // Insights del negocio: los del Figma para el negocio base; para el resto, generados de sus datos
   const insights =
@@ -165,8 +154,7 @@ export function Home() {
     navigate('/resumen')
   }
 
-  // Las 5 preguntas del dueño, de un vistazo: cuánto entró, cuánto salió y cuánto queda
-  // (lo principal) y, más discretos, cuánto te deben y cuánto debes
+  // Las preguntas del dueño, de un vistazo: cuánto entró, cuánto salió y cuánto queda
   const tiles = (
     <motion.div
       className={styles.tiles}
@@ -214,12 +202,6 @@ export function Home() {
             caption={`IGV + Renta · vence el ${formatDue(vencimiento(taxPeriod.key, business.ruc))}`}
             to="/sunat/impuestos"
           />
-        </motion.div>
-      )}
-      {!ledger.empty && (
-        <motion.div className={styles.pending} variants={fadeUp}>
-          <SecondaryTile kind="receivable" label="Por cobrar" value={cobrar.total} to="/cuentas/cobrar" status={cuentasStatus(cobrar)} />
-          <SecondaryTile kind="payable" label="Por pagar" value={pagar.total} to="/cuentas/pagar" status={cuentasStatus(pagar)} />
         </motion.div>
       )}
     </motion.div>

@@ -1,5 +1,4 @@
-import { formatDayMonth, formatMoney } from '../lib/format'
-import { contrapartesLabel, type Corte, corte, type Cuentas, estado, plural, proximos7 } from './cuentas'
+import { formatMoney } from '../lib/format'
 import type { Ledger } from './ledger'
 import type { Connection, RichText } from './mock'
 import { accountTotals, categoryTotals, getPeriod, getTransactions, periodLabel, totals, variation } from './selectors'
@@ -13,14 +12,12 @@ export type ChatBlock =
   | { type: 'table'; head: string[]; rows: string[][]; foot?: string[] }
   | { type: 'actions'; items: Array<{ label: string; to: string; icon: string }> }
 
-/** Las 5 preguntas que todo dueño de negocio necesita responder en segundos. */
+/** Las preguntas que todo dueño de negocio necesita responder en segundos. */
 export const SUGGESTIONS = [
   { label: '¿Cómo está mi negocio?', icon: 'query_stats' },
   { label: '¿Cuánto ingresó este mes?', icon: 'trending_up' },
   { label: '¿Cuánto salió este mes?', icon: 'trending_down' },
   { label: '¿Cuánto le queda al negocio?', icon: 'savings' },
-  { label: '¿Cuánto me deben?', icon: 'call_received' },
-  { label: '¿Cuánto debo?', icon: 'call_made' },
   { label: 'Subir un archivo', icon: 'upload_file', upload: true },
 ] as const
 
@@ -42,76 +39,12 @@ interface Context {
   ruc: string
   /** Comprobantes del SIRE del negocio activo */
   sire: Sire
-  /** Facturas por cobrar y por pagar del negocio activo */
-  cuentas: Cuentas
 }
 
 const signed = (n: number) => `${n > 0 ? '+' : ''}${n}%`
 
-/** "¿Cuánto me deben?" / "¿Cuánto debo?": total, lo vencido, quién y qué hacer primero. */
-function cuentasAnswer(c: Corte, business: string): ChatBlock[] {
-  const cobrar = c.tipo === 'cobrar'
-  const action: ChatBlock = {
-    type: 'actions',
-    items: [
-      cobrar
-        ? { label: 'Ver por cobrar', to: '/cuentas/cobrar', icon: 'call_received' }
-        : { label: 'Ver por pagar', to: '/cuentas/pagar', icon: 'call_made' },
-    ],
-  }
-  const fecha = formatDayMonth(c.fecha)
-  if (c.total === 0) {
-    return [
-      {
-        type: 'p',
-        text: cobrar
-          ? ['Al ', fecha, ' nadie le debe a ', { b: business }, ': todas sus facturas están cobradas.']
-          : ['Al ', fecha, ' ', { b: business }, ' no tiene facturas por pagar.'],
-      },
-      action,
-    ]
-  }
-
-  const [top] = c.saldos
-  const vencido: RichText = c.vencido > 0 ? [' De eso, ', { neg: m(c.vencido) }, ' ya venció.'] : [' Nada está vencido.']
-  const semana = proximos7(c)
-  const [next] = c.items.filter((d) => d.atraso <= 0).sort((a, b) => a.vence.localeCompare(b.vence))
-  let consejo: ChatText = ''
-  if (cobrar && c.vencido > 0) {
-    consejo = ['Empieza por ', { b: top.contraparte.nombre }, ': te debe ', { neg: m(top.vencido) }, ` vencidos desde hace ${plural(top.atraso, 'día')}.`]
-  } else if (!cobrar && c.vencido > 0) {
-    consejo = ['Lo más urgente es ', { b: top.contraparte.nombre }, ', con ', { neg: m(top.vencido) }, ` vencidos desde hace ${plural(top.atraso, 'día')}.`]
-  } else if (!cobrar && semana.length > 0) {
-    consejo = ['En los próximos 7 días vencen ', { neg: m(semana.reduce((acc, d) => acc + d.monto, 0)) }, ': sepáralos para pagar a tiempo.']
-  } else if (next) {
-    consejo = cobrar
-      ? [{ b: next.contraparte.nombre }, ' te paga ', { pos: m(next.monto) }, ' el ', formatDayMonth(next.vence), ': es tu próximo cobro.']
-      : ['Tu próximo pago es a ', { b: next.contraparte.nombre }, ', por ', { neg: m(next.monto) }, ', el ', formatDayMonth(next.vence), '.']
-  }
-
-  return [
-    {
-      type: 'p',
-      text: cobrar
-        ? ['Al ', fecha, ' te deben ', { pos: m(c.total) }, `: ${plural(c.items.length, 'factura')} de ${contrapartesLabel(c)}.`, ...vencido]
-        : ['Al ', fecha, ' debes ', { neg: m(c.total) }, ` a ${contrapartesLabel(c)} (${plural(c.items.length, 'factura')}).`, ...vencido],
-    },
-    {
-      type: 'table',
-      head: [cobrar ? 'Cliente' : 'Proveedor', 'Monto', 'Estado'],
-      rows: c.saldos.slice(0, 5).map((s) => {
-        const first = c.items.find((d) => d.contraparte.ruc === s.contraparte.ruc)!
-        return [s.contraparte.nombre, m(s.total), estado(first.atraso, first.vence).label]
-      }),
-      foot: ['Total', m(c.total), ''],
-    },
-    ...(consejo ? [{ type: 'p', text: consejo } as ChatBlock] : []),
-    action,
-  ]
-}
-
 /** Genera una respuesta simulada (demo sin backend) con los datos del negocio activo. */
-export function answer(question: string, { connections, periodKey, ledger, business, ruc, sire, cuentas }: Context): ChatBlock[] {
+export function answer(question: string, { connections, periodKey, ledger, business, ruc, sire }: Context): ChatBlock[] {
   const q = normalize(question)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period).toLowerCase()
@@ -208,14 +141,8 @@ export function answer(question: string, { connections, periodKey, ledger, busin
     ]
   }
 
-  // Las 5 respuestas de un vistazo
+  // Ingresos, egresos y utilidad de un vistazo
   if (/\bcomo (esta|va|anda|vamos|voy)\b/.test(q)) {
-    const cobrar = corte(cuentas, 'cobrar', periodKey)
-    const pagar = corte(cuentas, 'pagar', periodKey)
-    const alertas: RichText = [
-      ...(cobrar.vencido > 0 ? [' Ojo: ', { neg: m(cobrar.vencido) }, ' de lo que te deben ya venció.'] : []),
-      ...(pagar.vencido > 0 ? [' Tienes ', { neg: m(pagar.vencido) }, ' vencidos con proveedores.'] : []),
-    ]
     return [
       { type: 'p', text: ['Así está ', { b: business }, ' en ', month, ':'] },
       {
@@ -225,8 +152,6 @@ export function answer(question: string, { connections, periodKey, ledger, busin
           ['Ingresos (entró)', m(t.ingresos)],
           ['Egresos (salió)', m(t.egresos)],
           ['Utilidad (te queda)', m(t.neto)],
-          ['Por cobrar (te deben)', m(cobrar.total)],
-          ['Por pagar (debes)', m(pagar.total)],
         ],
       },
       {
@@ -235,22 +160,17 @@ export function answer(question: string, { connections, periodKey, ledger, busin
           t.neto >= 0 ? 'Ganas dinero: tu margen es de ' : 'Este mes salió más de lo que entró: tu margen es de ',
           t.neto >= 0 ? { pos: `${margin}%` } : { neg: `${margin}%` },
           '.',
-          ...alertas,
         ],
       },
       {
         type: 'actions',
         items: [
-          { label: 'Ver por cobrar', to: '/cuentas/cobrar', icon: 'call_received' },
-          { label: 'Ver por pagar', to: '/cuentas/pagar', icon: 'call_made' },
+          { label: 'Ver movimientos', to: '/movimientos/todo', icon: 'savings' },
+          { label: 'Ver resumen', to: '/resumen', icon: 'bar_chart' },
         ],
       },
     ]
   }
-
-  if (/\b(me|nos|le) deben\b|cobrar|cobranza|deudor/.test(q)) return cuentasAnswer(corte(cuentas, 'cobrar', periodKey), business)
-
-  if (/\b(debo|debemos|debe|pagar|proveedor(es)?|deudas?)\b/.test(q)) return cuentasAnswer(corte(cuentas, 'pagar', periodKey), business)
 
   if (q.includes('consolidado') || q.includes('todas mis cuentas') || q.includes('general')) {
     const total = connections.reduce((acc, c) => acc + c.balance, 0)
@@ -502,12 +422,8 @@ export function answer(question: string, { connections, periodKey, ledger, busin
         { b: 'cuánto entró' },
         ', ',
         { b: 'cuánto salió' },
-        ', ',
-        { b: 'cuánto te queda' },
-        ', ',
-        { b: 'cuánto te deben' },
         ' y ',
-        { b: 'cuánto debes' },
+        { b: 'cuánto te queda' },
         '. También puedo explicar tu balance o armar un consolidado de tus cuentas.',
       ],
     },

@@ -13,7 +13,6 @@ import { answer, type ChatBlock, fileAnswer, SUGGESTIONS } from '../data/chat'
 import { streamDuration, toSegments } from '../lib/richText'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { track } from '../lib/analytics'
-import { useCuentas } from '../lib/useCuentas'
 import { useSire } from '../lib/useSire'
 import { useApp } from '../state/context'
 import styles from './Chat.module.css'
@@ -208,10 +207,9 @@ export function Chat() {
   const { connections, periodKey, toast, profile, ledger, business } = useApp()
   const name = businessName(business)
   const sire = useSire()
-  const cuentas = useCuentas()
   const context = useMemo(
-    () => ({ connections, periodKey, ledger, business: name, ruc: business.ruc, sire, cuentas }),
-    [connections, periodKey, ledger, name, business.ruc, sire, cuentas],
+    () => ({ connections, periodKey, ledger, business: name, ruc: business.ruc, sire }),
+    [connections, periodKey, ledger, name, business.ruc, sire],
   )
   const [params, setParams] = useSearchParams()
   const [messages, setMessages] = useState<Message[]>([])

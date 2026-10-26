@@ -30,7 +30,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'summary',
     title: 'Tu negocio en 5 segundos',
-    body: 'Cuánto entró, cuánto salió y cuánto te queda. Debajo, cuánto te deben y cuánto debes. Toca cualquiera para ver el detalle.',
+    body: 'Cuánto entró, cuánto salió y cuánto te queda en el mes. Toca cualquiera para ver el detalle.',
   },
   {
     target: 'insights',
@@ -50,7 +50,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'menu',
     title: 'Menú',
-    body: 'Tus negocios, lo que te deben y lo que debes, lo que Zenity revisó por ti y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
+    body: 'Tus negocios, lo que Zenity revisó por ti y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
   },
   {
     target: 'nav-wallet',
@@ -75,6 +75,6 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'nav-chat',
     title: 'Habla con Zenity',
-    body: 'Pregúntale lo que quieras a tu asistente: cuánto te queda, cuánto te deben, comparaciones o un consolidado.',
+    body: 'Pregúntale lo que quieras a tu asistente: cuánto entró, cuánto te queda, comparaciones o un consolidado.',
   },
 ]
