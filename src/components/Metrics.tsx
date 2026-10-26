@@ -54,32 +54,6 @@ export function SummaryTile({ kind, label, value, caption, to, delta, status }: 
   )
 }
 
-interface SecondaryTileProps {
-  kind: 'receivable' | 'payable'
-  label: string
-  value: number
-  to: string
-  /** Una línea de estado: "2 vencidas", "Al día" */
-  status: { label: string; negative?: boolean }
-}
-
-/** Tiles secundarios del Inicio (por cobrar y por pagar): más discretos que los principales. */
-export function SecondaryTile({ kind, label, value, to, status }: SecondaryTileProps) {
-  return (
-    <Link to={to} className={styles.secondary} data-ripple="">
-      <span className={styles.secondaryHead}>
-        <Icon name={kind === 'receivable' ? 'call_received' : 'call_made'} size={18} className={styles.secondaryIcon} />
-        {label}
-        <Icon name="chevron_right" size={18} className={styles.secondaryArrow} />
-      </span>
-      <Amount value={value} className={styles.secondaryValue} />
-      <span className={styles.secondaryStatus} data-negative={Boolean(status.negative)}>
-        {status.label}
-      </span>
-    </Link>
-  )
-}
-
 interface MetricCardProps {
   label: string
   value: number

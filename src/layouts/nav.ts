@@ -45,12 +45,11 @@ export function isTabRoute(path: string): boolean {
     path === '/resumen' ||
     path === '/chat' ||
     path.startsWith('/movimientos/') ||
-    path.startsWith('/sunat/') ||
-    path.startsWith('/cuentas/')
+    path.startsWith('/sunat/')
   )
 }
 
 /** Rutas que muestran la barra de navegación inferior en móvil. */
 export function showsBottomNav(path: string): boolean {
-  return path === '/inicio' || path === '/resumen' || path.startsWith('/movimientos/') || path.startsWith('/cuentas/')
+  return path === '/inicio' || path === '/resumen' || path.startsWith('/movimientos/')
 }
