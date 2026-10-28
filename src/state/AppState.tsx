@@ -63,6 +63,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [categoryOverrides, setCategoryOverrides] = useState<Record<string, Record<string, CategoryId>>>({})
   /** Pares que el usuario corrigió, por negocio (los demás los concilia Zenity) */
   const [matchOverrides, setMatchOverrides] = useState<Record<string, Record<string, MatchChoice>>>({})
+  /** Movimientos y pares que el usuario ya revisó, por negocio */
+  const [reviewedIds, setReviewedIds] = useState<Record<string, string[]>>({})
   const [toasts, setToasts] = useState<Toast[]>([])
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sheet, setSheet] = useState<SheetName>(null)
@@ -79,14 +81,25 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   )
   // Piloto automático: cada movimiento lleva la categoría recomendada y cada par la decisión de
   // Zenity, salvo que el usuario las haya cambiado. Nada queda esperando una respuesta.
+  const reviewed = reviewedIds[businessId]
   const classified = useMemo<ClassifiedMovement[]>(() => {
     const own = categoryOverrides[businessId] ?? {}
-    return ledger.pending.map((p) => ({ ...p, category: own[p.id] ?? p.recommended, auto: !(p.id in own) }))
-  }, [ledger, categoryOverrides, businessId])
+    return ledger.pending.map((p) => ({
+      ...p,
+      category: own[p.id] ?? p.recommended,
+      auto: !(p.id in own),
+      reviewed: reviewed?.includes(p.id) ?? false,
+    }))
+  }, [ledger, categoryOverrides, businessId, reviewed])
   const reconciled = useMemo<ReconciledMatch[]>(() => {
     const own = matchOverrides[businessId] ?? {}
-    return ledger.matches.map((match) => ({ match, choice: own[match.id] ?? autoChoice(match), auto: !(match.id in own) }))
-  }, [ledger, matchOverrides, businessId])
+    return ledger.matches.map((match) => ({
+      match,
+      choice: own[match.id] ?? autoChoice(match),
+      auto: !(match.id in own),
+      reviewed: reviewed?.includes(match.id) ?? false,
+    }))
+  }, [ledger, matchOverrides, businessId, reviewed])
 
   useEffect(() => writeStorage(BUSINESSES_KEY, businesses), [businesses])
   useEffect(() => writeStorage(ACTIVE_BUSINESS_KEY, businessId), [businessId])
@@ -178,6 +191,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setActiveId(registered.id)
     setCategoryOverrides({})
     setMatchOverrides({})
+    setReviewedIds({})
   }, [])
 
   /** Cambia las conexiones del negocio activo. */
@@ -250,6 +264,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     [ledger, businessId],
   )
 
+  const setReviewed = useCallback(
+    (id: string, done: boolean) => {
+      setReviewedIds((prev) => {
+        const own = prev[businessId] ?? []
+        if (own.includes(id) === done) return prev
+        return { ...prev, [businessId]: done ? [...own, id] : own.filter((x) => x !== id) }
+      })
+    },
+    [businessId],
+  )
+
   const openSheet = useCallback((next: SheetName) => setSheet(next), [])
 
   const startTour = useCallback(() => setTourActive(true), [])
@@ -285,6 +310,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       reconciled,
       setCategory,
       setMatchChoice,
+      setReviewed,
       toasts,
       toast,
       dismissToast,
@@ -320,6 +346,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       reconciled,
       setCategory,
       setMatchChoice,
+      setReviewed,
       toasts,
       toast,
       dismissToast,

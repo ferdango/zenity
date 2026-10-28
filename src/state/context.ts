@@ -60,6 +60,8 @@ export interface ClassifiedMovement extends PendingTransaction {
   category: CategoryId
   /** true: la eligió Zenity; false: la cambió el usuario */
   auto: boolean
+  /** El usuario ya lo revisó (confirmó o cambió): en la bandeja pasa a «Aprobado» */
+  reviewed: boolean
 }
 
 /** Par de movimientos que Zenity ya concilió (o que el usuario corrigió). */
@@ -68,6 +70,8 @@ export interface ReconciledMatch {
   choice: MatchChoice
   /** true: lo decidió Zenity; false: lo corrigió el usuario */
   auto: boolean
+  /** El usuario ya lo revisó (confirmó o corrigió): en la bandeja pasa a «Aprobado» */
+  reviewed: boolean
 }
 
 type RegistrationForm = 'personal' | 'company'
@@ -108,6 +112,8 @@ export interface AppState {
   setCategory: (pendingId: string, category: CategoryId) => void
   /** Corrige la conciliación que hizo Zenity; se aplica al instante */
   setMatchChoice: (matchId: string, choice: MatchChoice) => void
+  /** Marca un movimiento o un par como revisado por el usuario (o lo devuelve a la bandeja) */
+  setReviewed: (id: string, done: boolean) => void
   toasts: Toast[]
   toast: (message: string, icon?: string) => void
   dismissToast: (id: number) => void
