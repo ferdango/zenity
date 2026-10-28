@@ -121,6 +121,26 @@
   background: var(--z-surface-low);
 }
 
+/* Revisado por el usuario: verde tenue y check en lugar del avatar */
+.item[data-reviewed='true'] {
+  background: color-mix(in srgb, var(--z-positive) 6%, transparent);
+}
+
+.item[data-reviewed='true'] .rowTitle,
+.item[data-reviewed='true'] .amount {
+  opacity: 0.7;
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--z-positive);
+  color: var(--z-bg);
+}
+
 .row {
   display: grid;
   grid-template-columns: 40px 1fr auto 24px;
@@ -188,6 +208,10 @@
 
 .decidedBy[data-tone='user'] {
   color: var(--z-primary);
+}
+
+.decidedBy[data-tone='done'] {
+  color: var(--z-positive);
 }
 
 /* Por qué Zenity eligió la categoría */
@@ -304,4 +328,17 @@
   gap: 12px;
   padding: 64px 24px;
   text-align: center;
+}
+
+/* Bandeja en cero: check grande con halo verde */
+.doneBadge {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--z-positive) 26%, transparent), transparent 70%);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--z-positive) 45%, transparent);
+  color: var(--z-positive);
 }

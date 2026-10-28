@@ -36,6 +36,7 @@ export type AnalyticsEvent =
   | 'negocio_cambiado'
   | 'conexion_agregada'
   | 'decision_automatica_cambiada'
+  | 'bandeja_revisada'
   | 'chat_pregunta_enviada'
   | 'reporte_abierto'
   | 'tutorial_finalizado'

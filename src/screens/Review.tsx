@@ -13,8 +13,10 @@ import { TopBar } from '../components/TopBar'
 import { AUTO_SAME_SCORE } from '../data/matches'
 import { CATEGORIES, type CategoryId, EXPENSE_CATEGORIES, INCOME_CATEGORIES, type PendingTransaction } from '../data/mock'
 import { avatarFor, connectionName } from '../data/selectors'
+import { track } from '../lib/analytics'
 import { formatShortDate, maskNumber } from '../lib/format'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useTimeouts } from '../lib/useTimeouts'
 import { type ClassifiedMovement, useApp } from '../state/context'
 import styles from './Review.module.css'
 
@@ -23,6 +25,11 @@ const FILTER_LABEL: Record<Filter, string> = { all: 'Todos', income: 'Ingresos',
 
 /** Por debajo de esta confianza, el movimiento se marca para que el usuario le eche un vistazo (sin exigirlo). */
 const LOW_CONFIDENCE = 70
+
+/** Pausa para que se vea la elección antes de colapsar el elemento como revisado. */
+const APPROVE_DELAY = 320
+
+const pop = { type: 'spring', stiffness: 520, damping: 22 } as const
 
 function suggestionsFor(tx: PendingTransaction): CategoryId[] {
   const base: CategoryId[] = tx.amount > 0 ? INCOME_CATEGORIES : EXPENSE_CATEGORIES
@@ -98,28 +105,53 @@ function Teach({ onSave }: { onSave: (rule: string) => void }) {
  * Revisado por Zenity (Figma: No-categorized ×4). Zenity clasifica sola los movimientos que
  * llegan sin categoría y concilia los pares de distintas conexiones («¿Es el mismo
  * movimiento?»): nada espera al usuario. Aquí ve qué decidió, por qué, y puede cambiarlo.
+ * Lo que aprueba colapsa con un check y el contador baja hasta «¡Todo al día!».
  */
 export function Review() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const { classified, setCategory, reconciled, setMatchChoice, connections, toast } = useApp()
+  const { classified, setCategory, reconciled, setMatchChoice, setReviewed, connections, toast } = useApp()
   // Si llega del análisis de una cuenta, el flujo sigue hacia esa cuenta
   const account = connections.find((c) => c.id === params.get('cuenta'))
   const exit = (to: string) => navigate(to, { replace: true })
   const [open, setOpen] = useState<string | null>(null)
   const [filter, setFilter] = useState<Filter>('all')
   const [menu, setMenu] = useState(false)
+  /** Con la bandeja en cero, el usuario puede volver a ver lo que aprobó */
+  const [showReviewed, setShowReviewed] = useState(false)
+  const later = useTimeouts()
   const total = classified.length + reconciled.length
+  const pending = classified.filter((p) => !p.reviewed).length + reconciled.filter((r) => !r.reviewed).length
 
   const inFilter = (amount: number) => filter === 'all' || (filter === 'income' ? amount > 0 : amount < 0)
   const visible = classified.filter((p) => inFilter(p.amount))
   const visibleMatches = reconciled.filter((r) => inFilter(r.match.legs[0].amount))
   const changed = classified.filter((p) => !p.auto).length + reconciled.filter((r) => !r.auto).length
 
+  /** Marca el movimiento o par como revisado tras un instante; si era el último, la bandeja queda en cero. */
+  const approve = (id: string, wasReviewed: boolean, delay = APPROVE_DELAY) => {
+    const last = !wasReviewed && pending === 1
+    later(() => {
+      setReviewed(id, true)
+      if (last) {
+        setShowReviewed(false)
+        track('bandeja_revisada', { total })
+      }
+    }, delay)
+  }
+
+  /** Aprobar un movimiento clasificado: se cierra su detalle y la fila queda con check. */
+  const approveMovement = (tx: ClassifiedMovement, delay = APPROVE_DELAY) => {
+    approve(tx.id, tx.reviewed, delay)
+    later(() => setOpen((current) => (current === tx.id ? null : current)), delay)
+  }
+
   const changeCategory = (tx: ClassifiedMovement, category: CategoryId) => {
-    if (category === tx.category) return
-    setCategory(tx.id, category)
-    if (category !== tx.recommended) toast('Listo. Zenity aplicará tu cambio a movimientos parecidos', 'school')
+    if (category !== tx.category) {
+      setCategory(tx.id, category)
+      if (category !== tx.recommended) toast('Listo. Zenity aplicará tu cambio a movimientos parecidos', 'school')
+    }
+    approveMovement(tx)
   }
 
   return (
@@ -138,7 +170,7 @@ export function Review() {
               <span className={styles.filterLabel}>
                 {FILTER_LABEL[filter]} <Icon name="arrow_drop_down" size={18} />
               </span>
-              <span className={styles.title}>Revisado por Zenity ({total})</span>
+              <span className={styles.title}>Revisado por Zenity ({pending})</span>
             </button>
             <AnimatePresence>
               {menu && (
@@ -197,6 +229,27 @@ export function Review() {
               )}
             </motion.div>
           </motion.div>
+        ) : pending === 0 && !showReviewed ? (
+          <motion.div className={styles.allDone} variants={staggerContainer(0.08)} initial="hidden" animate="show">
+            <motion.span
+              className={styles.doneBadge}
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, transition: pop }}
+            >
+              <Icon name="task_alt" size={44} />
+            </motion.span>
+            <motion.h2 className="t-headline-m" variants={fadeUp}>
+              <GradientText>¡Todo al día!</GradientText>
+            </motion.h2>
+            <motion.p className="t-body-l t-variant" variants={fadeUp}>
+              Has revisado y aprobado todos los movimientos pendientes. Tus reportes están sincronizados.
+            </motion.p>
+            <motion.div variants={fadeUp}>
+              <Button variant="text" icon="fact_check" onClick={() => setShowReviewed(true)}>
+                Ver lo que revisaste ({total})
+              </Button>
+            </motion.div>
+          </motion.div>
         ) : (
           <>
             <motion.div className={styles.intro} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
@@ -220,14 +273,19 @@ export function Review() {
                   une y cuentan una sola vez; por debajo, los deja separados.
                 </p>
                 <motion.ul className={styles.matchList} variants={staggerContainer(0.06)} initial="hidden" animate="show">
-                  {visibleMatches.map(({ match, choice, auto }) => (
+                  {visibleMatches.map(({ match, choice, auto, reviewed }) => (
                     <MatchCard
                       key={match.id}
                       match={match}
                       choice={choice}
                       auto={auto}
+                      reviewed={reviewed}
                       connections={connections}
-                      onChoose={(next) => setMatchChoice(match.id, next)}
+                      onChoose={(next) => {
+                        setMatchChoice(match.id, next)
+                        approve(match.id, reviewed)
+                      }}
+                      onReopen={() => setReviewed(match.id, false)}
                     />
                   ))}
                 </motion.ul>
@@ -245,7 +303,14 @@ export function Review() {
                 const type = tx.amount > 0 ? 'income' : 'expense'
                 const low = tx.auto && tx.confidence < LOW_CONFIDENCE
                 return (
-                  <motion.li key={tx.id} className={styles.item} data-open={isOpen} variants={fadeUp} layout="position">
+                  <motion.li
+                    key={tx.id}
+                    className={styles.item}
+                    data-open={isOpen}
+                    data-reviewed={tx.reviewed}
+                    variants={fadeUp}
+                    layout="position"
+                  >
                     <button
                       type="button"
                       className={styles.row}
@@ -253,7 +318,26 @@ export function Review() {
                       aria-expanded={isOpen}
                       onClick={() => setOpen(isOpen ? null : tx.id)}
                     >
-                      <BrandAvatar kind={avatarFor(tx.accountId, connections)} verified={avatarFor(tx.accountId, connections) === 'visa'} />
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        {tx.reviewed ? (
+                          <motion.span
+                            key="check"
+                            className={styles.check}
+                            initial={{ scale: 0.4, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1, transition: pop }}
+                            exit={{ scale: 0.4, opacity: 0 }}
+                          >
+                            <Icon name="check" size={22} weight={700} />
+                          </motion.span>
+                        ) : (
+                          <motion.span key="avatar" exit={{ scale: 0.4, opacity: 0 }}>
+                            <BrandAvatar
+                              kind={avatarFor(tx.accountId, connections)}
+                              verified={avatarFor(tx.accountId, connections) === 'visa'}
+                            />
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                       <span className={styles.rowText}>
                         <span className={styles.rowTitle}>{tx.title}</span>
                         <span className={styles.rowSub}>
@@ -269,9 +353,15 @@ export function Review() {
                               {CATEGORIES[tx.category].label}
                             </motion.span>
                           </AnimatePresence>
-                          <span className={styles.decidedBy} data-tone={tx.auto ? (low ? 'low' : 'auto') : 'user'}>
-                            {tx.auto ? `Zenity · ${tx.confidence}%` : 'Cambiado por ti'}
-                          </span>
+                          {tx.reviewed ? (
+                            <span className={styles.decidedBy} data-tone="done">
+                              {tx.auto ? 'Revisado' : 'Revisado · cambiado por ti'}
+                            </span>
+                          ) : (
+                            <span className={styles.decidedBy} data-tone={tx.auto ? (low ? 'low' : 'auto') : 'user'}>
+                              {tx.auto ? `Zenity · ${tx.confidence}%` : 'Cambiado por ti'}
+                            </span>
+                          )}
                         </span>
                       </span>
                       <Amount value={tx.amount} sign="always" tone="auto" animate={false} className={styles.amount} />
@@ -351,6 +441,10 @@ export function Review() {
                               ))}
                             </div>
 
+                            <Button variant="tonal" icon="check" fullWidth onClick={() => approveMovement(tx, 0)}>
+                              Aprobar {CATEGORIES[tx.category].label}
+                            </Button>
+
                             <Teach onSave={() => toast('Zenity aprendió una nueva regla', 'school')} />
                           </div>
                         </motion.div>
@@ -377,7 +471,8 @@ export function Review() {
                 </Button>
               </>
             ) : (
-              <Button size="lg" fullWidth icon="check" onClick={() => exit('/inicio')}>
+              // Con la bandeja en cero, «Listo» pasa a ser la acción principal
+              <Button size="lg" fullWidth icon="check" variant={pending === 0 ? 'filled' : 'tonal'} onClick={() => exit('/inicio')}>
                 Listo
               </Button>
             )}

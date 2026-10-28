@@ -1,15 +1,72 @@
 .card {
-  display: grid;
-  gap: 14px;
-  padding: 16px;
+  overflow: hidden;
   border-radius: var(--z-radius-xl);
   background: var(--z-surface);
   box-shadow: inset 0 0 0 1px var(--z-divider);
-  transition: box-shadow var(--z-dur-medium) var(--z-ease-standard);
+  transition:
+    box-shadow var(--z-dur-medium) var(--z-ease-standard),
+    background-color var(--z-dur-medium) var(--z-ease-standard);
 }
 
 .card[data-choice='same'] {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-positive) 55%, transparent);
+}
+
+/* Revisada: verde tenue y colapsada en una línea («✓ Conciliado») */
+.card[data-reviewed='true'] {
+  background: color-mix(in srgb, var(--z-positive) 7%, var(--z-surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-positive) 28%, transparent);
+}
+
+/* El contenedor que se anima de alto: sin padding, para colapsar del todo */
+.collapse {
+  overflow: hidden;
+}
+
+.body {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.done {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px 10px 14px;
+}
+
+.doneCheck {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--z-positive);
+  color: var(--z-bg);
+}
+
+.doneText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.doneLabel {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: var(--z-positive);
+}
+
+.doneSub {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .head {
