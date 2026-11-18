@@ -15,6 +15,7 @@ import { useLecciones } from '../../state/useZen'
 import { Button } from '../Button'
 import { Icon } from '../Icon'
 import { Spark } from '../Spark'
+import { TONE_CLASS, type Tone } from './tone'
 import styles from './zen.module.css'
 
 
@@ -184,10 +185,10 @@ export function Hoy() {
   return <>{fmtFecha(HOY)}</>
 }
 
-export function LinkRow({ to, icon, title, sub, end }: { to: string; icon: string; title: ReactNode; sub?: ReactNode; end?: ReactNode }) {
+export function LinkRow({ to, icon, title, sub, end, tone }: { to: string; icon: string; title: ReactNode; sub?: ReactNode; end?: ReactNode; tone?: Tone }) {
   return (
     <Link to={to} className={styles.row} data-ripple="">
-      <span className={styles.rowIcon}>
+      <span className={`${styles.rowIcon} ${tone ? TONE_CLASS[tone] : ''}`}>
         <Icon name={icon} size={20} />
       </span>
       <span className={styles.rowText}>

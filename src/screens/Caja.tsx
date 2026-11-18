@@ -11,9 +11,10 @@ import { LessonCard, Money, NoDemoData, Pill, SectionHead } from '../components/
 import styles from '../components/zen/zen.module.css'
 import { REGIMEN_LABORAL_LABEL } from '../domain/calendar'
 import { textoAlerta } from '../domain/cashflow'
-import type { Certeza, FuenteCaja, RegimenLaboral } from '../domain/types'
-import { fmtDiaMes, fmtFecha, fmtSolesCorto } from '../domain/util'
+import type { CashEvent, Certeza, FuenteCaja, RegimenLaboral } from '../domain/types'
+import { fmtDiaMes, fmtSolesCorto } from '../domain/util'
 import { businessName } from '../data/businesses'
+import { MONTHS, MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
 import { setOverride } from '../state/demoStore'
@@ -57,12 +58,20 @@ export function Caja() {
   }
 
   const eventos = caja.eventos
+  // Eventos agrupados por mes: «Noviembre 2026», «Diciembre 2026»…
+  const grupos = new Map<string, CashEvent[]>()
+  for (const e of eventos) {
+    const mes = `${MONTHS[Number(e.fecha.slice(5, 7)) - 1]} ${e.fecha.slice(0, 4)}`
+    grupos.set(mes, [...(grupos.get(mes) ?? []), e])
+  }
+  const meses = [...grupos.entries()]
 
   return (
     <div className="z-page">
       <TopBar
         title="Caja"
         subtitle={businessName(business)}
+        hideBack
         end={
           <Button size="sm" variant="text" icon="tune" onClick={() => { setColchon(String(Math.round(caja.colchon))); setAjustes(true) }}>
             Ajustes
@@ -158,37 +167,30 @@ export function Caja() {
 
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Lo que viene" hint={`${eventos.length} eventos`} />
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Concepto</th>
-                  <th className={styles.num}>Monto</th>
-                  <th>Certeza</th>
-                  <th>Fuente</th>
-                </tr>
-              </thead>
-              <tbody>
-                {eventos.map((e, i) => (
-                  <tr key={`${e.fecha}-${i}`}>
-                    <td>{fmtFecha(e.fecha)}</td>
-                    <td className={styles.wrapCell}>
-                      {e.concepto}
-                      {e.montoPesimista !== undefined && <span className={styles.muted}> · pesimista {fmtSolesCorto(Math.round(e.montoPesimista))}</span>}
-                    </td>
-                    <td className={styles.num}>
-                      <Money value={e.monto} sign="always" className={e.monto > 0 ? styles.amountPos : undefined} />
-                    </td>
-                    <td>
-                      <Pill tone={CERTEZA_TONE[e.certeza]}>{CERTEZA_LABEL[e.certeza]}</Pill>
-                    </td>
-                    <td className={styles.muted}>{FUENTE_LABEL[e.fuente]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {meses.map(([mes, lista]) => (
+            <div key={mes} className={styles.list}>
+              <p className={styles.monthHead}>{mes}</p>
+              {lista.map((e, i) => (
+                <div key={`${e.fecha}-${i}`} className={`${styles.row} ${styles.rowWrap}`}>
+                  <span className={styles.eventDate}>
+                    <span className={styles.eventDay}>{e.fecha.slice(8, 10)}</span>
+                    <span className={styles.eventMonth}>{MONTHS_SHORT[Number(e.fecha.slice(5, 7)) - 1]}</span>
+                  </span>
+                  <span className={styles.rowText}>
+                    <span className={styles.rowTitle}>{e.concepto}</span>
+                    <span className={styles.rowSub}>
+                      {FUENTE_LABEL[e.fuente]}
+                      {e.montoPesimista !== undefined && ` · pesimista ${fmtSolesCorto(Math.round(e.montoPesimista))}`}
+                    </span>
+                  </span>
+                  <span className={styles.rowEnd}>
+                    <Money value={e.monto} sign="always" className={e.monto > 0 ? styles.amountPos : undefined} />
+                    <Pill tone={CERTEZA_TONE[e.certeza]}>{CERTEZA_LABEL[e.certeza]}</Pill>
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
           <p className={styles.muted}>
             Escenario base: certeza alta y media. Las cobranzas vencidas (certeza baja) solo suman cuando registras una promesa de pago. Vencimientos SUNAT según el
             último dígito de tu RUC (cronograma de ejemplo).

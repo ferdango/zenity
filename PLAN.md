@@ -57,6 +57,13 @@ Decisiones tomadas durante la construcción:
 - **Seed calibrado** para que, con hoy = 18/11/2026, la alerta caiga el 20/12 por la gratificación y el IGV, y desaparezca al registrar la promesa de pago de la factura vencida.
 - **Microlección en contexto:** se muestra hasta que el usuario la lee o la cierra; después solo queda en `/aprende`.
 
+## Look and feel (19/11/2026)
+
+- **Tema claro por defecto** («Día»: fondo gris azulado, superficies blancas con sombra suave) y **tema oscuro mejorado** («Noche suave»: menos negro puro, superficies azul pizarra). Selector Claro · Oscuro · Automático en Más y en Ajustes de la cuenta (`src/lib/theme.ts`; `index.html` aplica el tema antes de pintar).
+- Las tarjetas de conexiones no cambian en ningún tema. Los tiles de Ingresos/Egresos/Utilidad pasan a tonos pastel en el tema claro.
+- Íconos con color según el estado (verde: cuadra, ámbar: atención, rojo: deuda, violeta: personal).
+- **Flujos:** «Ver la demo» en la bienvenida (sin login); las pestañas Por revisar, Caja y Cobrar ya no muestran flecha de volver; notificaciones calculadas con los datos y con enlace a su pantalla (la campana solo se enciende si hay algo que hacer); Conciliación abre en el primer estado con pendientes; Inicio con «Para hoy» en filas; Cobrar marca la urgencia con color; Caja muestra «Lo que viene» como lista por mes.
+
 ## Pendientes / TODO
 
 - Cronograma de vencimientos SUNAT y tipo de cambio: tablas mock, reemplazar por las oficiales.

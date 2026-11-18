@@ -7,6 +7,7 @@ import { Dialog } from '../components/Dialog'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { LinkRow, Pill, SectionHead } from '../components/zen'
+import { ThemeSwitch } from '../components/zen/ThemeSwitch'
 import styles from '../components/zen/zen.module.css'
 import { businessName } from '../data/businesses'
 import { ESTADO_LABEL, resumenMes } from '../domain/engine'
@@ -33,25 +34,30 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
-            <LinkRow to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
-            <LinkRow to="/personal" icon="person" title="Personal vs negocio" sub={`${ESTADO_LABEL.POSIBLE_PERSONAL.replace(/[¿?]/g, '')} y sueldo de dueño`} />
-            <LinkRow to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
-            <LinkRow to="/mi-contador" icon="support_agent" title="Mi contador" sub={`${CONTADOR.nombre} · ${CONTADOR.estudio}`} end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined} />
-            <LinkRow to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números y Mi progreso" />
-            <LinkRow to="/datos" icon="database" title="Datos de entrenamiento" sub="Acerca de los datos: lo que Zenity aprende" />
+            <LinkRow tone="info" to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
+            <LinkRow tone="violet" to="/personal" icon="person" title="Personal vs negocio" sub={`${ESTADO_LABEL.POSIBLE_PERSONAL.replace(/[¿?]/g, '')} y sueldo de dueño`} />
+            <LinkRow tone="warning" to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
+            <LinkRow tone="info" to="/mi-contador" icon="support_agent" title="Mi contador" sub={`${CONTADOR.nombre} · ${CONTADOR.estudio}`} end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined} />
+            <LinkRow tone="positive" to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números y Mi progreso" />
+            <LinkRow tone="violet" to="/datos" icon="database" title="Datos de entrenamiento" sub="Acerca de los datos: lo que Zenity aprende" />
           </div>
         </motion.section>
 
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Reportes" />
           <div className={styles.list}>
-            <LinkRow to="/movimientos/ingresos" icon="trending_up" title="Ingresos" />
-            <LinkRow to="/movimientos/egresos" icon="trending_down" title="Egresos" />
-            <LinkRow to="/resumen" icon="bar_chart" title="Balance" />
-            <LinkRow to="/chat" icon="auto_awesome" title="Habla con Zenity" />
-            <LinkRow to="/revisado" icon="checklist" title="Revisado por Zenity" />
-            <LinkRow to="/conexiones/nueva" icon="add_link" title="Nueva conexión" />
+            <LinkRow tone="positive" to="/movimientos/ingresos" icon="trending_up" title="Ingresos" />
+            <LinkRow tone="negative" to="/movimientos/egresos" icon="trending_down" title="Egresos" />
+            <LinkRow tone="info" to="/resumen" icon="bar_chart" title="Balance" />
+            <LinkRow tone="violet" to="/chat" icon="auto_awesome" title="Habla con Zenity" />
+            <LinkRow tone="positive" to="/revisado" icon="checklist" title="Revisado por Zenity" />
+            <LinkRow tone="info" to="/conexiones/nueva" icon="add_link" title="Nueva conexión" />
           </div>
+        </motion.section>
+
+        <motion.section className={styles.section} variants={fadeUp}>
+          <SectionHead title="Apariencia" />
+          <ThemeSwitch />
         </motion.section>
 
         <motion.section className={styles.section} variants={fadeUp}>

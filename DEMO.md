@@ -2,7 +2,9 @@
 
 Para BCP e inversionistas. Todo sale del seed determinístico (hoy = **18/11/2026**). Los números de abajo son los que muestra la demo recién reiniciada.
 
-**Antes de empezar:** Más → **Reiniciar demo** (o abre `https://ferdango.github.io/zenity/#/inicio` en una ventana privada). Para el dueño usa el celular o la vista de 375 px; para el contador, una pantalla de escritorio.
+**Antes de empezar:** Más → **Reiniciar demo** (o abre `https://ferdango.github.io/zenity/` en una ventana privada y toca **«Ver la demo»** en la bienvenida, sin pasar por el login). Para el dueño usa el celular o la vista de 375 px; para el contador, una pantalla de escritorio.
+
+**Apariencia:** la app abre en tema claro. En Más → **Apariencia** (o en Ajustes de la cuenta) se cambia a Oscuro o Automático; se mantiene al reiniciar la demo.
 
 ---
 

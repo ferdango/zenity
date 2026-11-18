@@ -115,7 +115,7 @@ export function Regimen() {
               <article
                 key={r.regimen}
                 className={styles.card}
-                style={r.regimen === mejor.regimen ? { borderColor: 'var(--z-positive)', background: 'rgb(109 213 140 / 0.06)' } : !r.disponible ? { opacity: 0.6 } : undefined}
+                style={r.regimen === mejor.regimen ? { borderColor: 'var(--z-positive)', background: 'color-mix(in srgb, var(--z-positive) 6%, var(--z-surface))' } : !r.disponible ? { opacity: 0.6 } : undefined}
               >
                 <div className={styles.sectionHead} style={{ padding: 0 }}>
                   <span className="t-title-m">{r.nombre}</span>

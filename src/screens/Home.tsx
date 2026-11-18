@@ -25,6 +25,7 @@ import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
+import { useAvisos } from '../state/useAvisos'
 import styles from './Home.module.css'
 
 function useScrolled() {
@@ -117,6 +118,7 @@ export function Home() {
     ledger,
   } = useApp()
   const scrolled = useScrolled()
+  const avisos = useAvisos()
   const sire = useSire()
   const taxPeriod = sirePeriod(sire, periodKey)
   const period = getPeriod(ledger, periodKey)
@@ -222,7 +224,7 @@ export function Home() {
         <IconButton
           icon="notifications"
           label="Notificaciones"
-          badge
+          badge={avisos ? avisos.some((n) => n.urgente) : true}
           onClick={() => openSheet('notifications')}
           data-tour="notifications"
         />

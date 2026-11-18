@@ -8,45 +8,65 @@
 :root {
   color-scheme: dark;
 
-  /* ── Superficies (Midnight) ──────────────────────────────── */
-  --z-bg: #0b0d13;
-  --z-surface-lowest: #07080d;
-  --z-surface-low: #0f121a;
-  --z-surface: #151924;
-  --z-surface-high: #1c2130;
-  --z-surface-highest: #262c3d;
-  --z-surface-glass: rgb(11 13 19 / 0.72);
+  /* ── Superficies (tema oscuro «Noche suave») ─────────────────
+     Menos negro puro que la paleta Midnight original: superficies azul pizarra con más
+     separación entre niveles y acentos más cálidos, para que todo se lea con calma. */
+  --z-bg: #0f121a;
+  --z-surface-lowest: #0b0e15;
+  --z-surface-low: #141824;
+  --z-surface: #191e2b;
+  --z-surface-high: #212737;
+  --z-surface-highest: #2b3245;
+  --z-surface-glass: rgb(15 18 26 / 0.76);
 
-  --z-on-surface: #e7e9f0;
-  --z-on-surface-variant: #c3c7d4;
-  --z-on-surface-low: #8f95a8;
+  --z-on-surface: #eef0f7;
+  --z-on-surface-variant: #c6cbd9;
+  --z-on-surface-low: #949ab0;
   --z-outline: #8a90a6;
-  --z-outline-variant: #333a4e;
-  --z-divider: rgb(180 196 255 / 0.08);
+  --z-outline-variant: #363d52;
+  --z-divider: rgb(190 205 255 / 0.09);
 
   /* ── Roles de color ──────────────────────────────────────── */
-  --z-primary: #a8c7fa;
-  --z-on-primary: #062e6f;
-  --z-primary-container: #1f3760;
-  --z-on-primary-container: #d3e3fd;
-  --z-primary-fixed: #d3e3fd;
-  --z-on-primary-fixed: #041e49;
-  --z-secondary-container: #004a77;
-  --z-on-secondary-container: #c2e7ff;
+  --z-primary: #9ec2ff;
+  --z-on-primary: #0a2a63;
+  --z-primary-container: #233d6b;
+  --z-on-primary-container: #d8e6ff;
+  --z-primary-fixed: #d8e6ff;
+  --z-on-primary-fixed: #061a40;
+  --z-secondary-container: #0c4a73;
+  --z-on-secondary-container: #c7e7ff;
 
-  --z-positive: #6dd58c;
-  --z-positive-container: rgb(109 213 140 / 0.14);
-  --z-on-positive-container: #c4eed0;
-  --z-negative: #ff8a7a;
-  --z-negative-container: rgb(255 112 90 / 0.14);
-  --z-on-negative-container: #ffdad4;
-  --z-warning: #fdd663;
+  --z-positive: #72d99a;
+  --z-positive-container: rgb(114 217 154 / 0.14);
+  --z-on-positive-container: #c8f0d6;
+  --z-negative: #ff9585;
+  --z-negative-container: rgb(255 127 108 / 0.14);
+  --z-on-negative-container: #ffdcd5;
+  --z-warning: #f7cf6a;
+  --z-warning-container: rgb(247 207 106 / 0.13);
+  --z-on-warning-container: #fbe6ad;
   --z-error: #f2b8b5;
   --z-celestial: #fdd663;
 
-  --z-inverse-surface: #e3e3e3;
-  --z-inverse-on-surface: #303030;
+  --z-inverse-surface: #e6e8ef;
+  --z-inverse-on-surface: #262b36;
+  --z-inverse-primary: #0b57d0;
   --z-scrim: rgb(0 0 0 / 0.55);
+
+  /* Sombra suave de las tarjetas (en oscuro basta el borde) */
+  --z-card-shadow: none;
+
+  /* Luz ambiental del fondo */
+  --z-ambient-1: rgb(66 133 244 / 0.16);
+  --z-ambient-2: rgb(155 114 203 / 0.13);
+  --z-ambient-3: rgb(20 184 166 / 0.07);
+
+  /* Vista previa de WhatsApp (modo oscuro de WhatsApp) */
+  --z-wa-bg: #0b141a;
+  --z-wa-in: #202c33;
+  --z-wa-out: #005c4b;
+  --z-wa-text: #e9edef;
+  --z-wa-meta: rgb(233 237 239 / 0.6);
 
   /* ── Marca / IA ──────────────────────────────────────────── */
   --z-blue: #4285f4;
@@ -81,12 +101,12 @@
     #4285f4
   );
 
-  /* Skeleton loader (valores reales de Gemini) */
-  --z-skel-1: #151924;
-  --z-skel-2: #262c3d;
+  /* Skeleton loader */
+  --z-skel-1: #191e2b;
+  --z-skel-2: #2b3245;
   --z-skel-3: #487fed;
 
-  /* Tarjetas de cuentas (Figma) */
+  /* Tarjetas de cuentas (Figma): iguales en los dos temas */
   --z-card-purple: #9467d3;
   --z-card-indigo: #4d54e9;
   --z-card-light: #e2eefe;
@@ -103,7 +123,7 @@
   --z-glow-2: #3186ff;
   --z-glow-3: #9b72cb;
   --z-glow-4: #d96570;
-  --z-glow-opacity: 0.55;
+  --z-glow-opacity: 0.5;
 
   /* ── Estados (Material 3) ────────────────────────────────── */
   --z-state-hover: 0.08;
@@ -146,6 +166,83 @@
   --z-shadow-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
   --z-shadow-3: 0 4px 8px 3px rgb(0 0 0 / 0.15), 0 1px 3px rgb(0 0 0 / 0.3);
   --z-glow-input: 0 0 20px 0 rgb(227 227 227 / 0.04);
+}
+
+/*
+ * Tema claro «Día»: fondo gris azulado muy suave, superficies blancas con sombra leve,
+ * azul de confianza y verdes, rojos y ámbar con buen contraste sobre blanco.
+ * Las tarjetas de conexiones (Cards.module.css) no cambian.
+ */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --z-bg: #f3f5fa;
+  --z-surface-lowest: #ffffff;
+  --z-surface-low: #f8f9fc;
+  --z-surface: #ffffff;
+  --z-surface-high: #eef2f8;
+  --z-surface-highest: #e3e8f1;
+  --z-surface-glass: rgb(243 245 250 / 0.84);
+
+  --z-on-surface: #172033;
+  --z-on-surface-variant: #46506a;
+  --z-on-surface-low: #6a7491;
+  --z-outline: #8b94ab;
+  --z-outline-variant: #d2d8e5;
+  --z-divider: rgb(24 40 80 / 0.08);
+
+  --z-primary: #1a5fd6;
+  --z-on-primary: #ffffff;
+  --z-primary-container: #dce8ff;
+  --z-on-primary-container: #0c2d6e;
+  --z-primary-fixed: #d6e4ff;
+  --z-on-primary-fixed: #0c2d6e;
+  --z-secondary-container: #d6ecff;
+  --z-on-secondary-container: #08365c;
+
+  --z-positive: #0d8f50;
+  --z-positive-container: rgb(13 143 80 / 0.1);
+  --z-on-positive-container: #0b5a35;
+  --z-negative: #d23b3b;
+  --z-negative-container: rgb(210 59 59 / 0.09);
+  --z-on-negative-container: #8a1c1c;
+  --z-warning: #a86200;
+  --z-warning-container: rgb(245 166 35 / 0.15);
+  --z-on-warning-container: #6b3f00;
+  --z-error: #b3261e;
+  --z-celestial: #f0a020;
+
+  --z-inverse-surface: #1f2533;
+  --z-inverse-on-surface: #eef1f7;
+  --z-inverse-primary: #9ec2ff;
+  --z-scrim: rgb(16 22 38 / 0.38);
+
+  --z-card-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 18px -10px rgb(16 24 40 / 0.14);
+
+  --z-ambient-1: rgb(26 95 214 / 0.07);
+  --z-ambient-2: rgb(155 114 203 / 0.07);
+  --z-ambient-3: rgb(20 184 166 / 0.05);
+
+  --z-wa-bg: #efeae2;
+  --z-wa-in: #ffffff;
+  --z-wa-out: #d9fdd3;
+  --z-wa-text: #111b21;
+  --z-wa-meta: rgb(17 27 33 / 0.5);
+
+  --z-skel-1: #eef1f7;
+  --z-skel-2: #dfe5ef;
+  --z-skel-3: #1a5fd6;
+
+  --z-glow-1: #a9c7ff;
+  --z-glow-2: #7fa9ff;
+  --z-glow-3: #cdb2f1;
+  --z-glow-4: #f4b4ba;
+  --z-glow-opacity: 0.45;
+
+  --z-shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.05);
+  --z-shadow-2: 0 2px 6px rgb(16 24 40 / 0.06), 0 8px 20px -6px rgb(16 24 40 / 0.12);
+  --z-shadow-3: 0 12px 32px -8px rgb(16 24 40 / 0.2), 0 2px 6px rgb(16 24 40 / 0.06);
+  --z-glow-input: 0 0 0 1px var(--z-outline-variant);
 }
 
 @property --z-angle {

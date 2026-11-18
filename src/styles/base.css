@@ -44,9 +44,9 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(70vmax 45vmax at -5% -10%, rgb(66 133 244 / 0.16), transparent 62%),
-    radial-gradient(55vmax 40vmax at 105% 0%, rgb(155 114 203 / 0.13), transparent 60%),
-    radial-gradient(80vmax 45vmax at 50% 115%, rgb(20 184 166 / 0.07), transparent 60%);
+    radial-gradient(70vmax 45vmax at -5% -10%, var(--z-ambient-1), transparent 62%),
+    radial-gradient(55vmax 40vmax at 105% 0%, var(--z-ambient-2), transparent 60%),
+    radial-gradient(80vmax 45vmax at 50% 115%, var(--z-ambient-3), transparent 60%);
 }
 
 #root {
