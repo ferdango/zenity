@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Business, DEMO_BUSINESSES, businessFromCompany, withRegimen } from '../data/businesses'
+import { demoConnections, ledgerFromAnalysis } from '../data/demoLedger'
 import { buildLedger } from '../data/ledger'
 import { autoChoice, type MatchChoice } from '../data/matches'
 import { type CategoryId, type Connection, DEFAULT_PERIOD, INITIAL_CONNECTIONS, type SourceKind, USER } from '../data/mock'
@@ -19,12 +20,14 @@ import {
   type SheetName,
   type Toast,
 } from './context'
+import { analysisFor, useDemoState } from './demoStore'
 
 const HIDE_KEY = 'zenity.hideBalances'
-const PROFILE_KEY = 'zenity.profile'
+// v2: la demo de la primera ola (Rosa, Ferretería San Martín y Bodega Doña Rosa)
+const PROFILE_KEY = 'zenity.profile.v2'
 const TOUR_KEY = 'zenity.tourDone'
-const BUSINESSES_KEY = 'zenity.businesses'
-const ACTIVE_BUSINESS_KEY = 'zenity.business'
+const BUSINESSES_KEY = 'zenity.businesses.v2'
+const ACTIVE_BUSINESS_KEY = 'zenity.business.v2'
 
 /** Etiqueta de la tarjeta según el tipo de fuente conectada. */
 const KIND_LABELS: Record<SourceKind, string> = {
@@ -56,7 +59,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [profile, setProfileState] = useState<Profile>(() => readStorage<Profile>(PROFILE_KEY, USER))
   const [registration, setRegistration] = useState<Registration>(EMPTY_REGISTRATION)
   const [hideBalances, setHideBalances] = useState(() => readStorage(HIDE_KEY, false))
-  const [periodKey, setPeriodKey] = useState(DEFAULT_PERIOD)
+  const [rawPeriodKey, setPeriodKey] = useState(DEFAULT_PERIOD)
   const [businesses, setBusinesses] = useState<Business[]>(loadBusinesses)
   const [activeId, setActiveId] = useState(() => readStorage(ACTIVE_BUSINESS_KEY, ''))
   /** Categorías que el usuario cambió, por negocio (las demás las decide Zenity) */
@@ -74,11 +77,19 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const business = businesses.find((b) => b.id === activeId) ?? businesses[0]
   const businessId = business.id
-  const connections = business.connections
-  const ledger = useMemo(
-    () => buildLedger(business, matchOverrides[business.id], categoryOverrides[business.id]),
-    [business, matchOverrides, categoryOverrides],
+  // Negocios de la demo: el libro sale del motor de conciliación (con las correcciones del usuario)
+  const demo = useDemoState()
+  const analysis = analysisFor(businessId, demo)
+  const connections = useMemo(
+    () => (analysis ? demoConnections(analysis, business.connections) : business.connections),
+    [analysis, business.connections],
   )
+  const ledger = useMemo(
+    () => (analysis ? ledgerFromAnalysis(analysis) : buildLedger(business, matchOverrides[business.id], categoryOverrides[business.id])),
+    [analysis, business, matchOverrides, categoryOverrides],
+  )
+  // Cada negocio tiene su calendario: si el mes elegido no existe en este, se muestra su último mes
+  const periodKey = ledger.periods.some((p) => p.key === rawPeriodKey) ? rawPeriodKey : ledger.periods[ledger.periods.length - 1].key
   // Piloto automático: cada movimiento lleva la categoría recomendada y cada par la decisión de
   // Zenity, salvo que el usuario las haya cambiado. Nada queda esperando una respuesta.
   const reviewed = reviewedIds[businessId]
@@ -160,10 +171,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const toast = useCallback(
-    (message: string, icon?: string) => {
+    (message: string, icon?: string, action?: Toast['action']) => {
       const id = ++toastId.current
-      setToasts((list) => [...list.slice(-1), { id, message, icon }])
-      window.setTimeout(() => dismissToast(id), 3200)
+      setToasts((list) => [...list.slice(-1), { id, message, icon, action }])
+      // Con acción («Deshacer») el aviso dura 5 segundos
+      window.setTimeout(() => dismissToast(id), action ? 5000 : 3200)
     },
     [dismissToast],
   )

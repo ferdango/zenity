@@ -54,7 +54,9 @@ export function esAbonoDePersona(m: BankMovement): boolean {
 }
 
 export function analyze(data: BusinessData, user: UserInputs): Analysis {
-  const business: DemoBusiness = { ...data.business, ...user.overrides }
+  // Solo los ajustes con valor: «volver a los valores de ejemplo» los deja en undefined
+  const overrides = Object.fromEntries(Object.entries(user.overrides ?? {}).filter(([, v]) => v !== undefined))
+  const business: DemoBusiness = { ...data.business, ...overrides }
   const id = business.id
   const corrections = user.corrections.filter((c) => c.businessId === id)
   const rules = user.rules.filter((r) => r.businessId === id)

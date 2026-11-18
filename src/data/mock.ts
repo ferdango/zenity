@@ -26,10 +26,11 @@ export interface Connection {
   syncedAt?: string
 }
 
+/** Dueña de la demo (Ferretería San Martín y Bodega Doña Rosa). Datos ficticios. */
 export const USER = {
-  firstName: 'Fernando',
-  fullName: 'Fernando Goicochea',
-  initials: 'FG',
+  firstName: 'Rosa',
+  fullName: 'Rosa Huamán Quispe',
+  initials: 'RH',
 }
 
 export const INITIAL_CONNECTIONS: Connection[] = [

@@ -13,6 +13,8 @@ export interface Toast {
   id: number
   message: string
   icon?: string
+  /** Botón del aviso (p. ej. «Deshacer») */
+  action?: { label: string; onClick: () => void }
 }
 
 /** Datos del usuario que se muestran en la app (saludo, menú, tarjetas). */
@@ -115,7 +117,7 @@ export interface AppState {
   /** Marca un movimiento o un par como revisado por el usuario (o lo devuelve a la bandeja) */
   setReviewed: (id: string, done: boolean) => void
   toasts: Toast[]
-  toast: (message: string, icon?: string) => void
+  toast: (message: string, icon?: string, action?: Toast['action']) => void
   dismissToast: (id: number) => void
   drawerOpen: boolean
   setDrawerOpen: (open: boolean) => void

@@ -14,7 +14,7 @@ Brief: «Zenity — Brief para construir la primera ola en el prototipo» (F-01 
 | Capa | Dónde | Qué |
 | --- | --- | --- |
 | Config | `src/config/` | `demo.ts` (hoy = 18/11/2026), `taxParams2026.ts` (UIT, IGV, regímenes, cronograma mock, tipo de cambio mock), `categories.ts` (categoría simple ↔ cuenta PCGE), `lessons.ts` (textos de microlecciones) |
-| Fuentes mock | `src/data/sources/` | `BankSource`, `SunatSireSource`, `DigitalPaymentsSource` con implementación mock |
+| Fuentes mock | `src/data/fuentes/` (`src/data/sources.ts` ya existía: catálogo de conexiones) | `BankSource`, `SunatSireSource`, `DigitalPaymentsSource` con implementación mock |
 | Seed | `src/data/seed/` | Generador determinístico: Ferretería San Martín (RMT, 4 trabajadores), Bodega Doña Rosa (NRUS, dos vías) y 8 clientes resumidos para el contador |
 | Dominio | `src/domain/` | Funciones puras con tests: `reconciliation`, `categorization`, `personal`, `collections`, `cashflow`, `taxSimulator`, `calendar`, `lessons`, `engine` (une todo) |
 | Estado demo | `src/state/demoStore.ts` | Store externo (`useSyncExternalStore`) con correcciones, reglas, comentarios, promesas, sueldo del dueño, eventos de lecciones, persona y permisos. Se guarda en `localStorage`; «Reiniciar demo» lo borra y vuelve al seed |
@@ -30,6 +30,32 @@ Brief: «Zenity — Brief para construir la primera ola en el prototipo» (F-01 
 - **Escenario base de caja:** incluye certeza ALTA y MEDIA; las cobranzas vencidas (BAJA) solo cuentan si hay promesa. El pesimista usa ventas promedio − 1 desviación y deja fuera las promesas.
 - **Personal:** además de las señales del brief, +0.5 si la transferencia va a una persona con el apellido del dueño («transferencia a un familiar»).
 - **Depósito de efectivo:** la regla SUGERIDO lo compara con las boletas al contado del día anterior (sin match) y lo propone como ventas en efectivo.
+
+## Estado (18/11/2026)
+
+| Paso | Estado |
+| --- | --- |
+| 0 · Inspección + `PLAN.md` | Hecho |
+| 1 · Seed + adaptadores mock + config | Hecho (`src/data/seed`, `src/data/fuentes`, `src/config`) |
+| 2 · `reconciliation` y `categorization` con tests de los 14 casos | Hecho (`src/domain/*.test.ts`) |
+| 3 · F-02 + F-03 (`/revisar`) | Hecho: tarjetas, ✓ Correcto / deslizar, 3 alternativas, «Otra…», «Es personal», reglas con parecidos, Deshacer 5 s, vista WhatsApp, preguntas del contador |
+| 4 · F-01 (`/conciliacion`) | Hecho: mes, % conciliado, chips por estado, detalle en tres columnas, banner NRUS |
+| 5 · F-04 (`/personal`) | Hecho: resumen + 3 meses, sueldo de dueño, alerta de exceso, reto de 30 días |
+| 6 · F-05 (`/cobrar`) | Hecho: lista por días × monto, tramos, mensaje por tono, wa.me, promesa, «Simular que pagó», días promedio de cobro |
+| 7 · F-06 (`/caja`) con tests | Hecho: 30/60/90, base + pesimista + colchón, alerta, acciones, tabla de eventos, ajustes (régimen laboral y colchón) |
+| 8 · F-07 (`/regimen`) con los tres tests | Hecho |
+| 9 · F-08 (`/contador`) | Hecho: tablero de 10 clientes con semáforo, movimientos con PCGE, reglas, comentarios, cierre, CSV |
+| 10 · Microlecciones | Hecho: 10 lecciones, tarjetas en contexto, `/aprende` con «Mi progreso» y eventos |
+| 11 · Inicio, navegación y «Reiniciar demo» | Hecho |
+| 12 · QA + `DEMO.md` | Hecho: 53 tests, build y lint; guion probado en el navegador (375 px dueño, 1280 px contador) |
+
+Decisiones tomadas durante la construcción:
+
+- **Alerta de caja = primer cruce del colchón** (o de cero) y su punto más bajo de esa semana; se nombran primero los picos peruanos (gratificación, IGV, CTS, planilla).
+- **Escenario pesimista con la desviación semanal** (no diaria): los abonos diarios son muy irregulares y con la desviación diaria las ventas pesimistas quedaban en cero.
+- **Yape no tiene saldo propio:** cada cobro se abona en la cuenta BCP; su tarjeta queda en S/ 0 para no contar dos veces el consolidado.
+- **Seed calibrado** para que, con hoy = 18/11/2026, la alerta caiga el 20/12 por la gratificación y el IGV, y desaparezca al registrar la promesa de pago de la factura vencida.
+- **Microlección en contexto:** se muestra hasta que el usuario la lee o la cierra; después solo queda en `/aprende`.
 
 ## Pendientes / TODO
 

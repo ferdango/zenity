@@ -9,7 +9,7 @@ import { partyKey } from './categorization.ts'
 import { comprobantesEn, totalNeto, type Analysis } from './engine.ts'
 import { vencimientoDe } from './reconciliation.ts'
 import type { BankMovement, CashEvent, Comprobante, DemoBusiness, PromesaPago } from './types.ts'
-import { addDays, addMonths, dayOf, diffDays, fmtDiaMes, lastDayOfMonth, monthOf, round2, weekday } from './util.ts'
+import { addDays, addMonths, dayOf, diffDays, fmtDiaMes, fmtSolesCorto, lastDayOfMonth, monthOf, round2, weekday } from './util.ts'
 
 export interface CashPoint {
   fecha: string
@@ -321,4 +321,10 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
   acciones.push({ id: 'capital', texto: 'Ver opciones de capital de trabajo BCP', disabled: true })
 
   return { saldoInicial, colchon, eventos, serie, minimo, alerta, acciones }
+}
+
+/** «El 20/12 tu caja baja a S/ 6,437 por la gratificación y el IGV.» */
+export function textoAlerta(a: CashAlert): string {
+  const motivos = a.motivos.length === 2 ? `${a.motivos[0]} y ${a.motivos[1]}` : (a.motivos[0] ?? 'tus pagos')
+  return `El ${fmtDiaMes(a.fecha)} tu caja baja a ${fmtSolesCorto(Math.round(a.saldo))} por ${motivos}.`
 }

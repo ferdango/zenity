@@ -3,8 +3,9 @@
  * Puntaje 0..1; se marca POSIBLE_PERSONAL si llega a 0.6.
  */
 import { ruleMatches } from './categorization.ts'
+import type { Analysis } from './engine.ts'
 import type { BankMovement, Correction, Rule } from './types.ts'
-import { hourOf, isWeekend, normalizeName, round2 } from './util.ts'
+import { diffDays, hourOf, isWeekend, monthOf, normalizeName, round2 } from './util.ts'
 
 export const UMBRAL_PERSONAL = 0.6
 
@@ -75,3 +76,31 @@ export function personalScore(m: BankMovement, ctx: PersonalContext): PersonalSc
   }
   return { score: round2(Math.max(0, Math.min(1, score))), senales }
 }
+
+export const RETO_DIAS = 30
+
+export function personalesDelMes(a: Analysis, mes: string): BankMovement[] {
+  return a.movements.filter((m) => monthOf(m.fecha) === mes && a.classifications.get(m.id)?.estado === 'POSIBLE_PERSONAL')
+}
+
+/** Reto «30 días con cuentas separadas»: se reinicia con un gasto personal que no cubre el sueldo del dueño. */
+export function progresoReto(a: Analysis, inicio: string, hoy: string) {
+  const sueldo = a.business.sueldoDueno ?? 0
+  const gastos = a.movements
+    .filter((m) => m.fecha.slice(0, 10) >= inicio && a.classifications.get(m.id)?.estado === 'POSIBLE_PERSONAL')
+    .sort((x, y) => x.fecha.localeCompare(y.fecha))
+  let acumulado = 0
+  let mes = ''
+  let reinicio: BankMovement | null = null
+  for (const m of gastos) {
+    if (monthOf(m.fecha) !== mes) {
+      mes = monthOf(m.fecha)
+      acumulado = 0
+    }
+    acumulado = round2(acumulado - m.monto)
+    if (acumulado > sueldo) reinicio = m
+  }
+  const desde = reinicio ? reinicio.fecha.slice(0, 10) : inicio
+  return { dias: Math.min(RETO_DIAS, Math.max(0, diffDays(desde, hoy))), reinicio }
+}
+
