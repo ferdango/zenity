@@ -32,6 +32,7 @@ const FUENTE_LABEL: Record<FuenteCaja, string> = {
   IMPUESTOS: 'Impuestos',
   GRATIFICACION: 'Gratificación',
   CTS: 'CTS',
+  CREDITO: 'Crédito BCP',
 }
 
 const CERTEZA_TONE: Record<Certeza, 'alta' | 'media' | 'baja'> = { ALTA: 'alta', MEDIA: 'media', BAJA: 'baja' }
@@ -123,7 +124,7 @@ export function Caja() {
                 ac.to ? (
                   <Link key={ac.id} to={ac.to} className={`${styles.row} ${styles.rowWrap}`} data-ripple="">
                     <span className={styles.rowIcon}>
-                      <Icon name="payments" size={20} />
+                      <Icon name={ac.id === 'capital' ? 'credit_score' : 'payments'} size={20} />
                     </span>
                     <span className={styles.rowText}>
                       <span className={styles.rowTitle}>{ac.texto}</span>

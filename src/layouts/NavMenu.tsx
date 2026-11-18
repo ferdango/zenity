@@ -246,6 +246,21 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
             },
           )}
           {row(
+            'bcp',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="account_balance" size={20} />
+              </span>
+              <span>Ver como BCP</span>
+            </>,
+            {
+              onClick: action(() => {
+                setPersona('BCP')
+                navigate('/bcp')
+              }),
+            },
+          )}
+          {row(
             'reset',
             <>
               <span className={styles.itemIcon}>

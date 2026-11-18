@@ -5,7 +5,10 @@
  * Se guarda en localStorage; «Reiniciar demo» lo borra y vuelve al seed.
  */
 import { useSyncExternalStore } from 'react'
-import { AHORA, CONTADOR_DEMO } from '../config/demo'
+import type { FuenteExpediente } from '../config/credit'
+import { AHORA, CONTADOR_DEMO, HOY } from '../config/demo'
+import { venceConsentimiento } from '../domain/credit'
+import { track } from '../lib/analytics'
 import { loadBusinessData } from '../data/fuentes'
 import { analyze, type Analysis } from '../domain/engine'
 import type {
@@ -29,6 +32,36 @@ export interface Permisos {
   activo: boolean
 }
 
+export type EstadoSolicitud = 'ENVIADA' | 'PRE_APROBADA' | 'MAS_INFO' | 'NO_POR_AHORA' | 'ACEPTADA'
+
+/** Consentimiento del dueño para compartir su expediente con el BCP (revocable). */
+export interface Consentimiento {
+  fuentes: FuenteExpediente[]
+  otorgado: string
+  vence: string
+  revocado?: string
+}
+
+export interface Solicitud {
+  monto: number
+  plazo: number
+  tea: number
+  enviada: string
+  estado: EstadoSolicitud
+  /** Respuesta del BCP (simulada en la vista BCP) */
+  respuesta?: { monto?: number; plazo?: number; nota: string; ts: string }
+  /** Lo que el dueño contestó cuando el BCP pidió más información */
+  infoDueno?: string
+  /** Fecha del desembolso al aceptar */
+  desembolso?: string
+}
+
+export interface CreditoNegocio {
+  visto?: boolean
+  consentimiento?: Consentimiento
+  solicitud?: Solicitud
+}
+
 export interface DemoState {
   v: 1
   corrections: Correction[]
@@ -42,7 +75,9 @@ export interface DemoState {
   lessonEvents: LessonEvent[]
   /** Lecciones cerradas en contexto ("negocio:L01"): ya no se muestran como tarjeta */
   leccionesCerradas: string[]
-  persona: 'DUENO' | 'CONTADOR'
+  persona: 'DUENO' | 'CONTADOR' | 'BCP'
+  /** F3 · Perfil crediticio por negocio */
+  credito: Record<string, CreditoNegocio>
   permisos: Record<string, Permisos>
   /** Cuenta PCGE que asignó el contador a un movimiento */
   pcge: Record<string, string>
@@ -70,6 +105,7 @@ function initial(): DemoState {
     lessonEvents: [],
     leccionesCerradas: [],
     persona: 'DUENO',
+    credito: {},
     permisos: {},
     pcge: {},
     cierre: {},
@@ -285,6 +321,78 @@ export function setCierre(key: string, value: boolean) {
 
 export function marcarRegimenRevisado(businessId: string) {
   setDemoState((s) => (s.regimenRevisado[businessId] ? s : { ...s, regimenRevisado: { ...s.regimenRevisado, [businessId]: true } }))
+}
+
+/* ── F3 · Crédito ─────────────────────────────────────────────── */
+
+function setCredito(businessId: string, patch: (c: CreditoNegocio) => CreditoNegocio) {
+  setDemoState((s) => ({ ...s, credito: { ...s.credito, [businessId]: patch(s.credito[businessId] ?? {}) } }))
+}
+
+/** Consentimiento vigente (no revocado ni vencido). */
+export function consentimientoActivo(c: CreditoNegocio | undefined): Consentimiento | null {
+  const k = c?.consentimiento
+  return k && !k.revocado && k.vence >= HOY ? k : null
+}
+
+export function marcarCreditoVisto(businessId: string, segmento: string) {
+  if (getDemoState().credito[businessId]?.visto) return
+  setCredito(businessId, (c) => ({ ...c, visto: true }))
+  track('credito_perfil_visto', { segmento })
+}
+
+export function otorgarConsentimiento(businessId: string, fuentes: FuenteExpediente[]) {
+  setCredito(businessId, (c) => ({ ...c, consentimiento: { fuentes, otorgado: AHORA, vence: venceConsentimiento(HOY) } }))
+  track('credito_consentimiento', { fuentes: fuentes.length })
+}
+
+export function revocarConsentimiento(businessId: string) {
+  setCredito(businessId, (c) => (c.consentimiento ? { ...c, consentimiento: { ...c.consentimiento, revocado: AHORA } } : c))
+  track('credito_consentimiento_revocado')
+}
+
+export function enviarSolicitud(businessId: string, monto: number, plazo: number, tea: number) {
+  setCredito(businessId, (c) => ({ ...c, solicitud: { monto, plazo, tea, enviada: AHORA, estado: 'ENVIADA' } }))
+  track('credito_solicitud_enviada', { plazo })
+}
+
+/** El BCP responde (vista BCP de la demo). */
+export function responderSolicitud(businessId: string, estado: 'PRE_APROBADA' | 'MAS_INFO' | 'NO_POR_AHORA', respuesta: { monto?: number; plazo?: number; nota: string }) {
+  setCredito(businessId, (c) => (c.solicitud ? { ...c, solicitud: { ...c.solicitud, estado, respuesta: { ...respuesta, ts: AHORA } } } : c))
+  track('credito_respuesta_bcp', { estado })
+}
+
+/** El dueño contesta el pedido de información: la solicitud vuelve a evaluación. */
+export function enviarInformacion(businessId: string, texto: string) {
+  setCredito(businessId, (c) => (c.solicitud ? { ...c, solicitud: { ...c.solicitud, estado: 'ENVIADA', infoDueno: texto } } : c))
+}
+
+/** Acepta la pre-aprobación: el desembolso entra hoy a la cuenta BCP y las cuotas, a la caja. */
+export function aceptarCredito(businessId: string) {
+  const s = getDemoState()
+  const sol = s.credito[businessId]?.solicitud
+  if (!sol || sol.estado !== 'PRE_APROBADA') return
+  const monto = sol.respuesta?.monto ?? sol.monto
+  const plazo = sol.respuesta?.plazo ?? sol.plazo
+  const saldo = analysisFor(businessId)?.saldoActual ?? 0
+  const movement: BankMovement = {
+    id: uid('desembolso'),
+    businessId,
+    fecha: AHORA,
+    monto,
+    glosa: 'DESEMBOLSO PRESTAMO CAPITAL DE TRABAJO BCP',
+    numeroOperacion: String(Math.floor(100_000_000 + Math.random() * 800_000_000)),
+    contraparteNombre: 'BCP',
+    canal: 'TRANSFERENCIA',
+    saldoDespues: Math.round((saldo + monto) * 100) / 100,
+    simulado: true,
+  }
+  setDemoState((st) => ({
+    ...st,
+    extraMovements: [...st.extraMovements, movement],
+    credito: { ...st.credito, [businessId]: { ...st.credito[businessId], solicitud: { ...sol, monto, plazo, estado: 'ACEPTADA', desembolso: HOY } } },
+  }))
+  track('credito_aceptado', { plazo })
 }
 
 /** Restaura el seed: borra todo lo que hizo el usuario en la demo. */

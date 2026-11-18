@@ -64,6 +64,14 @@ Decisiones tomadas durante la construcción:
 - Íconos con color según el estado (verde: cuadra, ámbar: atención, rojo: deuda, violeta: personal).
 - **Flujos:** «Ver la demo» en la bienvenida (sin login); las pestañas Por revisar, Caja y Cobrar ya no muestran flecha de volver; notificaciones calculadas con los datos y con enlace a su pantalla (la campana solo se enciende si hay algo que hacer); Conciliación abre en el primer estado con pendientes; Inicio con «Para hoy» en filas; Cobrar marca la urgencia con color; Caja muestra «Lo que viene» como lista por mes.
 
+## F3 · Perfil crediticio con flujo real (19/11/2026)
+
+- **Dueño (`/credito`):** perfil de crédito con puntaje 0–100 y 6 componentes explicados, monto sugerido, simulador (plazo, monto, cuota, intereses y efecto en la caja), consentimiento por fuente (90 días, revocable) y estado de la solicitud hasta el desembolso.
+- **Banco (`/bcp`, «Ver como BCP»):** expedientes de los clientes que autorizaron compartir, con señales tempranas (adelanto de F4), y decisión: pre-aprobar, pedir información o «no por ahora».
+- **Reglas de ejemplo** en `src/config/credit.ts` (TEA 30%, cuota ≤ 50% de lo que le sobra al negocio, factor por segmento). El cálculo vive en `src/domain/credit.ts` con tests. La política real es del BCP.
+- **Decisiones:** pedir prestado nunca mejora el perfil (el desembolso no cuenta como liquidez y la cuota nueva suma a la deuda); el perfil es del dueño y el banco solo lo ve con consentimiento vigente; eventos de PostHog sin montos (`credito_*`).
+- **Pendiente:** texto legal real del consentimiento, tarifa y política del BCP, comisión por crédito colocado y la mora de los créditos originados.
+
 ## Pendientes / TODO
 
 - Cronograma de vencimientos SUNAT y tipo de cambio: tablas mock, reemplazar por las oficiales.

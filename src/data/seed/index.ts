@@ -5,6 +5,7 @@ import { FERRETERIA_ID, seedFerreteria } from './ferreteria.ts'
 
 export { BODEGA_ID, FERRETERIA_ID }
 export { CARTERA_RESUMIDA, type ClienteResumen } from './cartera.ts'
+export { EXPEDIENTES_EJEMPLO, type ExpedienteResumen } from './expedientes.ts'
 
 let cache: Record<string, BusinessData> | null = null
 

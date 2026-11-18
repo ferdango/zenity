@@ -17,6 +17,7 @@ export interface LessonContext {
   limite: { pct: string; tope: string; regimen: string } | null
   revisados: number
   conciliado: string
+  credito: { excedente: string; cuotaMax: string; monto: string; plazo: number; intereses: string } | null
 }
 
 export interface LessonContent {
@@ -122,6 +123,16 @@ export const LESSONS: Record<LessonId, Builder> = {
       'Conciliar es comprobar que lo que vendiste, lo que facturaste y lo que entró al banco cuadran. Es lo que hace un contador cada mes, y tú lo acabas de hacer en minutos. Con todo conciliado, tus números son confiables.',
     comoTeAfecta: `Revisaste ${c.revisados} movimientos. ${c.negocio} va ${c.conciliado} conciliado este mes.`,
     accion: { label: 'Ver mi conciliación', to: '/conciliacion' },
+  }),
+  L11: (c) => ({
+    titulo: 'Pide solo lo que tu flujo puede pagar',
+    disparador: 'Cuando revisas tu perfil de crédito',
+    cuerpo:
+      'Un crédito no es plata extra: es plata de tus próximos meses. La regla práctica es que la cuota no pase de la mitad de lo que le sobra a tu negocio cada mes, después de compras, gastos, impuestos y tu sueldo.',
+    comoTeAfecta: c.credito
+      ? `Te sobran unos ${c.credito.excedente} al mes, así que tu cuota no debería pasar de ${c.credito.cuotaMax}. Con ${c.credito.monto} a ${c.credito.plazo} meses pagarías ${c.credito.intereses} de intereses.`
+      : 'Hoy a tu negocio no le sobra plata cada mes: primero ordena tus gastos y tu cobranza.',
+    accion: { label: 'Ver mi perfil de crédito', to: '/credito' },
   }),
 }
 

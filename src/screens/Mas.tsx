@@ -36,6 +36,7 @@ export function Mas() {
           <div className={styles.list}>
             <LinkRow tone="info" to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
             <LinkRow tone="violet" to="/personal" icon="person" title="Personal vs negocio" sub={`${ESTADO_LABEL.POSIBLE_PERSONAL.replace(/[¿?]/g, '')} y sueldo de dueño`} />
+            <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Tu perfil de crédito con tu flujo real" />
             <LinkRow tone="warning" to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
             <LinkRow tone="info" to="/mi-contador" icon="support_agent" title="Mi contador" sub={`${CONTADOR.nombre} · ${CONTADOR.estudio}`} end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined} />
             <LinkRow tone="positive" to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números y Mi progreso" />
@@ -78,6 +79,24 @@ export function Mas() {
               <span className={styles.rowText}>
                 <span className={styles.rowTitle}>Ver como contador</span>
                 <span className={styles.rowSub}>Portal multi-cliente de {CONTADOR.nombre} (mejor en escritorio)</span>
+              </span>
+              <Icon name="chevron_right" size={20} />
+            </button>
+            <button
+              type="button"
+              className={styles.row}
+              data-ripple=""
+              onClick={() => {
+                setPersona('BCP')
+                navigate('/bcp')
+              }}
+            >
+              <span className={styles.rowIcon}>
+                <Icon name="account_balance" size={20} />
+              </span>
+              <span className={styles.rowText}>
+                <span className={styles.rowTitle}>Ver como BCP</span>
+                <span className={styles.rowSub}>Expedientes que los clientes autorizaron compartir</span>
               </span>
               <Icon name="chevron_right" size={20} />
             </button>

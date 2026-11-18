@@ -31,7 +31,10 @@ export function useAvisos(): Aviso[] | null {
     const out: Aviso[] = []
     const preguntas = demo.comments.filter((c) => c.businessId === id && c.pregunta && !c.respondida).length
     if (preguntas) out.push({ id: 'preguntas', icon: 'support_agent', title: `${CONTADOR.nombre} te hizo ${preguntas === 1 ? 'una pregunta' : `${preguntas} preguntas`}`, time: 'Ahora', tone: 'ai', to: '/revisar', urgente: true })
-    const pagos = demo.extraMovements.filter((m) => m.businessId === id).slice(-2).reverse()
+    const sol = demo.credito[id]?.solicitud
+    if (sol?.estado === 'PRE_APROBADA') out.push({ id: 'credito', icon: 'credit_score', title: `¡El BCP pre-aprobó tu crédito de ${fmtSolesCorto(sol.respuesta?.monto ?? sol.monto)}!`, time: 'Ahora', tone: 'positive', to: '/credito', urgente: true })
+    if (sol?.estado === 'MAS_INFO') out.push({ id: 'credito', icon: 'credit_score', title: 'El BCP necesita un dato más para tu crédito', time: 'Ahora', tone: 'warning', to: '/credito', urgente: true })
+    const pagos = demo.extraMovements.filter((m) => m.businessId === id && !m.id.startsWith('desembolso')).slice(-2).reverse()
     for (const m of pagos) out.push({ id: m.id, icon: 'task_alt', title: `${m.contraparteNombre ?? 'Un cliente'} te pagó ${fmtSolesCorto(m.monto)} y Zenity lo concilió`, time: 'Hace un momento', tone: 'positive', to: '/conciliacion' })
     if (a.porRevisar.length) out.push({ id: 'revisar', icon: 'fact_check', title: `Tienes ${a.porRevisar.length} movimiento${a.porRevisar.length === 1 ? '' : 's'} por revisar`, time: 'Hoy', tone: 'ai', to: '/revisar', urgente: true })
     if (caja?.alerta) out.push({ id: 'caja', icon: 'warning', title: textoAlerta(caja.alerta), time: 'Hoy', tone: 'warning', to: '/caja', urgente: true })

@@ -40,6 +40,13 @@ export type AnalyticsEvent =
   | 'chat_pregunta_enviada'
   | 'reporte_abierto'
   | 'tutorial_finalizado'
+  // F3 · Perfil crediticio (sin montos ni datos personales)
+  | 'credito_perfil_visto'
+  | 'credito_consentimiento'
+  | 'credito_consentimiento_revocado'
+  | 'credito_solicitud_enviada'
+  | 'credito_respuesta_bcp'
+  | 'credito_aceptado'
 
 export function track(event: AnalyticsEvent, properties?: Record<string, string | number | boolean>) {
   if (!POSTHOG_TOKEN) return

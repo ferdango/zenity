@@ -237,6 +237,7 @@ export type FuenteCaja =
   | 'IMPUESTOS'
   | 'GRATIFICACION'
   | 'CTS'
+  | 'CREDITO'
 
 export interface CashEvent {
   fecha: string
@@ -249,7 +250,7 @@ export interface CashEvent {
   montoPesimista?: number
 }
 
-export type LessonId = 'L01' | 'L02' | 'L03' | 'L04' | 'L05' | 'L06' | 'L07' | 'L08' | 'L09' | 'L10'
+export type LessonId = 'L01' | 'L02' | 'L03' | 'L04' | 'L05' | 'L06' | 'L07' | 'L08' | 'L09' | 'L10' | 'L11'
 
 export interface LessonEvent {
   lessonId: LessonId

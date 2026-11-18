@@ -168,7 +168,11 @@ export function impuestosEstimados(b: DemoBusiness, comps: Comprobante[], period
 
 const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 
-export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string, dias: number): CashflowResult {
+/**
+ * `extras`: eventos que el dueño está evaluando o ya decidió fuera de los datos (p. ej. el desembolso y
+ * las cuotas de un crédito, F3). Entran con su certeza como cualquier otro evento.
+ */
+export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string, dias: number, extras: CashEvent[] = []): CashflowResult {
   const b = a.business
   const fin = addDays(hoy, dias)
   const mesActual = monthOf(hoy)
@@ -240,6 +244,8 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
     }
   }
 
+  for (const e of extras) if (enRango(e.fecha)) eventos.push(e)
+
   /* Ventas estimadas por día de la semana */
   const ventas = estimarVentas(a, hoy)
   const ventasDia = (f: string) => {
@@ -299,7 +305,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
       .sort((x, y) => pico(x) - pico(y) || x.monto - y.monto)
       .slice(0, 2)
     const nombre = (e: CashEvent) =>
-      e.fuente === 'GRATIFICACION' ? 'la gratificación' : e.fuente === 'IMPUESTOS' ? (e.concepto.includes('IGV') ? 'el IGV' : 'los impuestos') : e.fuente === 'PLANILLA' ? 'la planilla' : e.fuente === 'CTS' ? 'la CTS' : `el pago a ${e.concepto.replace(/^Pago a /, '')}`
+      e.fuente === 'CREDITO' ? 'la cuota del crédito' : e.fuente === 'GRATIFICACION' ? 'la gratificación' : e.fuente === 'IMPUESTOS' ? (e.concepto.includes('IGV') ? 'el IGV' : 'los impuestos') : e.fuente === 'PLANILLA' ? 'la planilla' : e.fuente === 'CTS' ? 'la CTS' : `el pago a ${e.concepto.replace(/^Pago a /, '')}`
     alerta = { fecha: bajo.fecha, saldo: bajo.base, cruza: bajo.base < 0 ? 'CERO' : 'COLCHON', motivos: cercanos.map(nombre) }
   }
 
@@ -318,7 +324,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
       acciones.push({ id: 'mover', texto: `Mueve el pago a ${mover.concepto.replace(/^Pago a /, '')} para después del ${fmtDiaMes(addDays(alerta.fecha, 1))}` })
     }
   }
-  acciones.push({ id: 'capital', texto: 'Ver opciones de capital de trabajo BCP', disabled: true })
+  acciones.push({ id: 'capital', texto: 'Ver cuánto crédito BCP puede pagar tu negocio', to: '/credito' })
 
   return { saldoInicial, colchon, eventos, serie, minimo, alerta, acciones }
 }

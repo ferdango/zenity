@@ -1,12 +1,10 @@
 import { motion } from 'motion/react'
 import { type ReactNode, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { InitialsAvatar } from '../components/Avatars'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
-import { Spark } from '../components/Spark'
 import { Pill } from '../components/zen'
+import { PortalShell } from '../components/zen/PortalShell'
 import styles from '../components/zen/zen.module.css'
 import { HOY } from '../config/demo'
 import { CARTERA_RESUMIDA, SEED_IDS } from '../data/seed'
@@ -16,7 +14,7 @@ import { REGIMEN_NOMBRE } from '../domain/taxSimulator'
 import type { RegimenTributario } from '../domain/types'
 import { fmtFecha } from '../domain/util'
 import { fadeUp, staggerContainer } from '../lib/motion'
-import { analysisFor, CONTADOR, permisosDe, setPersona, useDemoState } from '../state/demoStore'
+import { analysisFor, CONTADOR, permisosDe, useDemoState } from '../state/demoStore'
 
 const SEMAFORO_LABEL: Record<Semaforo, string> = { VERDE: 'Verde', AMBAR: 'Ámbar', ROJO: 'Rojo' }
 const SEMAFORO_CLASS: Record<Semaforo, string> = { VERDE: styles.verde, AMBAR: styles.ambar, ROJO: styles.rojo }
@@ -24,51 +22,10 @@ const ORDEN: Record<Semaforo, number> = { ROJO: 0, AMBAR: 1, VERDE: 2 }
 
 /** Encabezado del portal del contador (desktop-first). */
 export function ContadorShell({ children, title }: { children: ReactNode; title: ReactNode }) {
-  const navigate = useNavigate()
   return (
-    <div className="z-page" style={{ background: 'var(--z-bg)' }}>
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '12px var(--z-gutter)',
-          background: 'var(--z-surface-glass)',
-          backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid var(--z-divider)',
-        }}
-      >
-        <Link to="/contador" style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500 }}>
-          <Spark size={24} /> Zenity <span className={styles.muted}>· Portal del contador</span>
-        </Link>
-        <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span className={styles.small} style={{ textAlign: 'right' }}>
-            {CONTADOR.nombre}
-            <br />
-            <span className={styles.muted}>{CONTADOR.estudio}</span>
-          </span>
-          <InitialsAvatar initials={CONTADOR.iniciales} size={36} />
-          <Button
-            size="sm"
-            variant="tonal"
-            icon="switch_account"
-            onClick={() => {
-              setPersona('DUENO')
-              navigate('/inicio')
-            }}
-          >
-            Ver como dueño
-          </Button>
-        </span>
-      </header>
-      <div className={styles.pageWide} style={{ width: '100%' }}>
-        {typeof title === 'string' ? <h1 className="t-headline-s" style={{ paddingTop: 12 }}>{title}</h1> : title}
-        {children}
-      </div>
-    </div>
+    <PortalShell portal="Portal del contador" home="/contador" usuario={{ nombre: CONTADOR.nombre, detalle: CONTADOR.estudio, iniciales: CONTADOR.iniciales }} title={title}>
+      {children}
+    </PortalShell>
   )
 }
 
