@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { HOY } from '../config/demo'
 import { proyectarCaja } from '../domain/cashflow'
+import { cuotaAceptada, eventosCredito, perfilCrediticio } from '../domain/credit'
 import { porCobrar } from '../domain/collections'
 import type { Analysis } from '../domain/engine'
 import { evaluarLecciones } from '../domain/lessons'
@@ -27,9 +28,27 @@ export function useCobranzas() {
   return useMemo(() => (a ? porCobrar(a, demo.promesas, HOY) : []), [a, demo.promesas])
 }
 
+/** Cuotas de un crédito ya aceptado (el desembolso ya entró como movimiento del banco). */
+export function useCuotasCredito() {
+  const { demo, businessId } = useZen()
+  const sol = demo.credito[businessId]?.solicitud
+  return useMemo(
+    () => (sol?.estado === 'ACEPTADA' && sol.desembolso ? eventosCredito(sol.monto, sol.plazo, sol.tea, sol.desembolso).slice(1) : []),
+    [sol],
+  )
+}
+
 export function useCaja(dias: number) {
   const { a, demo } = useZen()
-  return useMemo(() => (a ? proyectarCaja(a, demo.promesas, HOY, dias) : null), [a, demo.promesas, dias])
+  const cuotas = useCuotasCredito()
+  return useMemo(() => (a ? proyectarCaja(a, demo.promesas, HOY, dias, cuotas) : null), [a, demo.promesas, dias, cuotas])
+}
+
+/** F3 · Perfil crediticio del negocio activo. */
+export function usePerfilCrediticio() {
+  const { a, demo, businessId } = useZen()
+  const cuota = cuotaAceptada(demo.credito[businessId]?.solicitud)
+  return useMemo(() => (a ? perfilCrediticio(a, HOY, demo.promesas, cuota) : null), [a, demo.promesas, cuota])
 }
 
 export function useSimulador() {
@@ -47,7 +66,18 @@ export function useLecciones() {
   const caja = useCaja(60)
   const sim = useSimulador()
   return useMemo(
-    () => (a && caja ? evaluarLecciones({ analysis: a, hoy: HOY, cobranzas, caja, limite: sim?.aviso ?? null, corrections: demo.corrections }) : null),
-    [a, caja, cobranzas, sim, demo.corrections],
+    () =>
+      a && caja
+        ? evaluarLecciones({
+            analysis: a,
+            hoy: HOY,
+            cobranzas,
+            caja,
+            limite: sim?.aviso ?? null,
+            corrections: demo.corrections,
+            creditoVisto: !!demo.credito[a.business.id]?.visto,
+          })
+        : null,
+    [a, caja, cobranzas, sim, demo.corrections, demo.credito],
   )
 }

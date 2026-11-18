@@ -9,10 +9,12 @@ import { AddBusiness } from './screens/AddBusiness'
 import { AddConnection } from './screens/AddConnection'
 import { Analyzing } from './screens/Analyzing'
 import { Aprende } from './screens/Aprende'
+import { Bcp, BcpExpediente } from './screens/Bcp'
 import { Caja } from './screens/Caja'
 import { Cobrar } from './screens/Cobrar'
 import { Conciliacion } from './screens/Conciliacion'
 import { Contador } from './screens/Contador'
+import { Credito } from './screens/Credito'
 import { ContadorCliente } from './screens/ContadorCliente'
 import { DatosEntrenamiento } from './screens/DatosEntrenamiento'
 import { Mas } from './screens/Mas'
@@ -36,7 +38,7 @@ import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Pantallas de la primera ola que viven dentro del layout del dueño. */
-const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador']
+const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito']
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
@@ -101,12 +103,15 @@ function AnimatedRoutes() {
           <Route path="/datos" element={<DatosEntrenamiento />} />
           <Route path="/mi-contador" element={<MiContador />} />
           <Route path="/mas" element={<Mas />} />
+          <Route path="/credito" element={<Credito />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
           <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
         </Route>
         <Route path="/contador" element={screen(<Contador />)} />
         <Route path="/contador/:id" element={screen(<ContadorCliente />)} />
+        <Route path="/bcp" element={screen(<Bcp />)} />
+        <Route path="/bcp/:id" element={screen(<BcpExpediente />)} />
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />
         <Route path="/sunat" element={<Navigate to="/sunat/balance" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

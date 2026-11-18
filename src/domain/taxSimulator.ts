@@ -159,8 +159,8 @@ export interface DatosSimulador {
  * Datos precargados desde el SIRE (o las boletas, en el NRUS): ventas y compras de los últimos
  * 12 meses sin IGV. Los gastos deducibles suman las compras y los gastos del negocio que pagó el banco.
  */
-export function datosSimulador(a: Analysis, hoy: string): DatosSimulador {
-  const meses = Array.from({ length: 12 }, (_, i) => addMonths(monthOf(hoy), i - 11))
+/** Ventas y compras sin IGV por mes: historial SIRE anterior + comprobantes del periodo con datos. */
+export function ventasPorMes(a: Analysis): Map<string, { ventas: number; compras: number }> {
   const porMes = new Map<string, { ventas: number; compras: number }>()
   for (const h of a.data.historialMensual) porMes.set(h.mes, { ventas: h.ventas, compras: h.compras })
   const seedMeses = new Set(a.data.comprobantes.map((c) => monthOf(c.fechaEmision)))
@@ -179,6 +179,12 @@ export function datosSimulador(a: Analysis, hoy: string): DatosSimulador {
       if (row && m.monto < 0 && a.classifications.get(m.id)?.categoriaId === 'insumos') row.compras += Math.abs(m.monto)
     }
   }
+  return porMes
+}
+
+export function datosSimulador(a: Analysis, hoy: string): DatosSimulador {
+  const meses = Array.from({ length: 12 }, (_, i) => addMonths(monthOf(hoy), i - 11))
+  const porMes = ventasPorMes(a)
   const filas = meses.map((m) => porMes.get(m) ?? { ventas: 0, compras: 0 })
   const ingresos = filas.reduce((s, r) => s + r.ventas, 0)
   const compras = filas.reduce((s, r) => s + r.compras, 0)

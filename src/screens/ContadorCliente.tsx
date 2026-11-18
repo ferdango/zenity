@@ -82,9 +82,11 @@ export function ContadorCliente() {
     <ContadorShell
       title={
         <div style={{ display: 'grid', gap: 4, paddingTop: 12 }}>
-          <Button size="sm" variant="text" icon="arrow_back" to="/contador">
-            Cartera
-          </Button>
+          <div>
+            <Button size="sm" variant="text" icon="arrow_back" to="/contador">
+              Cartera
+            </Button>
+          </div>
           <h1 className="t-headline-s">{a.business.nombreComercial}</h1>
           <span className={styles.muted}>
             {a.business.razonSocial} · RUC {a.business.ruc} · {REGIMEN_NOMBRE[a.business.regimenTributario]} · {Math.round(r.conciliado * 100)}% conciliado en{' '}

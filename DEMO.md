@@ -62,11 +62,20 @@ Para BCP e inversionistas. Todo sale del seed determinístico (hoy = **18/11/202
 4. **Reglas del contador**: crea una (contraparte contiene… → categoría + cuenta PCGE) y mira cuántos movimientos reclasifica.
 5. **Exportar asientos** → **Descargar CSV** (`fecha, glosa, cuenta_pcge, debe, haber, comprobante, ruc_contraparte`), con debe = haber.
 
+## 9. Crédito BCP (F3) · 60 s
+
+1. Más → **Crédito BCP** (o en Caja: «Ver cuánto crédito BCP puede pagar tu negocio»): «Según tu flujo real, podrías pedir hasta **S/ 14,500**» a 12 meses, cuota ≈ S/ 1,389.
+2. **Así ve el banco a tu negocio:** puntaje **72**, segmento B (riesgo moderado), con 6 componentes explicados (capacidad de pago, ventas −15%, 99.7% con comprobante, 13 días de caja, S/ 4,130 vencidos, impuestos a tiempo).
+3. **Simula tu crédito:** plazo y monto; «Sin crédito, el 20/12 tu caja baja a S/ 6,437. Con este crédito, tu caja no baja de…».
+4. **Enviar mi expediente al BCP** → consentimiento por fuente (SIRE, BCP, Yape/POS), 90 días, revocable → «Autorizo y envío».
+5. **Ver como BCP** (Más o menú): tablero de expedientes con puntaje, monto y señales tempranas → abrir Ferretería → **Pre-aprobar**.
+6. Volver como dueña: «¡Pre-aprobado! S/ 14,500 a 12 meses» → **Aceptar y desembolsar**: el saldo sube a S/ 25,155.66, las cuotas entran a Caja y la alerta de diciembre desaparece. El puntaje baja a 65: pedir prestado nunca mejora el perfil.
+
 ---
 
 ### Verificación técnica
 
 ```bash
-npm test        # 53 tests: 14 casos de conciliación, 3 regímenes laborales, 3 casos del simulador, cobranza, lecciones y contador
+npm test        # 62 tests: 14 casos de conciliación, 3 regímenes laborales, 3 casos del simulador, cobranza, lecciones, contador y crédito
 npm run build
 ```

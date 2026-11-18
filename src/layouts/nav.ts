@@ -10,7 +10,7 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador']
+const MAS_PATHS = ['/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito']
 
 /** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
 export const PRIMARY_NAV: NavItem[] = [
@@ -25,6 +25,7 @@ export const PRIMARY_NAV: NavItem[] = [
 export const TOOLS_NAV: NavItem[] = [
   { id: 'conciliacion', label: 'Conciliación', short: 'Conciliación', icon: 'rule', to: '/conciliacion', match: (p) => p === '/conciliacion' },
   { id: 'personal', label: 'Personal vs negocio', short: 'Personal', icon: 'person', to: '/personal', match: (p) => p === '/personal' },
+  { id: 'credito', label: 'Crédito BCP', short: 'Crédito', icon: 'credit_score', to: '/credito', match: (p) => p === '/credito' },
   { id: 'regimen', label: 'Simulador de régimen', short: 'Régimen', icon: 'balance', to: '/regimen', match: (p) => p === '/regimen' },
   { id: 'mi-contador', label: 'Mi contador', short: 'Contador', icon: 'support_agent', to: '/mi-contador', match: (p) => p === '/mi-contador' },
   { id: 'aprende', label: 'Aprende', short: 'Aprende', icon: 'school', to: '/aprende', match: (p) => p === '/aprende' },

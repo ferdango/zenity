@@ -15,3 +15,10 @@ export const CONTADOR_DEMO = {
   estudio: 'Paredes & Asociados',
   iniciales: 'LP',
 }
+
+/** Analista del BCP en la vista del banco (F3). Datos ficticios. */
+export const BANCO_DEMO = {
+  nombre: 'Carla Rojas',
+  detalle: 'BCP · Banca Pequeña Empresa',
+  iniciales: 'CR',
+}
