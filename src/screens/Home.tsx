@@ -1,7 +1,6 @@
 import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import sun from '../assets/sun.svg'
 import { GradientText } from '../components/AiText'
 import { BusinessSwitcher } from '../components/Business'
 import { Button } from '../components/Button'
@@ -22,11 +21,16 @@ import { TOUR_STEPS } from '../data/tour'
 import { FEATURES } from '../lib/features'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
+import { useMediaQuery } from '../lib/useMediaQuery'
 import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
 import { useAvisos } from '../state/useAvisos'
+import { ChatPanel } from './Chat'
 import styles from './Home.module.css'
+
+/** Desde este ancho el Inicio muestra el chat a la derecha (en móvil no cambia nada). */
+const CHAT_PANEL_QUERY = '(min-width: 1180px)'
 
 function useScrolled() {
   const [scrolled, setScrolled] = useState(false)
@@ -118,13 +122,14 @@ export function Home() {
     ledger,
   } = useApp()
   const scrolled = useScrolled()
+  // En escritorio, el chat «Pregúntale a Zenity» vive a la derecha del Inicio
+  const chatPanel = useMediaQuery(CHAT_PANEL_QUERY)
   const avisos = useAvisos()
   const sire = useSire()
   const taxPeriod = sirePeriod(sire, periodKey)
   const period = getPeriod(ledger, periodKey)
   const month = periodLabel(period)
-  const dayPart = getDayPart()
-  const greeting = GREETING[dayPart]
+  const greeting = GREETING[getDayPart()]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
   const margen = period.ingresos ? Math.round((neto / period.ingresos) * 100) : null
   const name = businessName(business)
@@ -211,121 +216,122 @@ export function Home() {
   )
 
   return (
-    <div className={`z-page ${styles.home}`}>
-      <header className={styles.header} data-scrolled={scrolled}>
-        <IconButton
-          icon="menu"
-          label="Abrir menú"
-          className={styles.menuButton}
-          onClick={() => setDrawerOpen(true)}
-          data-tour="menu"
-        />
-        <BusinessSwitcher />
-        <IconButton
-          icon="notifications"
-          label="Notificaciones"
-          badge={avisos ? avisos.some((n) => n.urgente) : true}
-          onClick={() => openSheet('notifications')}
-          data-tour="notifications"
-        />
-      </header>
+    <div className={`z-page ${styles.home}`} data-chat={chatPanel || undefined}>
+      <div className={styles.column}>
+        <header className={styles.header} data-scrolled={scrolled}>
+          <IconButton
+            icon="menu"
+            label="Abrir menú"
+            className={styles.menuButton}
+            onClick={() => setDrawerOpen(true)}
+            data-tour="menu"
+          />
+          <BusinessSwitcher />
+          <IconButton
+            icon="notifications"
+            label="Notificaciones"
+            badge={avisos ? avisos.some((n) => n.urgente) : true}
+            onClick={() => openSheet('notifications')}
+            data-tour="notifications"
+          />
+        </header>
 
-      <div className={styles.layout} data-simple={!FEATURES.inicioClasico || undefined}>
-        <motion.div className={styles.primary} variants={staggerContainer(0.06)} initial="hidden" animate="show">
-          <motion.section className={styles.greeting} variants={fadeUp} data-tour="greeting">
-            {dayPart === 'morning' ? (
-              <motion.img
-                src={sun}
-                alt=""
-                className={styles.sun}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-              />
-            ) : (
-              <Icon name={greeting.icon} size={30} fill style={{ color: 'var(--z-celestial)' }} />
+        <div className={styles.layout} data-simple={!FEATURES.inicioClasico || undefined}>
+          <motion.div className={styles.primary} variants={staggerContainer(0.06)} initial="hidden" animate="show">
+            <motion.section className={styles.greeting} variants={fadeUp} data-tour="greeting">
+              <div>
+                <span className={styles.live}>
+                  <span className="fx-live-dot" aria-hidden />
+                  Resumen
+                </span>
+                <h1 className={styles.hello}>
+                  {greeting.text}, <GradientText>{profile.firstName}</GradientText>
+                </h1>
+              </div>
+              <button type="button" className={styles.eye} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
+                <Icon name={hideBalances ? 'visibility' : 'visibility_off'} size={26} />
+                {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
+              </button>
+            </motion.section>
+
+            <InicioOla1 />
+
+            {FEATURES.inicioClasico && (
+              <motion.div className={styles.period} variants={fadeUp}>
+                <div data-tour="period">
+                  <PeriodPicker />
+                </div>
+              </motion.div>
             )}
-            <div>
-              <span className={styles.live}>
-                <span className="fx-live-dot" aria-hidden />
-                Resumen
-              </span>
-              <h1 className={styles.hello}>
-                {greeting.text}, <GradientText>{profile.firstName}</GradientText>
-              </h1>
-            </div>
-            <button type="button" className={styles.eye} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
-              <Icon name={hideBalances ? 'visibility' : 'visibility_off'} size={26} />
-              {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
-            </button>
-          </motion.section>
 
-          <InicioOla1 />
+            {ledger.empty ? (
+              <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
+                <div className={styles.empty}>
+                  <span className={styles.emptyIcon}>
+                    <Icon name="add_card" size={28} />
+                  </span>
+                  <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
+                  <p className={styles.emptyText}>Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.</p>
+                  <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
+                    Conectar cuenta
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              (
+                <>
+                  <motion.div variants={fadeUp} data-tour="accounts">
+                    <Carousel />
+                  </motion.div>
+                  <motion.div variants={fadeUp} style={{ display: 'grid' }}>
+                    <Button variant="tonal" size="lg" icon="link" className={styles.addButton} to="/conexiones" data-tour="add-account">
+                      Ver y agregar conexiones
+                    </Button>
+                  </motion.div>
+                </>
+              )
+            )}
+            {!ledger.empty && (
+              <motion.h2 className={styles.monthTitle} variants={fadeUp}>
+                Cómo te va en {month.toLowerCase()}
+              </motion.h2>
+            )}
+            {tiles}
+          </motion.div>
 
           {FEATURES.inicioClasico && (
-            <motion.div className={styles.period} variants={fadeUp}>
-              <div data-tour="period">
-                <PeriodPicker />
-              </div>
-            </motion.div>
-          )}
-
-          {ledger.empty ? (
-            <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
-              <div className={styles.empty}>
-                <span className={styles.emptyIcon}>
-                  <Icon name="add_card" size={28} />
-                </span>
-                <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
-                <p className={styles.emptyText}>Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.</p>
-                <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
-                  Conectar cuenta
+            <div className={styles.secondary}>
+              {ledger.empty ? (
+                <section className={styles.emptyInsights}>
+                  <SectionHeader title="Resumen al día de hoy" tourId="insights" />
+                  <p className={styles.emptyText}>Cuando conectes una cuenta, Zenity analizará los movimientos de {name} y te explicará lo más importante.</p>
+                </section>
+              ) : (
+                <InsightList key={business.id} insights={insights} title="Resumen al día de hoy" tourId="insights" />
+              )}
+              <div className={styles.report} hidden={ledger.empty}>
+                <Button variant="tonal" size="lg" fullWidth className={styles.reportButton} icon={<Spark size={22} />} onClick={openReport} data-tour="report">
+                  Ver reporte de {month.toLowerCase()}
                 </Button>
+                <p className={styles.reportNote}>
+                  <Icon name="autorenew" size={16} />
+                  Zenity lo genera solo cada mes y lo actualiza a diario
+                </p>
               </div>
-            </motion.div>
-          ) : (
-            (
-              <>
-                <motion.div variants={fadeUp} data-tour="accounts">
-                  <Carousel />
-                </motion.div>
-                <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-                  <Button variant="tonal" size="lg" icon="link" className={styles.addButton} to="/conexiones" data-tour="add-account">
-                    Ver y agregar conexiones
-                  </Button>
-                </motion.div>
-              </>
-            )
-          )}
-          {!ledger.empty && (
-            <motion.h2 className={styles.monthTitle} variants={fadeUp}>
-              Cómo te va en {month.toLowerCase()}
-            </motion.h2>
-          )}
-          {tiles}
-        </motion.div>
-
-        {FEATURES.inicioClasico && (
-          <div className={styles.secondary}>
-            {ledger.empty ? (
-              <section className={styles.emptyInsights}>
-                <SectionHeader title="Resumen al día de hoy" tourId="insights" />
-                <p className={styles.emptyText}>Cuando conectes una cuenta, Zenity analizará los movimientos de {name} y te explicará lo más importante.</p>
-              </section>
-            ) : (
-              <InsightList key={business.id} insights={insights} title="Resumen al día de hoy" tourId="insights" />
-            )}
-            <div className={styles.report} hidden={ledger.empty}>
-              <Button variant="tonal" size="lg" fullWidth className={styles.reportButton} icon={<Spark size={22} />} onClick={openReport} data-tour="report">
-                Ver reporte de {month.toLowerCase()}
-              </Button>
-              <p className={styles.reportNote}>
-                <Icon name="autorenew" size={16} />
-                Zenity lo genera solo cada mes y lo actualiza a diario
-              </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {chatPanel && (
+        <motion.aside
+          className={styles.chat}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0, transition: { duration: 0.45, ease: ease.decelerate, delay: 0.15 } }}
+        >
+          <ChatPanel />
+        </motion.aside>
+      )}
 
       {tourActive && <Tour steps={TOUR_STEPS} firstName={profile.firstName} onFinish={finishTour} />}
     </div>
