@@ -55,6 +55,6 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'nav-mas',
     title: 'Más',
-    body: 'Cierre de caja, gasto personal, crédito, tu contador y los ajustes.',
+    body: 'Gasto personal, crédito, tu contador y los ajustes.',
   },
 ]

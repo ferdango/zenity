@@ -35,7 +35,9 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
-            <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="Anota el efectivo que contaste hoy" />
+            {FEATURES.cierreCaja && (
+              <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="Anota el efectivo que contaste hoy" />
+            )}
             <LinkRow tone="violet" to="/personal" icon="person" title="Gasto personal" sub="Lo que sacaste del negocio para ti" />
             <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Cuánto te podrían prestar" />
             <LinkRow

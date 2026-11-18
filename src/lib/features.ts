@@ -14,6 +14,8 @@ export const FEATURES = {
   lecciones: false,
   /** Inicio del prototipo anterior: periodo, carrusel de cuentas, resumen con IA y reporte del mes */
   inicioClasico: false,
+  /** Cierre de caja (efectivo contado al cerrar el día): entrada en Más, menú lateral y Conciliación */
+  cierreCaja: false,
   /** «Por revisar»: vista previa en WhatsApp y conciliados con confianza media */
   revisarExtras: false,
 }
