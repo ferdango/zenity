@@ -20,6 +20,8 @@ import { seeded } from './registry'
 export interface Ledger {
   periods: Period[]
   base: Transaction[]
+  /** Movimientos reales por mes (negocios de la demo); si falta, los meses se derivan de `base` */
+  byPeriod?: Record<string, Transaction[]>
   pending: PendingTransaction[]
   /** Insights fijos del inicio; null = se generan a partir de los datos */
   insights: Insight[] | null

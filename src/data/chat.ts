@@ -439,6 +439,6 @@ export function fileAnswer(name: string, size: number): ChatBlock[] {
       type: 'p',
       text: 'En la versión final leería sus movimientos y los clasificaría y conciliaría sola, sin que tengas que revisarlos. Este prototipo no procesa archivos reales.',
     },
-    { type: 'actions', items: [{ label: 'Ver lo que Zenity revisó', to: '/revisar', icon: 'fact_check' }] },
+    { type: 'actions', items: [{ label: 'Ver lo que Zenity revisó', to: '/revisado', icon: 'fact_check' }] },
   ]
 }

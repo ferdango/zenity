@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { InitialsAvatar } from '../components/Avatars'
 import { BusinessAvatar } from '../components/Business'
 import { Button } from '../components/Button'
@@ -12,8 +12,10 @@ import { FEATURES } from '../lib/features'
 import { fadeUp, spring, staggerContainer } from '../lib/motion'
 import { useSwitchBusiness } from '../lib/useSwitchBusiness'
 import { useApp } from '../state/context'
+import { setPersona } from '../state/demoStore'
+import { useZen } from '../state/useZen'
 import styles from './NavMenu.module.css'
-import { PRIMARY_NAV } from './nav'
+import { PRIMARY_NAV, REPORTS_NAV, TOOLS_NAV } from './nav'
 
 /** Negocios que se muestran como acceso directo; el resto, en "Tus negocios". */
 const QUICK_LIMIT = 4
@@ -31,7 +33,10 @@ function ItemIcon({ icon }: { icon: string }) {
 /** Contenido del menú lateral (Figma: Menu). Se usa en el drawer móvil y en la barra lateral de escritorio. */
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const { openSheet, profile, business, businesses } = useApp()
+  const { a, demo } = useZen()
+  const porRevisar = (a?.porRevisar.length ?? 0) + demo.comments.filter((c) => c.businessId === business.id && c.pregunta && !c.respondida).length
   const switchTo = useSwitchBusiness()
   const others = businesses.filter((b) => b.id !== business.id)
   const layoutId = `nav-active-${variant}`
@@ -163,8 +168,43 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
       <div className={styles.divider} />
 
       <div className={styles.scroll}>
-        <motion.ul className={styles.group} variants={staggerContainer(0.035, 0.05)} initial="hidden" animate="show">
-          {PRIMARY_NAV.map((item) =>
+        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.05)} initial="hidden" animate="show">
+          {PRIMARY_NAV.filter((item) => item.id !== 'mas').map((item) =>
+            row(
+              item.id,
+              <>
+                <span className={styles.itemIcon}>
+                  <ItemIcon icon={item.icon} />
+                </span>
+                <span>{item.label}</span>
+              </>,
+              {
+                to: item.to,
+                active: item.match(pathname),
+                tour: `nav-${item.id}`,
+                end: item.id === 'revisar' && porRevisar > 0 ? <span className={styles.count}>{porRevisar}</span> : undefined,
+              },
+            ),
+          )}
+        </motion.ul>
+        <p className={styles.sectionLabel}>Herramientas</p>
+        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.1)} initial="hidden" animate="show">
+          {TOOLS_NAV.map((item) =>
+            row(
+              item.id,
+              <>
+                <span className={styles.itemIcon}>
+                  <ItemIcon icon={item.icon} />
+                </span>
+                <span>{item.label}</span>
+              </>,
+              { to: item.to, active: item.match(pathname) },
+            ),
+          )}
+        </motion.ul>
+        <p className={styles.sectionLabel}>Reportes</p>
+        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.15)} initial="hidden" animate="show">
+          {REPORTS_NAV.map((item) =>
             row(
               item.id,
               <>
@@ -175,16 +215,6 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
               </>,
               { to: item.to, active: item.match(pathname), tour: `nav-${item.id}` },
             ),
-          )}
-          {row(
-            'review',
-            <>
-              <span className={styles.itemIcon}>
-                <Icon name="fact_check" size={20} />
-              </span>
-              <span>Revisado por Zenity</span>
-            </>,
-            { to: '/revisar', active: pathname === '/revisar' },
           )}
           {FEATURES.sunatSire &&
             row(
@@ -197,6 +227,34 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
               </>,
               { to: '/sunat/balance', active: pathname.startsWith('/sunat/') },
             )}
+        </motion.ul>
+        <p className={styles.sectionLabel}>Demo</p>
+        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.2)} initial="hidden" animate="show">
+          {row(
+            'contador',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="switch_account" size={20} />
+              </span>
+              <span>Ver como contador</span>
+            </>,
+            {
+              onClick: action(() => {
+                setPersona('CONTADOR')
+                navigate('/contador')
+              }),
+            },
+          )}
+          {row(
+            'reset',
+            <>
+              <span className={styles.itemIcon}>
+                <Icon name="restart_alt" size={20} />
+              </span>
+              <span>Reiniciar demo</span>
+            </>,
+            { to: '/mas' },
+          )}
         </motion.ul>
       </div>
 

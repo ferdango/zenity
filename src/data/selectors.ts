@@ -29,6 +29,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100
 export function getTransactions(ledger: Ledger, periodKey: string): Transaction[] {
   const last = ledger.periods[ledger.periods.length - 1]
   const period = getPeriod(ledger, periodKey)
+  if (ledger.byPeriod) return ledger.byPeriod[period.key] ?? []
   if (period.key === last.key || ledger.base.length === 0) return ledger.base
 
   const scale = (type: TxType, target: number, base: number) => {

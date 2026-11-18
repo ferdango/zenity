@@ -23,6 +23,19 @@ export function Toaster() {
           >
             {t.icon && <Icon name={t.icon} size={20} fill />}
             <span>{t.message}</span>
+            {t.action && (
+              <button
+                type="button"
+                className={styles.toastAction}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  t.action!.onClick()
+                  dismissToast(t.id)
+                }}
+              >
+                {t.action.label}
+              </button>
+            )}
           </motion.div>
         ))}
       </AnimatePresence>

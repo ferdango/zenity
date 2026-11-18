@@ -8,6 +8,18 @@ import { saveScroll, useRouteTransition } from './layouts/transitions'
 import { AddBusiness } from './screens/AddBusiness'
 import { AddConnection } from './screens/AddConnection'
 import { Analyzing } from './screens/Analyzing'
+import { Aprende } from './screens/Aprende'
+import { Caja } from './screens/Caja'
+import { Cobrar } from './screens/Cobrar'
+import { Conciliacion } from './screens/Conciliacion'
+import { Contador } from './screens/Contador'
+import { ContadorCliente } from './screens/ContadorCliente'
+import { DatosEntrenamiento } from './screens/DatosEntrenamiento'
+import { Mas } from './screens/Mas'
+import { MiContador } from './screens/MiContador'
+import { Personal } from './screens/Personal'
+import { PorRevisar } from './screens/PorRevisar'
+import { Regimen } from './screens/Regimen'
 import { Chat } from './screens/Chat'
 import { ConnectionDetail } from './screens/ConnectionDetail'
 import { ConnectionResult } from './screens/ConnectionResult'
@@ -23,13 +35,16 @@ import { Sunat } from './screens/Sunat'
 import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
+/** Pantallas de la primera ola que viven dentro del layout del dueño. */
+const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador']
+
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
   return (
+    OLA1_PATHS.includes(path) ||
     path === '/inicio' ||
     path === '/resumen' ||
     path === '/chat' ||
-    path === '/revisar' ||
     path === '/conexiones/nueva' ||
     path === '/negocios/nuevo' ||
     path.startsWith('/movimientos/') ||
@@ -75,11 +90,23 @@ function AnimatedRoutes() {
           <Route path="/resumen" element={<Summary />} />
           <Route path="/sunat/:tab" element={<Sunat />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/revisar" element={<Review />} />
+          <Route path="/revisar" element={<PorRevisar />} />
+          <Route path="/revisado" element={<Review />} />
+          <Route path="/conciliacion" element={<Conciliacion />} />
+          <Route path="/personal" element={<Personal />} />
+          <Route path="/cobrar" element={<Cobrar />} />
+          <Route path="/caja" element={<Caja />} />
+          <Route path="/regimen" element={<Regimen />} />
+          <Route path="/aprende" element={<Aprende />} />
+          <Route path="/datos" element={<DatosEntrenamiento />} />
+          <Route path="/mi-contador" element={<MiContador />} />
+          <Route path="/mas" element={<Mas />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
           <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
         </Route>
+        <Route path="/contador" element={screen(<Contador />)} />
+        <Route path="/contador/:id" element={screen(<ContadorCliente />)} />
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />
         <Route path="/sunat" element={<Navigate to="/sunat/balance" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

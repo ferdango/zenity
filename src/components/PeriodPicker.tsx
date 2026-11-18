@@ -1,7 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { PERIODS } from '../data/mock'
-import { calendarPeriod } from '../data/selectors'
 import { cn } from '../lib/cn'
 import { MONTHS } from '../lib/format'
 import { ease } from '../lib/motion'
@@ -13,9 +11,11 @@ type MenuKind = 'month' | 'year' | null
 
 /** Selector de periodo (Figma: píldoras "Marzo" + "2026") con menús de Material 3. */
 export function PeriodPicker() {
-  const { periodKey, setPeriodKey } = useApp()
+  const { periodKey, setPeriodKey, ledger } = useApp()
   const [menu, setMenu] = useState<MenuKind>(null)
-  const period = calendarPeriod(periodKey)
+  // Cada negocio tiene sus propios meses con datos
+  const PERIODS = ledger.periods
+  const period = PERIODS.find((p) => p.key === periodKey) ?? PERIODS[PERIODS.length - 1]
   const years = [...new Set(PERIODS.map((p) => p.year))]
   const monthsOfYear = PERIODS.filter((p) => p.year === period.year)
 

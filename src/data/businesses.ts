@@ -1,4 +1,5 @@
-import { type Connection, INITIAL_CONNECTIONS } from './mock'
+import type { Connection } from './mock'
+import { BODEGA_ID, FERRETERIA_ID } from './seed'
 import { regimenFromRuc, type SunatCompany, seeded } from './registry'
 import type { Regimen } from './sire'
 
@@ -23,61 +24,39 @@ export interface Business {
 
 export const BUSINESS_TONES = 5
 
-/** Cuentas del segundo negocio de ejemplo. */
-const COCINA_CONNECTIONS: Connection[] = [
-  {
-    id: 'bcp-4410',
-    label: 'Cuenta corriente',
-    name: 'BCP Soles',
-    shortName: 'BCP cuenta corriente',
-    balance: 1268.4,
-    theme: 'navy',
-    avatar: 'bank',
-  },
-  {
-    id: 'visa-6624',
-    label: 'Tarjeta Crédito',
-    name: 'Visa Empresarial',
-    shortName: 'Visa empresarial 6624',
-    last4: '6624',
-    holder: 'Fernando Goicochea',
-    balance: 642.15,
-    theme: 'blue',
-    avatar: 'visa',
-  },
-  {
-    id: 'caja-diaria',
-    label: 'Excel',
-    name: 'Caja diaria',
-    shortName: 'Caja diaria',
-    balance: 345.6,
-    theme: 'yellow',
-    avatar: 'sheet',
-  },
-]
+/** Cuentas de un negocio de la demo: la cuenta BCP (el saldo sale del motor) y su Yape. */
+function demoConnections(id: string, last4: string, phone: string): Connection[] {
+  return [
+    { id: `${id}-bcp`, label: 'Cuenta corriente', name: 'BCP Soles', shortName: 'BCP cuenta corriente', last4, balance: 0, theme: 'navy', avatar: 'bank' },
+    { id: `${id}-yape`, label: 'Yape · se abona en tu BCP', name: 'Yape', shortName: 'Yape', phone, balance: 0, theme: 'grape', avatar: 'yape' },
+  ]
+}
 
-/** Negocios de ejemplo cuando no hubo registro (el primero usa los datos base del Figma). */
+/**
+ * Negocios de ejemplo cuando no hubo registro: los de la primera ola (seed agosto–noviembre 2026).
+ * Un RUC registrado desde el onboarding sigue usando los datos del Figma.
+ */
 export const DEMO_BUSINESSES: Business[] = [
   {
-    id: '20603123451',
-    ruc: '20603123451',
-    razonSocial: 'Comercializadora Los Andes S.A.C.',
-    nombreComercial: 'Andes Market',
-    tipoContribuyente: 'Sociedad anónima cerrada',
+    id: FERRETERIA_ID,
+    ruc: FERRETERIA_ID,
+    razonSocial: 'Ferretería San Martín E.I.R.L.',
+    nombreComercial: 'Ferretería San Martín',
+    tipoContribuyente: 'Empresa individual de responsabilidad limitada',
     regimen: 'rmt',
-    connections: INITIAL_CONNECTIONS,
+    connections: demoConnections(FERRETERIA_ID, '0012', '456'),
     scale: 1,
     tone: 0,
   },
   {
-    id: '20558712342',
-    ruc: '20558712342',
-    razonSocial: 'Inversiones Gastronómicas del Pacífico S.A.C.',
-    nombreComercial: 'Cocina Pacífico',
-    tipoContribuyente: 'Sociedad anónima cerrada',
+    id: BODEGA_ID,
+    ruc: BODEGA_ID,
+    razonSocial: 'Huamán Quispe Rosa',
+    nombreComercial: 'Bodega Doña Rosa',
+    tipoContribuyente: 'Persona natural con negocio',
     regimen: 'rer',
-    connections: COCINA_CONNECTIONS,
-    scale: 0.58,
+    connections: demoConnections(BODEGA_ID, '0045', '457'),
+    scale: 1,
     tone: 1,
   },
 ]
