@@ -6,7 +6,8 @@ import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { TopBar } from '../components/TopBar'
-import { ConfidenceBadge, LessonCard, Money, NoDemoData, ProgressBar, Why } from '../components/zen'
+import { ConfidenceBadge, LessonCard, Money, NoDemoData, Pill, ProgressBar, SectionHead, Why } from '../components/zen'
+import { REGLA_LABEL } from '../components/zen/reglas'
 import styles from '../components/zen/zen.module.css'
 import { CATEGORIA_IDS, CATEGORIAS } from '../config/categories'
 import { businessName } from '../data/businesses'
@@ -14,7 +15,7 @@ import { tituloMovimiento } from '../data/demoLedger'
 import { alternativas, partyKey } from '../domain/categorization'
 import { resumenMes } from '../domain/engine'
 import type { BankMovement, CategoriaId, Comment } from '../domain/types'
-import { fmtFecha } from '../domain/util'
+import { fmtFecha, monthOf } from '../domain/util'
 import { HOY } from '../config/demo'
 import { formatMoney } from '../lib/format'
 import { ease } from '../lib/motion'
@@ -25,6 +26,7 @@ import {
   crearRegla,
   deshacer,
   marcarCreoRegla,
+  responderConciliacion,
   responderPregunta,
   type UndoToken,
 } from '../state/demoStore'
@@ -191,6 +193,8 @@ export function PorRevisar() {
           </motion.div>
         )}
         <LessonCard id="L10" />
+
+        <ConfianzaMedia />
 
         {actual && (
           <p className={styles.muted} style={{ textAlign: 'center' }}>
@@ -389,5 +393,59 @@ function Pregunta({ pregunta }: { pregunta: Comment }) {
         <IconButton icon="send" label="Enviar respuesta" variant="filled" onClick={() => responder(texto)} />
       </div>
     </motion.article>
+  )
+}
+
+/**
+ * Conciliaciones del mes con confianza media (0.60–0.89): Zenity ya las aplicó, pero el dueño puede
+ * confirmarlas o consultarlas con su contador. No cuentan en «Por revisar» (decisión del prototipo).
+ */
+function ConfianzaMedia() {
+  const { a, demo } = useZen()
+  const { toast } = useApp()
+  if (!a) return null
+  const media = a.matches.filter((m) => {
+    const mov = a.movementsById.get(m.movementIds[0])
+    return m.confianza >= 0.6 && m.confianza < 0.9 && !demo.confirmados[m.id] && !!mov && monthOf(mov.fecha) === HOY.slice(0, 7)
+  })
+  if (media.length === 0) return null
+  return (
+    <section className={styles.section}>
+      <SectionHead title="Conciliados con confianza media" hint={`${media.length} · ya aplicados`} />
+      <div className={styles.list}>
+        {media.map((m) => {
+          const mov = a.movementsById.get(m.movementIds[0])!
+          const responder = (respuesta: 'OK' | 'CONSULTA') => {
+            responderConciliacion({ businessId: a.business.id, matchId: m.id, movementId: mov.id, regla: m.regla, motivo: m.motivo, respuesta })
+            toast(respuesta === 'OK' ? 'Conciliación confirmada' : 'Le preguntaste a tu contador', respuesta === 'OK' ? 'task_alt' : 'support_agent')
+          }
+          return (
+            <article key={m.id} className={styles.card}>
+              <div className={styles.row} style={{ padding: 0, background: 'none', minHeight: 0 }}>
+                <span className={styles.rowText}>
+                  <span className={styles.rowTitle}>{tituloMovimiento(mov)}</span>
+                  <span className={styles.rowSub}>
+                    {fmtFecha(mov.fecha)} · {m.motivo}
+                  </span>
+                </span>
+                <span className={styles.rowEnd}>
+                  <Money value={mov.monto} sign="always" className={mov.monto > 0 ? styles.amountPos : undefined} />
+                  <ConfidenceBadge confianza={m.confianza} showPct={false} />
+                </span>
+              </div>
+              <div className={styles.actions}>
+                <Pill tone="info">{REGLA_LABEL[m.regla]}</Pill>
+                <Button size="sm" variant="tonal" icon="check" onClick={() => responder('OK')}>
+                  Está bien
+                </Button>
+                <Button size="sm" variant="text" icon="support_agent" onClick={() => responder('CONSULTA')}>
+                  Preguntar a mi contador
+                </Button>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
   )
 }

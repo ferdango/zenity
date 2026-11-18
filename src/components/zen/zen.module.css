@@ -150,6 +150,7 @@ a.row:hover {
   justify-items: end;
   gap: 4px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .list {

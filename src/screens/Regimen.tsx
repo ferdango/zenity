@@ -11,6 +11,7 @@ import { masBarato, REGIMEN_NOMBRE, simularRegimenes, topeRegimen } from '../dom
 import { fmtPct, fmtSolesCorto } from '../domain/util'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
+import { track } from '../lib/analytics'
 import { comentar, marcarRegimenRevisado } from '../state/demoStore'
 import { useSimulador, useZen } from '../state/useZen'
 
@@ -29,8 +30,12 @@ export function Regimen() {
   const [enviado, setEnviado] = useState(false)
 
   useEffect(() => {
-    if (a) marcarRegimenRevisado(a.business.id)
-  }, [a])
+    if (!a || !sim) return
+    marcarRegimenRevisado(a.business.id)
+    const r = simularRegimenes({ ...sim.datos, necesitaFactura: a.business.regimenTributario !== 'NRUS' })
+    const mejor = masBarato(r)
+    track('regimen_simulado', { actual: a.business.regimenTributario, mas_barato: mejor.regimen, conviene_cambiar: mejor.regimen !== a.business.regimenTributario })
+  }, [a?.business.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!a || !sim) {
     return (

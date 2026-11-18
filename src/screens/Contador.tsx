@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
@@ -13,6 +13,7 @@ import { proximoVencimiento } from '../domain/calendar'
 import { REGIMEN_NOMBRE } from '../domain/taxSimulator'
 import type { RegimenTributario } from '../domain/types'
 import { fmtFecha } from '../domain/util'
+import { track } from '../lib/analytics'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { analysisFor, CONTADOR, permisosDe, useDemoState } from '../state/demoStore'
 
@@ -59,6 +60,9 @@ export function Contador() {
           : ORDEN[x.semaforo] - ORDEN[y.semaforo] || x.vencimiento.dias - y.vencimiento.dias,
     )
   const conteo = (s: Semaforo) => filas.filter((f) => f.semaforo === s).length
+  useEffect(() => {
+    track('contador_portal_visto', { clientes: filas.length, con_acceso: filas.filter((f) => !('sinAcceso' in f && f.sinAcceso)).length })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ContadorShell title={`Tu cartera · ${filas.length} clientes`}>

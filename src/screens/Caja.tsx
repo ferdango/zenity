@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
@@ -12,12 +12,14 @@ import styles from '../components/zen/zen.module.css'
 import { REGIMEN_LABORAL_LABEL } from '../domain/calendar'
 import { textoAlerta } from '../domain/cashflow'
 import type { CashEvent, Certeza, FuenteCaja, RegimenLaboral } from '../domain/types'
-import { fmtDiaMes, fmtSolesCorto } from '../domain/util'
+import { addDays, diffDays, fmtDiaMes, fmtSolesCorto } from '../domain/util'
+import { HOY } from '../config/demo'
+import { track } from '../lib/analytics'
 import { businessName } from '../data/businesses'
 import { MONTHS, MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
-import { setOverride } from '../state/demoStore'
+import { guardarProyeccion, setOverride } from '../state/demoStore'
 import { useCaja, useZen } from '../state/useZen'
 
 type Dias = '30' | '60' | '90'
@@ -33,6 +35,7 @@ const FUENTE_LABEL: Record<FuenteCaja, string> = {
   GRATIFICACION: 'Gratificación',
   CTS: 'CTS',
   CREDITO: 'Crédito BCP',
+  EFECTIVO: 'Efectivo en caja',
 }
 
 const CERTEZA_TONE: Record<Certeza, 'alta' | 'media' | 'baja'> = { ALTA: 'alta', MEDIA: 'media', BAJA: 'baja' }
@@ -46,6 +49,15 @@ export function Caja() {
   const [ajustes, setAjustes] = useState(false)
   const [colchon, setColchon] = useState('')
   const caja = useCaja(Number(dias))
+  const businessId = a?.business.id
+  const alerta = caja?.alerta
+  // Métricas: la vista de caja (sin montos) y la proyección a 7 días para medir su error después
+  useEffect(() => {
+    if (!businessId || !caja) return
+    track('caja_vista', { horizonte: Number(dias), alerta: !!alerta, dias_a_alerta: alerta ? diffDays(HOY, alerta.fecha) : -1 })
+    const punto = caja.serie.find((p) => p.fecha === addDays(HOY, 7))
+    if (punto) guardarProyeccion(businessId, punto.base)
+  }, [businessId, dias]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!a || !caja) {
     return (
@@ -221,6 +233,18 @@ export function Caja() {
             <input className={styles.input} inputMode="decimal" value={colchon} onChange={(e) => setColchon(e.target.value)} />
           </label>
           <p className={styles.muted}>Por defecto es una semana de tus egresos promedio.</p>
+          <Link to="/bienvenida?paso=planilla" className={styles.row} data-ripple="">
+            <span className={`${styles.rowIcon} ${styles.toneInfo}`}>
+              <Icon name="groups" size={20} />
+            </span>
+            <span className={styles.rowText}>
+              <span className={styles.rowTitle}>Tu planilla</span>
+              <span className={styles.rowSub}>
+                {a.business.trabajadores} trabajador{a.business.trabajadores === 1 ? '' : 'es'} · {REGIMEN_LABORAL_LABEL[a.business.regimenLaboral]}
+              </span>
+            </span>
+            <Icon name="chevron_right" size={20} />
+          </Link>
           <Button
             size="lg"
             icon="check"

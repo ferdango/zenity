@@ -35,12 +35,23 @@ export function Mas() {
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
             <LinkRow tone="info" to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
+            <LinkRow tone="info" to="/conciliacion?subir=1" icon="upload_file" title="Subir extracto del banco" sub="Excel o CSV de tu banca por internet" />
+            <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="El efectivo que contaste al cerrar el día" />
             <LinkRow tone="violet" to="/personal" icon="person" title="Personal vs negocio" sub={`${ESTADO_LABEL.POSIBLE_PERSONAL.replace(/[¿?]/g, '')} y sueldo de dueño`} />
             <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Tu perfil de crédito con tu flujo real" />
             <LinkRow tone="warning" to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
             <LinkRow tone="info" to="/mi-contador" icon="support_agent" title="Mi contador" sub={`${CONTADOR.nombre} · ${CONTADOR.estudio}`} end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined} />
             <LinkRow tone="positive" to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números y Mi progreso" />
             <LinkRow tone="violet" to="/datos" icon="database" title="Datos de entrenamiento" sub="Acerca de los datos: lo que Zenity aprende" />
+          </div>
+        </motion.section>
+
+        <motion.section className={styles.section} variants={fadeUp}>
+          <SectionHead title="Tus datos y el piloto" />
+          <div className={styles.list}>
+            <LinkRow tone="positive" to="/permisos" icon="verified_user" title="Permisos de datos" sub="Qué lee Zenity y quién ve tus datos" end={!demo.datos[business.id] ? <Pill tone="media">Pendiente</Pill> : undefined} />
+            <LinkRow tone="info" to="/bienvenida?paso=planilla" icon="groups" title="Tu planilla" sub="Régimen laboral, trabajadores y sueldo" />
+            <LinkRow tone="warning" to="/metricas" icon="insights" title="Métricas del piloto" sub="Las de defensa y las de cada feature" />
           </div>
         </motion.section>
 

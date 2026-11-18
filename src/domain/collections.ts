@@ -1,5 +1,5 @@
 /** F-05 · Cobranza asistida: quién te debe, cuánto, desde cuándo y cómo recordárselo. */
-import { comprobantesEn, totalNeto, type Analysis } from './engine.ts'
+import { comprobantesEn, saldoPendiente, type Analysis } from './engine.ts'
 import { docLabel, tipoLabel, vencimientoDe } from './reconciliation.ts'
 import type { Comprobante, DemoBusiness, PromesaPago } from './types.ts'
 import { diffDays, fmtFecha, fmtSoles, monthOf, round2 } from './util.ts'
@@ -40,7 +40,7 @@ export function porCobrar(a: Analysis, promesas: PromesaPago[], hoy: string): Co
       const dias = diffDays(vencimiento, hoy)
       return {
         comprobante: c,
-        monto: totalNeto(a, c),
+        monto: saldoPendiente(a, c),
         vencimiento,
         diasVencidos: dias,
         tramo: tramoDe(dias),

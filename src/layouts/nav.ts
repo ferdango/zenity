@@ -10,7 +10,7 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito']
+const MAS_PATHS = ['/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
 
 /** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
 export const PRIMARY_NAV: NavItem[] = [

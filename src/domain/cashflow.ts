@@ -6,7 +6,7 @@
 import { TAX_2026 } from '../config/taxParams2026.ts'
 import { ctsSemestral, gratificacion, planillaMensual, vencimientoSunat } from './calendar.ts'
 import { partyKey } from './categorization.ts'
-import { comprobantesEn, totalNeto, type Analysis } from './engine.ts'
+import { comprobantesEn, saldoPendiente, type Analysis } from './engine.ts'
 import { vencimientoDe } from './reconciliation.ts'
 import type { BankMovement, CashEvent, Comprobante, DemoBusiness, PromesaPago } from './types.ts'
 import { addDays, addMonths, dayOf, diffDays, fmtDiaMes, fmtSolesCorto, lastDayOfMonth, monthOf, round2, weekday } from './util.ts'
@@ -181,7 +181,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
 
   /* Entradas: por cobrar y promesas */
   for (const c of comprobantesEn(a, 'COMPROBANTE_SIN_COBRO')) {
-    const monto = totalNeto(a, c)
+    const monto = saldoPendiente(a, c)
     const promesa = [...promesas].reverse().find((p) => p.comprobanteId === c.id)
     const vence = vencimientoDe(c)
     const quien = c.nombreContraparte
@@ -199,7 +199,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
   for (const c of comprobantesEn(a, 'FACTURA_SIN_PAGO')) {
     const vence = vencimientoDe(c)
     const f = vence > hoy ? vence : addDays(hoy, 1)
-    if (enRango(f)) eventos.push({ fecha: f, concepto: `Pago a ${c.nombreContraparte}`, monto: -totalNeto(a, c), certeza: 'ALTA', fuente: 'POR_PAGAR' })
+    if (enRango(f)) eventos.push({ fecha: f, concepto: `Pago a ${c.nombreContraparte}`, monto: -saldoPendiente(a, c), certeza: 'ALTA', fuente: 'POR_PAGAR' })
   }
 
   /* Recurrentes detectados (alquiler, servicios, proveedores, cuota del préstamo…) */
@@ -313,7 +313,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
   const acciones: CashAction[] = []
   const vencidas = comprobantesEn(a, 'COMPROBANTE_SIN_COBRO').filter((c) => vencimientoDe(c) < hoy && !promesas.some((p) => p.comprobanteId === c.id))
   if (vencidas.length) {
-    const total = round2(vencidas.reduce((s, c) => s + totalNeto(a, c), 0))
+    const total = round2(vencidas.reduce((s, c) => s + saldoPendiente(a, c), 0))
     acciones.push({ id: 'cobrar', texto: `Cobra ${vencidas.length === 1 ? 'tu factura vencida' : `tus ${vencidas.length} facturas vencidas`} (S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })})`, to: '/cobrar' })
   }
   if (alerta) {

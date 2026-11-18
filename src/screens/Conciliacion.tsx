@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
@@ -8,19 +8,23 @@ import { Icon } from '../components/Icon'
 import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TopBar } from '../components/TopBar'
 import { ConfidenceBadge, LessonCard, Money, NoDemoData, Pill, ProgressBar, SectionHead, Why } from '../components/zen'
+import { ImportarExtracto } from '../components/zen/ImportarExtracto'
+import { REGLA_LABEL } from '../components/zen/reglas'
 import { TONE_CLASS, type Tone } from '../components/zen/tone'
 import styles from '../components/zen/zen.module.css'
 import { CATEGORIAS } from '../config/categories'
 import { HOY, MESES_DEMO } from '../config/demo'
 import { businessName } from '../data/businesses'
 import { tituloMovimiento } from '../data/demoLedger'
-import { type Analysis, ESTADO_LABEL, ESTADOS, type EstadoItem, resumenMes } from '../domain/engine'
+import { abonosDe, type Analysis, ESTADO_LABEL, ESTADOS, type EstadoItem, resumenMes } from '../domain/engine'
 import { docLabel, tipoLabel } from '../domain/reconciliation'
-import type { Estado, Match, Regla } from '../domain/types'
+import type { Estado, Match } from '../domain/types'
 import { fmtFecha, fmtSolesCorto } from '../domain/util'
+import { track } from '../lib/analytics'
 import { MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
+import { CONTADOR, useDemoState } from '../state/demoStore'
 import { useZen } from '../state/useZen'
 
 const ESTADO_ICON: Record<Estado, string> = {
@@ -43,16 +47,6 @@ const ESTADO_TONE: Record<Estado, Tone> = {
   SIN_CATEGORIA_SEGURA: 'info',
 }
 
-const REGLA_LABEL: Record<Regla, string> = {
-  EXACTO: 'Monto exacto',
-  DETRACCION: 'Detracción',
-  RETENCION: 'Retención de IGV',
-  AGRUPADO: 'Agrupado',
-  MONEDA: 'Moneda extranjera',
-  SUGERIDO: 'Sugerido',
-  MANUAL: 'Manual',
-}
-
 const mesLabel = (key: string) => `${MONTHS_SHORT[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`
 
 /** F-01 · Conciliación de tres vías (con F-02: confianza y motivo). */
@@ -65,9 +59,27 @@ export function Conciliacion() {
   const resumen = useMemo(() => (a ? resumenMes(a, mes) : null), [a, mes])
   const chipRef = useRef<HTMLButtonElement>(null)
   const estadoParam = params.get('estado')
+  const subir = params.get('subir') === '1'
   useEffect(() => {
     chipRef.current?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
   }, [estadoParam, mes])
+  const pctMes = resumen ? Math.round(resumen.conciliado * 100) : null
+  const vistoRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (pctMes === null || vistoRef.current === mes) return
+    vistoRef.current = mes
+    track('conciliacion_vista', { pct: pctMes, mes_actual: mes === HOY.slice(0, 7) })
+  }, [mes, pctMes])
+  const abrirSubir = (abrir: boolean) =>
+    setParams(
+      (p) => {
+        const next = new URLSearchParams(p)
+        if (abrir) next.set('subir', '1')
+        else next.delete('subir')
+        return next
+      },
+      { replace: true },
+    )
 
   if (!a || !resumen) {
     return (
@@ -86,6 +98,7 @@ export function Conciliacion() {
   const estado: Estado = pedido && ESTADOS.includes(pedido) ? pedido : (pendiente ?? 'CONCILIADO')
   const bucket = resumen.porEstado[estado]
   const elegir = (e: Estado) => setParams({ estado: e }, { replace: true })
+  const importados = a.movements.filter((m) => m.importado).length
 
   return (
     <div className="z-page">
@@ -116,6 +129,23 @@ export function Conciliacion() {
             Banco BCP + SUNAT {a.business.dosVias ? '(boletas)' : 'SIRE'} + Yape y POS. Lo que vendiste, lo que facturaste y lo que entró al banco.
           </span>
         </motion.section>
+
+        <motion.div className={styles.grid2} variants={fadeUp}>
+          <button type="button" className={styles.cardButton} onClick={() => abrirSubir(true)} data-ripple="">
+            <span className={`${styles.rowIcon} ${styles.toneInfo}`}>
+              <Icon name="upload_file" size={20} />
+            </span>
+            <span className={styles.rowTitle}>Subir extracto del banco</span>
+            <span className={styles.rowSub}>{importados ? `${importados} movimientos subidos` : 'Excel o CSV de tu banca por internet'}</span>
+          </button>
+          <Link to="/cierre-caja" className={styles.cardButton} data-ripple="">
+            <span className={`${styles.rowIcon} ${styles.tonePositive}`}>
+              <Icon name="point_of_sale" size={20} />
+            </span>
+            <span className={styles.rowTitle}>Cierre de caja</span>
+            <span className={styles.rowSub}>Tus ventas en efectivo del día</span>
+          </Link>
+        </motion.div>
 
         <motion.div className={styles.chips} variants={fadeUp} role="tablist" aria-label="Estados">
           {ESTADOS.map((e) => (
@@ -156,6 +186,10 @@ export function Conciliacion() {
       <BottomSheet open={!!detalle} onClose={() => setDetalle(null)} title="Detalle de la conciliación">
         {detalle && <Detalle a={a} item={detalle} />}
       </BottomSheet>
+
+      <BottomSheet open={subir} onClose={() => abrirSubir(false)} title="Subir extracto del banco">
+        {subir && <ImportarExtracto onClose={() => abrirSubir(false)} />}
+      </BottomSheet>
     </div>
   )
 }
@@ -163,6 +197,7 @@ export function Conciliacion() {
 function ItemRow({ a, item, onOpen }: { a: Analysis; item: EstadoItem; onOpen: () => void }) {
   if (item.kind === 'comprobante') {
     const c = a.comprobantesById.get(item.id)!
+    const abonos = abonosDe(a, c)
     return (
       <button type="button" className={styles.row} onClick={onOpen} data-ripple="">
         <span className={`${styles.rowIcon} ${TONE_CLASS[ESTADO_TONE[a.comprobanteEstado.get(c.id) ?? 'CONCILIADO']]}`}>
@@ -172,10 +207,12 @@ function ItemRow({ a, item, onOpen }: { a: Analysis; item: EstadoItem; onOpen: (
           <span className={styles.rowTitle}>{c.nombreContraparte}</span>
           <span className={styles.rowSub}>
             {tipoLabel(c)} {docLabel(c)} · {fmtFecha(c.fechaEmision)}
+            {abonos && ` · abonó ${fmtSolesCorto(abonos.pagado)}`}
           </span>
         </span>
         <span className={styles.rowEnd}>
           <Money value={c.total} />
+          {abonos && <Pill tone="info">Pago en partes</Pill>}
         </span>
       </button>
     )
@@ -212,6 +249,8 @@ function Detalle({ a, item }: { a: Analysis; item: EstadoItem }) {
   const yape = m ? a.data.yapePayments.find((y) => y.numeroOperacion === m.numeroOperacion) : undefined
   const lote = match?.posSaleIds?.length ? a.data.posBatches.find((b) => a.data.posSales.some((s) => s.loteId === b.loteId && match.posSaleIds!.includes(s.id))) : undefined
   const estado: Estado = item.kind === 'comprobante' ? a.comprobanteEstado.get(item.id)! : cl!.estado
+  const demo = useDemoState()
+  const notas = demo.comments.filter((c) => c.businessId === a.business.id && c.autor === 'CONTADOR' && movs.some((x) => x.id === c.movementId))
 
   return (
     <div style={{ display: 'grid', gap: 14, padding: '0 0 20px' }}>
@@ -339,6 +378,38 @@ function Detalle({ a, item }: { a: Analysis; item: EstadoItem }) {
           </span>
         </p>
       )}
+      {match?.regla === 'PARCIAL' && (
+        <p className={match.pendiente ? styles.bannerWarn : styles.banner}>
+          <Icon name="splitscreen" size={20} />
+          <span>
+            {match.pendiente ? (
+              <>
+                Llegaron <strong>{fmtSolesCorto(movs.reduce((s, x) => s + Math.abs(x.monto), 0))}</strong> en {movs.length} abono{movs.length === 1 ? '' : 's'}. Faltan{' '}
+                <strong>{fmtSolesCorto(match.pendiente)}</strong> para completar el comprobante.
+              </>
+            ) : (
+              <>Pagado completo en {movs.length} abonos.</>
+            )}
+          </span>
+        </p>
+      )}
+      {match?.regla === 'CIERRE' && (match.sinBoleta || match.enCaja) && (
+        <p className={styles.bannerWarn}>
+          <Icon name="point_of_sale" size={20} />
+          <span>
+            {match.sinBoleta ? (
+              <>
+                <strong>{fmtSolesCorto(match.sinBoleta)}</strong> de tu cierre no tienen boleta: emítela o regístrala como venta sin comprobante.{' '}
+              </>
+            ) : null}
+            {match.enCaja ? (
+              <>
+                <strong>{fmtSolesCorto(match.enCaja)}</strong> quedaron en caja: deposítalos para que tu cuenta cuadre.
+              </>
+            ) : null}
+          </span>
+        </p>
+      )}
       {match?.regla === 'RETENCION' && match.retencion && (
         <p className={styles.bannerWarn}>
           <Icon name="savings" size={20} />
@@ -349,6 +420,19 @@ function Detalle({ a, item }: { a: Analysis; item: EstadoItem }) {
       )}
 
       <Why motivo={match?.motivo ?? cl?.motivo ?? (estado === 'COMPROBANTE_SIN_COBRO' ? 'Emitiste este comprobante y todavía no llega su pago al banco.' : 'Recibiste esta factura y todavía no sale su pago del banco.')} defaultOpen />
+
+      {notas.length > 0 && (
+        <div className={styles.card}>
+          <span className={styles.statLabel}>
+            <Icon name="support_agent" size={16} /> Nota de tu contador
+          </span>
+          {notas.map((n) => (
+            <p key={n.id} className={styles.small}>
+              «{n.texto}» <span className={styles.muted}>· {CONTADOR.nombre}</span>
+            </p>
+          ))}
+        </div>
+      )}
 
       {cl && !match && (
         <p className={styles.small}>

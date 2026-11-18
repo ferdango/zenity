@@ -2,6 +2,7 @@
 import { useMemo } from 'react'
 import { HOY } from '../config/demo'
 import { proyectarCaja } from '../domain/cashflow'
+import { estadoCierres, eventoEfectivo } from '../domain/cierres'
 import { cuotaAceptada, eventosCredito, perfilCrediticio } from '../domain/credit'
 import { porCobrar } from '../domain/collections'
 import type { Analysis } from '../domain/engine'
@@ -38,10 +39,20 @@ export function useCuotasCredito() {
   )
 }
 
+/** Cierres de caja del negocio activo con su estado (boletas, depósito, efectivo por depositar). */
+export function useCierres() {
+  const { a, demo } = useZen()
+  return useMemo(() => (a ? estadoCierres(a, demo.cierresCaja) : []), [a, demo.cierresCaja])
+}
+
 export function useCaja(dias: number) {
   const { a, demo } = useZen()
   const cuotas = useCuotasCredito()
-  return useMemo(() => (a ? proyectarCaja(a, demo.promesas, HOY, dias, cuotas) : null), [a, demo.promesas, dias, cuotas])
+  const cierres = useCierres()
+  return useMemo(
+    () => (a ? proyectarCaja(a, demo.promesas, HOY, dias, [...cuotas, ...eventoEfectivo(cierres, HOY)]) : null),
+    [a, demo.promesas, dias, cuotas, cierres],
+  )
 }
 
 /** F3 · Perfil crediticio del negocio activo. */
