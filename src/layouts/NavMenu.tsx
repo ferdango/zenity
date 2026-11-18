@@ -202,8 +202,8 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
             ),
           )}
         </motion.ul>
-        <p className={styles.sectionLabel}>Reportes</p>
-        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.15)} initial="hidden" animate="show">
+        {(REPORTS_NAV.length > 0 || FEATURES.sunatSire) && <p className={styles.sectionLabel}>Reportes</p>}
+        <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.15)} initial="hidden" animate="show" hidden={!REPORTS_NAV.length && !FEATURES.sunatSire}>
           {REPORTS_NAV.map((item) =>
             row(
               item.id,

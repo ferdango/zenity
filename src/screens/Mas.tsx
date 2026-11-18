@@ -10,15 +10,16 @@ import { LinkRow, Pill, SectionHead } from '../components/zen'
 import { ThemeSwitch } from '../components/zen/ThemeSwitch'
 import styles from '../components/zen/zen.module.css'
 import { businessName } from '../data/businesses'
-import { ESTADO_LABEL, resumenMes } from '../domain/engine'
+import { resumenMes } from '../domain/engine'
 import { HOY } from '../config/demo'
+import { FEATURES } from '../lib/features'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { resetDemo } from '../lib/resetDemo'
 import { useApp } from '../state/context'
 import { CONTADOR, setPersona } from '../state/demoStore'
 import { useZen } from '../state/useZen'
 
-/** «Más»: el resto de herramientas, el cambio de persona y «Reiniciar demo». */
+/** «Más»: las herramientas del día a día, los ajustes y la demo (contador, BCP y reinicio). */
 export function Mas() {
   const navigate = useNavigate()
   const { business } = useApp()
@@ -34,41 +35,46 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
-            <LinkRow tone="info" to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
+            <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="Anota el efectivo que contaste hoy" />
+            <LinkRow tone="violet" to="/personal" icon="person" title="Gasto personal" sub="Lo que sacaste del negocio para ti" />
+            <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Cuánto te podrían prestar" />
+            <LinkRow
+              tone="info"
+              to="/mi-contador"
+              icon="support_agent"
+              title="Mi contador"
+              sub={CONTADOR.nombre}
+              end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined}
+            />
             <LinkRow tone="info" to="/conciliacion?subir=1" icon="upload_file" title="Subir extracto del banco" sub="Excel o CSV de tu banca por internet" />
-            <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="El efectivo que contaste al cerrar el día" />
-            <LinkRow tone="violet" to="/personal" icon="person" title="Personal vs negocio" sub={`${ESTADO_LABEL.POSIBLE_PERSONAL.replace(/[¿?]/g, '')} y sueldo de dueño`} />
-            <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Tu perfil de crédito con tu flujo real" />
-            <LinkRow tone="warning" to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
-            <LinkRow tone="info" to="/mi-contador" icon="support_agent" title="Mi contador" sub={`${CONTADOR.nombre} · ${CONTADOR.estudio}`} end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined} />
-            <LinkRow tone="positive" to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números y Mi progreso" />
-            <LinkRow tone="violet" to="/datos" icon="database" title="Datos de entrenamiento" sub="Acerca de los datos: lo que Zenity aprende" />
+            <LinkRow tone="violet" to="/chat" icon="auto_awesome" title="Pregúntale a Zenity" sub="Respuestas con los números de tu negocio" />
           </div>
         </motion.section>
 
+        {FEATURES.herramientasAvanzadas && (
+          <motion.section className={styles.section} variants={fadeUp}>
+            <SectionHead title="Más herramientas" />
+            <div className={styles.list}>
+              <LinkRow tone="info" to="/conciliacion" icon="fact_check" title="Conciliación" sub="Banco + SUNAT + Yape y POS" end={pct !== null ? <Pill tone={pct >= 90 ? 'alta' : 'media'}>{pct}%</Pill> : undefined} />
+              <LinkRow tone="warning" to="/regimen" icon="balance" title="Simulador de régimen" sub="NRUS, RER, RMT o General" />
+              <LinkRow tone="positive" to="/aprende" icon="school" title="Aprende" sub="Microlecciones con tus números" />
+              <LinkRow tone="violet" to="/datos" icon="database" title="Datos de entrenamiento" sub="Lo que Zenity aprende" />
+              <LinkRow tone="warning" to="/metricas" icon="insights" title="Métricas del piloto" sub="Las de defensa y las de cada feature" />
+              <LinkRow tone="positive" to="/movimientos/ingresos" icon="trending_up" title="Ingresos" />
+              <LinkRow tone="negative" to="/movimientos/egresos" icon="trending_down" title="Egresos" />
+              <LinkRow tone="info" to="/resumen" icon="bar_chart" title="Balance" />
+              <LinkRow tone="positive" to="/revisado" icon="checklist" title="Revisado por Zenity" />
+              <LinkRow tone="info" to="/conexiones/nueva" icon="add_link" title="Nueva conexión" />
+            </div>
+          </motion.section>
+        )}
+
         <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Tus datos y el piloto" />
+          <SectionHead title="Ajustes" />
           <div className={styles.list}>
             <LinkRow tone="positive" to="/permisos" icon="verified_user" title="Permisos de datos" sub="Qué lee Zenity y quién ve tus datos" end={!demo.datos[business.id] ? <Pill tone="media">Pendiente</Pill> : undefined} />
-            <LinkRow tone="info" to="/bienvenida?paso=planilla" icon="groups" title="Tu planilla" sub="Régimen laboral, trabajadores y sueldo" />
-            <LinkRow tone="warning" to="/metricas" icon="insights" title="Métricas del piloto" sub="Las de defensa y las de cada feature" />
+            <LinkRow tone="info" to="/bienvenida?paso=planilla" icon="groups" title="Tu planilla" sub="Trabajadores y sueldos" />
           </div>
-        </motion.section>
-
-        <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Reportes" />
-          <div className={styles.list}>
-            <LinkRow tone="positive" to="/movimientos/ingresos" icon="trending_up" title="Ingresos" />
-            <LinkRow tone="negative" to="/movimientos/egresos" icon="trending_down" title="Egresos" />
-            <LinkRow tone="info" to="/resumen" icon="bar_chart" title="Balance" />
-            <LinkRow tone="violet" to="/chat" icon="auto_awesome" title="Habla con Zenity" />
-            <LinkRow tone="positive" to="/revisado" icon="checklist" title="Revisado por Zenity" />
-            <LinkRow tone="info" to="/conexiones/nueva" icon="add_link" title="Nueva conexión" />
-          </div>
-        </motion.section>
-
-        <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Apariencia" />
           <ThemeSwitch />
         </motion.section>
 

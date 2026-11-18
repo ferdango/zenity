@@ -3,8 +3,7 @@ import { Link } from 'react-router'
 import { HOY } from '../../config/demo'
 import { textoAlerta } from '../../domain/cashflow'
 import { totalCobranzas } from '../../domain/collections'
-import { personalesDelMes } from '../../domain/personal'
-import { fmtFecha, round2 } from '../../domain/util'
+import { fmtFecha } from '../../domain/util'
 import { fadeUp } from '../../lib/motion'
 import { useApp } from '../../state/context'
 import { inicioCompleto } from '../../state/demoStore'
@@ -14,8 +13,8 @@ import { LessonCard, Money } from './index'
 import styles from './zen.module.css'
 
 /**
- * Inicio del dueño (sección 8 del brief), en este orden: saldo actual · alerta principal de caja ·
- * por revisar · te deben · gasto personal del mes · tarjeta de microlección.
+ * Inicio del dueño, solo lo esencial: saldo actual · alerta de caja · lo que hay que hacer hoy
+ * (revisar y cobrar).
  */
 export function InicioOla1() {
   const { business } = useApp()
@@ -26,7 +25,6 @@ export function InicioOla1() {
   if (!a) return null
   const preguntas = demo.comments.filter((c) => c.businessId === a.business.id && c.pregunta && !c.respondida).length
   const porRevisar = a.porRevisar.length + preguntas
-  const personal = round2(personalesDelMes(a, HOY.slice(0, 7)).reduce((s, m) => s - m.monto, 0))
   const vencidas = cobranzas.filter((c) => c.diasVencidos > 0).length
   const leccion = lecciones?.activas.find((id) => !demo.leccionesCerradas.includes(`${business.id}:${id}`))
 
@@ -35,7 +33,7 @@ export function InicioOla1() {
       <motion.section className={styles.hero} variants={fadeUp} data-tour="saldo">
         <span className={styles.heroLabel}>Saldo actual · BCP cuenta corriente</span>
         <Money animated value={a.saldoActual} className={styles.heroAmount} />
-        <span className={styles.heroMeta}>Al {fmtFecha(HOY)} · se actualiza solo</span>
+        <span className={styles.heroMeta}>Al {fmtFecha(HOY)}</span>
       </motion.section>
 
       {!inicioCompleto(demo, a.business.id) && (
@@ -94,18 +92,6 @@ export function InicioOla1() {
                 {cobranzas.length} comprobante{cobranzas.length === 1 ? '' : 's'}
                 {vencidas ? ` · ${vencidas} vencido${vencidas === 1 ? '' : 's'}` : ''}
               </span>
-            </span>
-            <Icon name="chevron_right" size={20} />
-          </Link>
-          <Link to="/personal" className={styles.todo} data-ripple="">
-            <span className={`${styles.rowIcon} ${styles.toneViolet}`}>
-              <Icon name="person" size={20} />
-            </span>
-            <span className={styles.rowText}>
-              <span className={styles.todoValue}>
-                Gasto personal: <Money value={personal} />
-              </span>
-              <span className={styles.rowSub}>Salió este mes de la cuenta del negocio</span>
             </span>
             <Icon name="chevron_right" size={20} />
           </Link>

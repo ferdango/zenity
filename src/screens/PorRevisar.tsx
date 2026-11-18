@@ -17,6 +17,7 @@ import { resumenMes } from '../domain/engine'
 import type { BankMovement, CategoriaId, Comment } from '../domain/types'
 import { fmtFecha, monthOf } from '../domain/util'
 import { HOY } from '../config/demo'
+import { FEATURES } from '../lib/features'
 import { formatMoney } from '../lib/format'
 import { celebrate } from '../lib/celebrate'
 import { haptic } from '../lib/haptics'
@@ -246,7 +247,9 @@ function PorRevisarView({
         subtitle={businessName(business)}
         hideBack
         end={
-          <IconButton icon={whatsapp ? 'view_agenda' : 'chat'} label={whatsapp ? 'Ver como tarjeta' : 'Ver en WhatsApp'} variant="tonal" onClick={() => setWhatsapp(!whatsapp)} />
+          FEATURES.revisarExtras ? (
+            <IconButton icon={whatsapp ? 'view_agenda' : 'chat'} label={whatsapp ? 'Ver como tarjeta' : 'Ver en WhatsApp'} variant="tonal" onClick={() => setWhatsapp(!whatsapp)} />
+          ) : undefined
         }
       />
       <div className={`z-container ${styles.page}`}>
@@ -304,18 +307,15 @@ function PorRevisarView({
                 : 'Zenity clasificó todo con confianza alta. No hay nada que revisar.'}
             </p>
             <div className={styles.actions} style={{ justifyContent: 'center' }}>
-              <Button variant="tonal" icon="fact_check" to="/conciliacion">
-                Ver conciliación
-              </Button>
-              <Button variant="text" icon="database" to="/datos">
-                Datos de entrenamiento
+              <Button variant="tonal" icon="home" to="/inicio">
+                Volver al inicio
               </Button>
             </div>
           </motion.div>
         )}
         <LessonCard id="L10" />
 
-        <ConfianzaMedia />
+        {FEATURES.revisarExtras && <ConfianzaMedia />}
 
         {actual && (
           <p className={styles.muted} style={{ textAlign: 'center' }}>
@@ -324,11 +324,7 @@ function PorRevisarView({
               Atajos: <kbd className={styles.kbd}>Enter</kbd> correcto · <kbd className={styles.kbd}>1</kbd>–<kbd className={styles.kbd}>3</kbd> otra opción ·{' '}
               <kbd className={styles.kbd}>O</kbd> buscar.{' '}
             </span>
-            Cada respuesta enseña a Zenity y queda en{' '}
-            <a href="#/datos" style={{ color: 'var(--z-primary)' }}>
-              Datos de entrenamiento
-            </a>
-            .
+            Cada respuesta enseña a Zenity.
           </p>
         )}
       </div>

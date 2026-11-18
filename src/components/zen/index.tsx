@@ -7,6 +7,7 @@ import { contenido } from '../../domain/lessons'
 import { nivel } from '../../domain/categorization'
 import type { LessonId } from '../../domain/types'
 import { fmtFecha } from '../../domain/util'
+import { FEATURES } from '../../lib/features'
 import { formatMoney } from '../../lib/format'
 import { ease, spring } from '../../lib/motion'
 import { useAnimatedNumber } from '../../lib/useAnimatedNumber'
@@ -137,7 +138,7 @@ export function LessonCard({ id, force = false }: { id: LessonId; force?: boolea
   const [abierta, setAbierta] = useState(false)
   const activa = lecciones?.activas.includes(id)
   const cerrada = demo.leccionesCerradas.includes(`${business.id}:${id}`)
-  const visible = !!lecciones && (force || (activa && !cerrada))
+  const visible = !!lecciones && (force || (FEATURES.lecciones && activa && !cerrada))
 
   useEffect(() => {
     if (visible) registrarLeccion(business.id, id, 'MOSTRADA')
