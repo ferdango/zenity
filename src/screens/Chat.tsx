@@ -202,8 +202,18 @@ function getRecognition(): Recognition | null {
   return Ctor ? new Ctor() : null
 }
 
-/** Chat con Zenity (Figma: Chat) con el comportamiento de Gemini. */
+/** Chat con Zenity (Figma: Chat) con el comportamiento de Gemini: pantalla completa en /chat. */
 export function Chat() {
+  return <ChatView variant="page" />
+}
+
+/** El mismo chat como panel lateral del Inicio en escritorio, para consultas rápidas. */
+export function ChatPanel() {
+  return <ChatView variant="panel" />
+}
+
+function ChatView({ variant }: { variant: 'page' | 'panel' }) {
+  const panel = variant === 'panel'
   const { connections, periodKey, toast, profile, ledger, business } = useApp()
   const name = businessName(business)
   const sire = useSire()
@@ -221,6 +231,8 @@ export function Chat() {
   const fileRef = useRef<HTMLInputElement>(null)
   const recognition = useRef<Recognition | null>(null)
   const consumedQuery = useRef<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const busy = messages.some((msg) => msg.role === 'ai' && msg.status !== 'done')
 
   const respond = useCallback(
@@ -253,15 +265,16 @@ export function Chat() {
     [context, respond],
   )
 
-  // Pregunta enviada desde otra pantalla (?q=…)
+  // Pregunta enviada desde otra pantalla (?q=…); solo la pantalla completa la atiende
   useEffect(() => {
+    if (panel) return
     const q = params.get('q')
     if (q && consumedQuery.current !== q) {
       consumedQuery.current = q
       setParams({}, { replace: true })
       send(q, 'enlace')
     }
-  }, [params, setParams, send])
+  }, [panel, params, setParams, send])
 
   // Como en Gemini: al enviar se baja al final; cuando llega la respuesta,
   // la última pregunta queda arriba y el texto se escribe debajo.
@@ -269,14 +282,19 @@ export function Chat() {
   useEffect(() => {
     const last = messages.at(-1)
     if (!last) return
+    // En el panel se desplaza su propia lista; en la pantalla completa, la ventana
+    const box = panel ? scrollRef.current : null
     if (last.role === 'user' || last.status === 'thinking') {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })
+      if (box) box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' })
+      else window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })
     } else if (last.status === 'streaming' && scrolledFor.current !== last.id) {
       scrolledFor.current = last.id
-      const question = document.querySelector<HTMLElement>('[data-last-question]')
-      if (question) window.scrollTo({ top: question.getBoundingClientRect().top + window.scrollY - 84, behavior: 'smooth' })
+      const question = rootRef.current?.querySelector<HTMLElement>('[data-last-question]')
+      if (!question) return
+      if (box) box.scrollTo({ top: question.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 12, behavior: 'smooth' })
+      else window.scrollTo({ top: question.getBoundingClientRect().top + window.scrollY - 84, behavior: 'smooth' })
     }
-  }, [messages])
+  }, [messages, panel])
 
   const stop = () => {
     timers.current.forEach(window.clearTimeout)
@@ -345,8 +363,159 @@ export function Chat() {
   const lastUserText = lastUser?.text ?? ''
   const lastUserId = lastUser?.id
 
+  const conversation = (
+    <AnimatePresence mode="wait" initial={false}>
+      {messages.length === 0 ? (
+        <motion.section
+          key="zero"
+          className={styles.zero}
+          variants={staggerContainer(0.07, 0.1)}
+          initial="hidden"
+          animate="show"
+          exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}
+        >
+          <Spark size={panel ? 36 : 44} animateIn />
+          <motion.h1 className={styles.hello} variants={fadeUp}>
+            <GradientText>Hola, {profile.firstName}</GradientText>
+          </motion.h1>
+          <motion.p className={styles.question} variants={fadeUp}>
+            {panel ? '¿Qué quieres saber de tu negocio?' : '¿Por dónde empezamos?'}
+          </motion.p>
+          <motion.div className={styles.suggestions} variants={staggerContainer(0.06, 0.25)}>
+            {SUGGESTIONS.map((s) => (
+              <motion.div key={s.label} variants={fadeUp}>
+                <button
+                  type="button"
+                  className={styles.suggestion}
+                  data-ripple=""
+                  onClick={() => ('upload' in s ? fileRef.current?.click() : send(s.label, 'sugerencia'))}
+                >
+                  <Icon name={s.icon} size={20} />
+                  {s.label}
+                </button>
+              </motion.div>
+            ))}
+          </motion.div>
+        </motion.section>
+      ) : (
+        <motion.div key="messages" className={styles.messages} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          {messages.map((msg) =>
+            msg.role === 'user' ? (
+              <motion.div
+                key={msg.id}
+                data-last-question={msg.id === lastUserId || undefined}
+                className={styles.user}
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.35, ease: ease.decelerate }}
+              >
+                {msg.file && (
+                  <span className={styles.attachment}>
+                    <span className={styles.attachmentIcon}>
+                      <Icon name="description" size={20} />
+                    </span>
+                    <span>
+                      <strong className="t-strong">{msg.file.name}</strong>
+                      <br />
+                      <span className="t-low">{Math.max(1, Math.round(msg.file.size / 1024))} KB</span>
+                    </span>
+                  </span>
+                )}
+                <div className={styles.bubble}>{msg.text}</div>
+              </motion.div>
+            ) : (
+              <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, context))} />
+            ),
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
+  const composer = (
+    <div className={styles.composerWrap}>
+      <form className={`${styles.composer} fx-glow-border`} data-active={focused || busy || listening} onSubmit={onSubmit}>
+        <IconButton icon="add" label="Subir un archivo" onClick={() => fileRef.current?.click()} />
+        <input ref={fileRef} type="file" hidden accept=".xlsx,.xls,.csv,.xml,.pdf" onChange={onFile} />
+        <textarea
+          className={styles.textarea}
+          rows={1}
+          placeholder={listening ? 'Te escucho…' : 'Pregunta lo que quieras'}
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          onKeyDown={onKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          aria-label="Mensaje para Zenity"
+        />
+        <AnimatePresence mode="popLayout" initial={false}>
+          {busy ? (
+            <motion.span key="stop" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}>
+              <IconButton icon="stop" label="Detener respuesta" variant="inverse" fillIcon onClick={stop} />
+            </motion.span>
+          ) : input.trim() ? (
+            <motion.span key="send" initial={{ scale: 0.6, opacity: 0, rotate: -45 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.6, opacity: 0 }}>
+              <IconButton icon="arrow_upward" label="Enviar" variant="filled" type="submit" />
+            </motion.span>
+          ) : (
+            <motion.span key="mic" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}>
+              <IconButton
+                icon={
+                  listening ? (
+                    <span className={styles.wave} aria-hidden>
+                      {[0, 1, 2, 3].map((i) => (
+                        <motion.span
+                          key={i}
+                          animate={{ height: [6, 18, 8, 14, 6] }}
+                          transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.12 }}
+                        />
+                      ))}
+                    </span>
+                  ) : (
+                    'mic'
+                  )
+                }
+                label={listening ? 'Detener dictado' : 'Dictar por voz'}
+                selected={listening}
+                onClick={toggleMic}
+              />
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </form>
+      <p className={styles.disclaimer}>
+        {panel ? 'Zenity es una IA y puede equivocarse.' : 'Zenity es una IA y puede cometer errores. Prototipo con datos de ejemplo.'}
+      </p>
+    </div>
+  )
+
+  if (panel) {
+    return (
+      <section ref={rootRef} className={styles.panel} aria-label="Pregúntale a Zenity">
+        <header className={styles.panelHead}>
+          <Spark size={24} state={busy ? 'thinking' : 'idle'} />
+          <span className={styles.panelTitle}>
+            <strong>Pregúntale a Zenity</strong>
+            <span>Consultas rápidas sobre {name}</span>
+          </span>
+          <AnimatePresence initial={false}>
+            {messages.length > 0 && (
+              <motion.span key="nuevo" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}>
+                <IconButton icon="edit_square" label="Nuevo chat" onClick={reset} />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </header>
+        <div ref={scrollRef} className={styles.panelBody}>
+          {conversation}
+        </div>
+        {composer}
+      </section>
+    )
+  }
+
   return (
-    <div className={`z-page ${styles.page}`}>
+    <div ref={rootRef} className={`z-page ${styles.page}`}>
       <TopBar
         title="Zenity"
         subtitle={name}
@@ -357,128 +526,8 @@ export function Chat() {
           </>
         }
       />
-
-      <div className={styles.body}>
-        <AnimatePresence mode="wait" initial={false}>
-          {messages.length === 0 ? (
-            <motion.section
-              key="zero"
-              className={styles.zero}
-              variants={staggerContainer(0.07, 0.1)}
-              initial="hidden"
-              animate="show"
-              exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}
-            >
-              <Spark size={44} animateIn />
-              <motion.h1 className={styles.hello} variants={fadeUp}>
-                <GradientText>Hola, {profile.firstName}</GradientText>
-              </motion.h1>
-              <motion.p className={styles.question} variants={fadeUp}>
-                ¿Por dónde empezamos?
-              </motion.p>
-              <motion.div className={styles.suggestions} variants={staggerContainer(0.06, 0.25)}>
-                {SUGGESTIONS.map((s) => (
-                  <motion.div key={s.label} variants={fadeUp}>
-                    <button
-                      type="button"
-                      className={styles.suggestion}
-                      data-ripple=""
-                      onClick={() => ('upload' in s ? fileRef.current?.click() : send(s.label, 'sugerencia'))}
-                    >
-                      <Icon name={s.icon} size={20} />
-                      {s.label}
-                    </button>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.section>
-          ) : (
-            <motion.div key="messages" className={styles.messages} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              {messages.map((msg) =>
-                msg.role === 'user' ? (
-                  <motion.div
-                    key={msg.id}
-                    data-last-question={msg.id === lastUserId || undefined}
-                    className={styles.user}
-                    initial={{ opacity: 0, y: 16, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.35, ease: ease.decelerate }}
-                  >
-                    {msg.file && (
-                      <span className={styles.attachment}>
-                        <span className={styles.attachmentIcon}>
-                          <Icon name="description" size={20} />
-                        </span>
-                        <span>
-                          <strong className="t-strong">{msg.file.name}</strong>
-                          <br />
-                          <span className="t-low">{Math.max(1, Math.round(msg.file.size / 1024))} KB</span>
-                        </span>
-                      </span>
-                    )}
-                    <div className={styles.bubble}>{msg.text}</div>
-                  </motion.div>
-                ) : (
-                  <AiMessage key={msg.id} message={msg} onRetry={() => respond(answer(lastUserText, context))} />
-                ),
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className={styles.composerWrap}>
-        <form className={`${styles.composer} fx-glow-border`} data-active={focused || busy || listening} onSubmit={onSubmit}>
-          <IconButton icon="add" label="Subir un archivo" onClick={() => fileRef.current?.click()} />
-          <input ref={fileRef} type="file" hidden accept=".xlsx,.xls,.csv,.xml,.pdf" onChange={onFile} />
-          <textarea
-            className={styles.textarea}
-            rows={1}
-            placeholder={listening ? 'Te escucho…' : 'Pregunta lo que quieras'}
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={onKeyDown}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            aria-label="Mensaje para Zenity"
-          />
-          <AnimatePresence mode="popLayout" initial={false}>
-            {busy ? (
-              <motion.span key="stop" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}>
-                <IconButton icon="stop" label="Detener respuesta" variant="inverse" fillIcon onClick={stop} />
-              </motion.span>
-            ) : input.trim() ? (
-              <motion.span key="send" initial={{ scale: 0.6, opacity: 0, rotate: -45 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.6, opacity: 0 }}>
-                <IconButton icon="arrow_upward" label="Enviar" variant="filled" type="submit" />
-              </motion.span>
-            ) : (
-              <motion.span key="mic" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}>
-                <IconButton
-                  icon={
-                    listening ? (
-                      <span className={styles.wave} aria-hidden>
-                        {[0, 1, 2, 3].map((i) => (
-                          <motion.span
-                            key={i}
-                            animate={{ height: [6, 18, 8, 14, 6] }}
-                            transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.12 }}
-                          />
-                        ))}
-                      </span>
-                    ) : (
-                      'mic'
-                    )
-                  }
-                  label={listening ? 'Detener dictado' : 'Dictar por voz'}
-                  selected={listening}
-                  onClick={toggleMic}
-                />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </form>
-        <p className={styles.disclaimer}>Zenity es una IA y puede cometer errores. Prototipo con datos de ejemplo.</p>
-      </div>
+      <div className={styles.body}>{conversation}</div>
+      {composer}
     </div>
   )
 }

@@ -41,16 +41,10 @@
 
 .greeting {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: end;
   gap: 12px;
   padding: 4px var(--z-gutter) 0;
-}
-
-.sun {
-  width: 30px;
-  height: 30px;
-  margin-bottom: 2px;
 }
 
 .live {
@@ -206,6 +200,11 @@
   .menuButton {
     display: none;
   }
+
+  /* Escritorio: el selector de negocio y la campana alineados con el contenido */
+  .header {
+    padding-inline: var(--z-gutter);
+  }
 }
 
 @media (min-width: 1180px) {
@@ -219,6 +218,29 @@
   .layout[data-simple] {
     grid-template-columns: minmax(0, 720px);
     justify-content: center;
+  }
+
+  /* Inicio simplificado: el encabezado sigue la misma columna de 720 px que el contenido */
+  .home:has(.layout[data-simple]) .header {
+    padding-inline: calc(max(16px, (100% - 720px) / 2) + var(--z-gutter));
+  }
+
+  /* Con el chat: el Inicio a la izquierda y «Pregúntale a Zenity» fijo a la derecha, a todo el alto */
+  .home[data-chat] {
+    --chat-width: clamp(360px, 30vw, 440px);
+    max-width: none;
+    padding-right: var(--chat-width);
+  }
+
+  .chat {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    width: var(--chat-width);
+    border-left: 1px solid var(--z-divider);
+    background: var(--z-surface-low);
   }
 
   .secondary {
