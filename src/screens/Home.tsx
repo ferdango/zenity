@@ -283,14 +283,14 @@ export function Home() {
               </div>
             </motion.div>
           ) : (
-            FEATURES.inicioClasico && (
+            (
               <>
                 <motion.div variants={fadeUp} data-tour="accounts">
                   <Carousel />
                 </motion.div>
                 <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-                  <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
-                    Agregar una conexión
+                  <Button variant="tonal" size="lg" icon="link" className={styles.addButton} to="/conexiones" data-tour="add-account">
+                    Ver y agregar conexiones
                   </Button>
                 </motion.div>
               </>

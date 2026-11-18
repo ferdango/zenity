@@ -12,7 +12,7 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
+const MAS_PATHS = ['/mas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
 
 /** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
 export const PRIMARY_NAV: NavItem[] = [
@@ -20,11 +20,12 @@ export const PRIMARY_NAV: NavItem[] = [
   { id: 'revisar', label: 'Por revisar', short: 'Revisar', icon: 'fact_check', to: '/revisar', match: (p) => p === '/revisar' },
   { id: 'caja', label: 'Caja', short: 'Caja', icon: 'monitoring', to: '/caja', match: (p) => p === '/caja' },
   { id: 'cobrar', label: 'Cobrar', short: 'Cobrar', icon: 'payments', to: '/cobrar', match: (p) => p === '/cobrar' },
-  { id: 'mas', label: 'Más', short: 'Más', icon: 'apps', to: '/mas', match: (p) => MAS_PATHS.includes(p) },
+  { id: 'mas', label: 'Más', short: 'Más', icon: 'apps', to: '/mas', match: (p) => MAS_PATHS.includes(p) || p.startsWith('/conexion/') },
 ]
 
 /** Herramientas del dueño (menú lateral): solo lo que usa en el día a día. */
 export const TOOLS_NAV: NavItem[] = [
+  { id: 'conexiones', label: 'Conexiones', short: 'Conexiones', icon: 'link', to: '/conexiones', match: (p) => p.startsWith('/conexion') },
   ...(FEATURES.cierreCaja
     ? [{ id: 'cierre-caja', label: 'Cierre de caja', short: 'Cierre', icon: 'point_of_sale', to: '/cierre-caja', match: (p: string) => p === '/cierre-caja' }]
     : []),

@@ -54,7 +54,7 @@ export function ConnectionDetail() {
   if (found && found !== lastSeen) setLastSeen(found)
   const connection = found ?? lastSeen
 
-  if (!connection) return <Navigate to="/inicio" replace />
+  if (!connection) return <Navigate to="/conexiones" replace />
 
   const month = periodLabel(getPeriod(ledger, periodKey))
   const all = filterByAccount(getTransactions(ledger, periodKey), connection.id)
@@ -76,7 +76,7 @@ export function ConnectionDetail() {
   const remove = () => {
     setConfirm(false)
     toast(`${connection.name} se eliminó de tu consolidado`, 'delete')
-    navigate('/inicio', { replace: true })
+    navigate('/conexiones', { replace: true })
     removeConnection(connection.id)
   }
 
