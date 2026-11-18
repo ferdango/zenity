@@ -1,12 +1,12 @@
-import { AnimatePresence, motion } from 'motion/react'
-import { useState } from 'react'
+import { AnimatePresence, motion, type PanInfo, useMotionValue, useTransform } from 'motion/react'
+import { type Ref, useEffect, useRef, useState } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
 import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
 import { IconButton } from '../components/IconButton'
 import { TopBar } from '../components/TopBar'
-import { ConfidenceBadge, LessonCard, Money, NoDemoData, Pill, ProgressBar, SectionHead, Why } from '../components/zen'
+import { ConfidenceBadge, DoneCheck, LessonCard, Money, NoDemoData, Pill, ProgressBar, SectionHead, Why } from '../components/zen'
 import { REGLA_LABEL } from '../components/zen/reglas'
 import styles from '../components/zen/zen.module.css'
 import { CATEGORIA_IDS, CATEGORIAS } from '../config/categories'
@@ -18,7 +18,9 @@ import type { BankMovement, CategoriaId, Comment } from '../domain/types'
 import { fmtFecha, monthOf } from '../domain/util'
 import { HOY } from '../config/demo'
 import { formatMoney } from '../lib/format'
-import { ease } from '../lib/motion'
+import { celebrate } from '../lib/celebrate'
+import { haptic } from '../lib/haptics'
+import { ease, spring } from '../lib/motion'
 import { useApp } from '../state/context'
 import {
   analysisFor,
@@ -58,6 +60,8 @@ export function PorRevisar() {
   const [busqueda, setBusqueda] = useState('')
   const [regla, setRegla] = useState<ReglaPendiente | null>(null)
   const [whatsapp, setWhatsapp] = useState(false)
+  /** Hacia dónde sale la tarjeta actual: derecha (correcto), arriba (otra categoría) */
+  const [salida, setSalida] = useState<'right' | 'up'>('right')
 
   if (!a) {
     return (
@@ -79,12 +83,14 @@ export function PorRevisar() {
   const revisados = corregidos.size + porRegla
   const total = pendientes + revisados
   const actual = cola[0]
+  const siguiente = cola[1]
 
   const conDeshacer = (mensaje: string, token: UndoToken, icon = 'check_circle') =>
     toast(mensaje, icon, { label: 'Deshacer', onClick: () => deshacer(token) })
 
   const elegir = (m: BankMovement, categoria: CategoriaId, opts: { personal?: boolean } = {}) => {
     const sugerida = a.classifications.get(m.id)?.categoriaId
+    setSalida(categoria === sugerida ? 'right' : 'up')
     const token = corregir({ movementIds: [m.id], businessId: a.business.id, rubro: a.business.rubro, elegida: categoria })
     setOtra(null)
     if (opts.personal) return conDeshacer('Marcado como gasto personal', token, 'person')
@@ -127,6 +133,113 @@ export function PorRevisar() {
   const minutos = Math.max(1, Math.ceil((pendientes * 10) / 60))
 
   return (
+    <PorRevisarView
+      {...{ business, a, cola, preguntas, pendientes, revisados, total, actual, siguiente, minutos, whatsapp, setWhatsapp, salida, otra, setOtra, busqueda, setBusqueda, regla, elegir, soloEstaVez, siempre }}
+    />
+  )
+}
+
+type ViewProps = {
+  business: ReturnType<typeof useApp>['business']
+  a: NonNullable<ReturnType<typeof useZen>['a']>
+  cola: BankMovement[]
+  preguntas: Comment[]
+  pendientes: number
+  revisados: number
+  total: number
+  actual?: BankMovement
+  siguiente?: BankMovement
+  minutos: number
+  whatsapp: boolean
+  setWhatsapp: (v: boolean) => void
+  salida: 'right' | 'up'
+  otra: BankMovement | null
+  setOtra: (m: BankMovement | null) => void
+  busqueda: string
+  setBusqueda: (v: string) => void
+  regla: ReglaPendiente | null
+  elegir: (m: BankMovement, categoria: CategoriaId, opts?: { personal?: boolean }) => void
+  soloEstaVez: () => void
+  siempre: () => void
+}
+
+const sinTildes = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+function PorRevisarView({
+  business,
+  a,
+  cola,
+  preguntas,
+  pendientes,
+  revisados,
+  total,
+  actual,
+  siguiente,
+  minutos,
+  whatsapp,
+  setWhatsapp,
+  salida,
+  otra,
+  setOtra,
+  busqueda,
+  setBusqueda,
+  regla,
+  elegir,
+  soloEstaVez,
+  siempre,
+}: ViewProps) {
+  const abrirOtra = (m: BankMovement) => {
+    setBusqueda('')
+    setOtra(m)
+  }
+
+  // Celebración cuando el dueño termina la cola en esta visita
+  const habiaPendientes = useRef(pendientes > 0)
+  useEffect(() => {
+    if (pendientes > 0) habiaPendientes.current = true
+    else if (habiaPendientes.current) {
+      habiaPendientes.current = false
+      window.setTimeout(() => celebrate({ count: 48 }), 250)
+    }
+  }, [pendientes])
+
+  // Atajos de teclado: Enter/→ correcto, ← u O otra, 1–3 alternativas, P personal
+  const sheetAbierto = !!otra || !!regla
+  useEffect(() => {
+    if (!actual || whatsapp || sheetAbierto) return
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el?.closest('input, textarea, select, [contenteditable="true"]') || e.metaKey || e.ctrlKey || e.altKey) return
+      const cl = a.classifications.get(actual.id)
+      if (!cl) return
+      const alts = alternativas(actual, cl.categoriaId)
+      const k = e.key.toLowerCase()
+      if (k === 'enter' || k === 'arrowright') {
+        if (el?.closest('button, a') && k === 'enter') return
+        e.preventDefault()
+        elegir(actual, cl.categoriaId)
+      } else if (k === 'arrowleft' || k === 'o') {
+        e.preventDefault()
+        abrirOtra(actual)
+      } else if (/^[1-9]$/.test(k) && alts[Number(k) - 1]) {
+        e.preventDefault()
+        elegir(actual, alts[Number(k) - 1])
+      } else if (k === 'p' && actual.monto < 0) {
+        e.preventDefault()
+        elegir(actual, 'retiro_dueno', { personal: true })
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  const sugeridaOtra = otra ? a.classifications.get(otra.id)?.categoriaId : undefined
+  // La sugerencia de Zenity va primero; el resto, en el orden de siempre
+  const categorias = CATEGORIA_IDS.filter((id) => sinTildes(CATEGORIAS[id].label).includes(sinTildes(busqueda))).sort(
+    (x, y) => Number(y === sugeridaOtra) - Number(x === sugeridaOtra),
+  )
+
+  return (
     <div className="z-page">
       <TopBar
         title="Por revisar"
@@ -141,7 +254,11 @@ export function PorRevisar() {
           <section className={styles.section} aria-live="polite">
             <div className={styles.sectionHead}>
               <span className="t-title-m">
-                Te quedan {pendientes} · ~{minutos} minuto{minutos === 1 ? '' : 's'}
+                Te quedan{' '}
+                <motion.span key={pendientes} style={{ display: 'inline-block' }} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring.snappy}>
+                  {pendientes}
+                </motion.span>{' '}
+                · ~{minutos} minuto{minutos === 1 ? '' : 's'}
               </span>
               <span className={styles.sectionHint}>
                 {revisados} de {total} revisados
@@ -155,27 +272,31 @@ export function PorRevisar() {
           <Pregunta key={p.id} pregunta={p} />
         ))}
 
-        <AnimatePresence mode="popLayout" initial={false}>
-          {actual && !whatsapp && (
-            <ReviewCard
-              key={actual.id}
-              movement={actual}
-              onElegir={(cat, opts) => elegir(actual, cat, opts)}
-              onOtra={() => {
-                setBusqueda('')
-                setOtra(actual)
-              }}
-            />
-          )}
-        </AnimatePresence>
+        {actual && !whatsapp && (
+          <div className={styles.reviewStack}>
+            {siguiente && (
+              <motion.div
+                key={`peek-${siguiente.id}`}
+                className={styles.reviewPeek}
+                aria-hidden
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                {cola.length > 2 && <span>+{cola.length - 1} más</span>}
+              </motion.div>
+            )}
+            <AnimatePresence initial={false} custom={salida}>
+              <ReviewCard key={actual.id} movement={actual} onElegir={(cat, opts) => elegir(actual, cat, opts)} onOtra={() => abrirOtra(actual)} />
+            </AnimatePresence>
+          </div>
+        )}
 
         {actual && whatsapp && <VistaWhatsApp movement={actual} />}
 
         {pendientes === 0 && (
           <motion.div className={styles.empty} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ ease: ease.decelerate }}>
-            <span className={styles.celebrate} aria-hidden>
-              🎉
-            </span>
+            <DoneCheck />
             <p className="t-headline-s">¡Todo al día!</p>
             <p className={styles.muted}>
               {revisados > 0
@@ -198,7 +319,12 @@ export function PorRevisar() {
 
         {actual && (
           <p className={styles.muted} style={{ textAlign: 'center' }}>
-            Desliza la tarjeta a la derecha para confirmar. Cada respuesta enseña a Zenity y queda en{' '}
+            <span className={styles.touchOnly}>Desliza a la derecha para confirmar o a la izquierda para elegir otra. </span>
+            <span className={styles.keysOnly}>
+              Atajos: <kbd className={styles.kbd}>Enter</kbd> correcto · <kbd className={styles.kbd}>1</kbd>–<kbd className={styles.kbd}>3</kbd> otra opción ·{' '}
+              <kbd className={styles.kbd}>O</kbd> buscar.{' '}
+            </span>
+            Cada respuesta enseña a Zenity y queda en{' '}
             <a href="#/datos" style={{ color: 'var(--z-primary)' }}>
               Datos de entrenamiento
             </a>
@@ -213,21 +339,40 @@ export function PorRevisar() {
             className={styles.input}
             placeholder="Buscar categoría"
             value={busqueda}
+            autoFocus={window.matchMedia?.('(hover: hover)').matches}
             onChange={(e) => setBusqueda(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && otra && categorias[0]) elegir(otra, categorias[0], { personal: categorias[0] === 'retiro_dueno' })
+            }}
             aria-label="Buscar categoría"
           />
           <div className={styles.list}>
-            {CATEGORIA_IDS.filter((id) => CATEGORIAS[id].label.toLowerCase().includes(busqueda.toLowerCase())).map((id) => (
-              <button key={id} type="button" className={styles.row} onClick={() => otra && elegir(otra, id, { personal: id === 'retiro_dueno' })}>
-                <span className={styles.rowIcon}>
+            {categorias.map((id, i) => (
+              <motion.button
+                key={id}
+                type="button"
+                className={styles.row}
+                data-ripple=""
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 10) * 0.018 } }}
+                onClick={() => otra && elegir(otra, id, { personal: id === 'retiro_dueno' })}
+              >
+                <span className={`${styles.rowIcon} ${id === sugeridaOtra ? styles.toneInfo : ''}`}>
                   <Icon name={CATEGORIAS[id].icon} size={20} />
                 </span>
                 <span className={styles.rowText}>
                   <span className={styles.rowTitle}>{CATEGORIAS[id].label}</span>
+                  {id === sugeridaOtra && <span className={styles.rowSub}>Sugerencia de Zenity</span>}
                 </span>
-                <span />
-              </button>
+                <span className={styles.rowEnd}>{busqueda && i === 0 && <kbd className={styles.kbd}>Enter</kbd>}</span>
+              </motion.button>
             ))}
+            {categorias.length === 0 && (
+              <div className={styles.empty} style={{ boxShadow: 'none' }}>
+                <Icon name="search_off" size={32} />
+                <p className={styles.muted}>No hay una categoría «{busqueda}». Prueba con otra palabra.</p>
+              </div>
+            )}
           </div>
         </div>
       </BottomSheet>
@@ -254,10 +399,12 @@ export function PorRevisar() {
 }
 
 function ReviewCard({
+  ref,
   movement: m,
   onElegir,
   onOtra,
 }: {
+  ref?: Ref<HTMLElement>
   movement: BankMovement
   onElegir: (c: CategoriaId, opts?: { personal?: boolean }) => void
   onOtra: () => void
@@ -267,26 +414,87 @@ function ReviewCard({
   if (!cl) return null
   const sugerida = cl.categoriaId
   const alts = alternativas(m, sugerida)
+  return <SwipeCard ref={ref} movement={m} sugerida={sugerida} alts={alts} confianza={cl.confianza} motivo={cl.motivo} onElegir={onElegir} onOtra={onOtra} />
+}
+
+const UMBRAL = 110
+
+/** Salida según la decisión: a la derecha si confirmó, hacia arriba si eligió otra categoría. */
+const salidaVariants = {
+  exit: (dir: 'right' | 'up') =>
+    dir === 'up'
+      ? { opacity: 0, y: -40, scale: 0.94, transition: { duration: 0.25, ease: ease.accelerate } }
+      : { opacity: 0, x: 260, rotate: 8, transition: { duration: 0.25, ease: ease.accelerate } },
+}
+
+function SwipeCard({
+  ref,
+  movement: m,
+  sugerida,
+  alts,
+  confianza,
+  motivo,
+  onElegir,
+  onOtra,
+}: {
+  ref?: Ref<HTMLElement>
+  movement: BankMovement
+  sugerida: CategoriaId
+  alts: CategoriaId[]
+  confianza: number
+  motivo: string
+  onElegir: (c: CategoriaId, opts?: { personal?: boolean }) => void
+  onOtra: () => void
+}) {
+  const x = useMotionValue(0)
+  const rotate = useTransform(x, [-220, 0, 220], [-7, 0, 7])
+  const okOpacity = useTransform(x, [20, UMBRAL], [0, 1])
+  const otraOpacity = useTransform(x, [-UMBRAL, -20], [1, 0])
+  const pasado = useRef<'ok' | 'otra' | null>(null)
+
+  // Vibración corta al cruzar el umbral (se siente el «clic» de la decisión)
+  useEffect(
+    () =>
+      x.on('change', (v) => {
+        const zona = v > UMBRAL ? 'ok' : v < -UMBRAL ? 'otra' : null
+        if (zona && zona !== pasado.current) haptic('select')
+        pasado.current = zona
+      }),
+    [x],
+  )
+
+  const onDragEnd = (_: unknown, info: PanInfo) => {
+    if (info.offset.x > UMBRAL || info.velocity.x > 700) onElegir(sugerida)
+    else if (info.offset.x < -UMBRAL || info.velocity.x < -700) onOtra()
+  }
+
   return (
     <motion.article
+      ref={ref}
       className={styles.reviewCard}
-      layout
       drag="x"
+      style={{ x, rotate }}
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
-      onDragEnd={(_, info) => {
-        if (info.offset.x > 120) onElegir(sugerida)
-      }}
+      dragElastic={0.55}
+      whileDrag={{ cursor: 'grabbing', scale: 1.01 }}
+      onDragEnd={onDragEnd}
+      variants={salidaVariants}
       initial={{ opacity: 0, y: 24, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: ease.decelerate } }}
-      exit={{ opacity: 0, x: 220, rotate: 6, transition: { duration: 0.25, ease: ease.accelerate } }}
+      exit="exit"
       aria-label={`Movimiento por revisar: ${tituloMovimiento(m)}`}
     >
+      <motion.span className={`${styles.swipeTag} ${styles.swipeOk}`} style={{ opacity: okOpacity }} aria-hidden>
+        <Icon name="check" size={18} /> Correcto
+      </motion.span>
+      <motion.span className={`${styles.swipeTag} ${styles.swipeOtra}`} style={{ opacity: otraOpacity }} aria-hidden>
+        <Icon name="more_horiz" size={18} /> Otra
+      </motion.span>
       <div className={styles.sectionHead} style={{ padding: 0 }}>
         <span className={styles.muted}>
           {fmtFecha(m.fecha)} · {m.fecha.slice(11, 16)}
         </span>
-        <ConfidenceBadge confianza={cl.confianza} />
+        <ConfidenceBadge confianza={confianza} />
       </div>
       <div>
         <Money value={m.monto} sign="always" className={`${styles.reviewAmount} ${m.monto > 0 ? styles.amountPos : ''}`} />
@@ -302,17 +510,17 @@ function ReviewCard({
           <Icon name={CATEGORIAS[sugerida].icon} size={20} />
         </span>
         <span className={styles.rowText}>
-          <span className={styles.rowSub}>{cl.confianza < 0.6 ? 'No estamos seguros. ¿Es…?' : 'Sugerimos'}</span>
+          <span className={styles.rowSub}>{confianza < 0.6 ? 'No estamos seguros. ¿Es…?' : 'Sugerimos'}</span>
           <span className={styles.rowTitle}>{CATEGORIAS[sugerida].label}</span>
         </span>
       </div>
-      <Why motivo={cl.motivo} />
+      <Why motivo={motivo} />
       <Button size="lg" icon="check" onClick={() => onElegir(sugerida)}>
         Correcto
       </Button>
       <div className={styles.chipsWrap} role="group" aria-label="Otras categorías">
-        {alts.map((c) => (
-          <Chip key={c} icon={CATEGORIAS[c].icon} onClick={() => onElegir(c)}>
+        {alts.map((c, i) => (
+          <Chip key={c} icon={CATEGORIAS[c].icon} onClick={() => onElegir(c)} title={`Atajo: ${i + 1}`}>
             {CATEGORIAS[c].label}
           </Chip>
         ))}

@@ -1,3 +1,5 @@
+import { haptic } from './haptics'
+
 /**
  * Ripple de Material 3 delegado a nivel de documento: cualquier elemento con
  * `data-ripple` recibe la onda al presionarlo. Un solo listener para toda la app.
@@ -8,6 +10,7 @@ export function installRipple(): () => void {
     const target = (event.target as Element | null)?.closest<HTMLElement>('[data-ripple]')
     if (!target || target.matches(':disabled, [aria-disabled="true"]')) return
 
+    haptic('tap')
     const rect = target.getBoundingClientRect()
     const x = event.clientX - rect.left
     const y = event.clientY - rect.top

@@ -140,6 +140,10 @@
 }
 
 .toast {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
   pointer-events: auto;
   display: flex;
   align-items: center;
@@ -156,7 +160,38 @@
 }
 
 /* Acción del snackbar («Deshacer») */
+.toastIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* Tiempo restante para «Deshacer»: una línea que se vacía */
+.toastTimer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--z-inverse-primary);
+  opacity: 0.7;
+  transform-origin: left center;
+  animation: toast-timer linear forwards;
+}
+
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 .toastAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
   margin-left: auto;
   padding: 6px 10px;
   border-radius: var(--z-radius-full);

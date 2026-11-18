@@ -1,6 +1,6 @@
 /** Piezas de UI de la primera ola: confianza, motivo, microlecciones, barras y estados vacíos. */
 import { AnimatePresence, motion } from 'motion/react'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { HOY } from '../../config/demo'
 import { contenido } from '../../domain/lessons'
@@ -8,7 +8,8 @@ import { nivel } from '../../domain/categorization'
 import type { LessonId } from '../../domain/types'
 import { fmtFecha } from '../../domain/util'
 import { formatMoney } from '../../lib/format'
-import { ease } from '../../lib/motion'
+import { ease, spring } from '../../lib/motion'
+import { useAnimatedNumber } from '../../lib/useAnimatedNumber'
 import { useApp } from '../../state/context'
 import { cerrarLeccion, registrarLeccion, useDemoState } from '../../state/demoStore'
 import { useLecciones } from '../../state/useZen'
@@ -76,9 +77,44 @@ export function ProgressBar({ value, label }: { value: number; label: string }) 
   )
 }
 
-export function Money({ value, sign = 'auto', className }: { value: number; sign?: 'auto' | 'always' | 'never'; className?: string }) {
+export function Money({
+  value,
+  sign = 'auto',
+  className,
+  animated = false,
+}: {
+  value: number
+  sign?: 'auto' | 'always' | 'never'
+  className?: string
+  /** Cuenta hasta el valor nuevo y da un pulso cuando cambia (montos grandes / hero) */
+  animated?: boolean
+}) {
   const { hideBalances } = useApp()
+  if (animated && !hideBalances) return <AnimatedMoney value={value} sign={sign} className={className} />
   return <span className={className}>{hideBalances ? 'S/ ••••' : formatMoney(value, sign)}</span>
+}
+
+function AnimatedMoney({ value, sign, className }: { value: number; sign: 'auto' | 'always' | 'never'; className?: string }) {
+  const format = useCallback((n: number) => formatMoney(Math.round(n * 100) / 100, sign), [sign])
+  const ref = useAnimatedNumber<HTMLSpanElement>(value, format, { duration: 0.8 })
+  const first = useRef(value)
+  const [pulse, setPulse] = useState(0)
+  useEffect(() => {
+    if (value !== first.current) setPulse((p) => p + 1)
+    first.current = value
+  }, [value])
+  return (
+    <motion.span
+      key={pulse}
+      className={className}
+      style={{ display: 'inline-block', fontVariantNumeric: 'tabular-nums' }}
+      initial={pulse ? { scale: 1.06 } : false}
+      animate={{ scale: 1 }}
+      transition={spring.bouncy}
+    >
+      <span ref={ref} />
+    </motion.span>
+  )
 }
 
 export function SectionHead({ title, hint, action }: { title: string; hint?: ReactNode; action?: ReactNode }) {
@@ -197,5 +233,43 @@ export function LinkRow({ to, icon, title, sub, end, tone }: { to: string; icon:
       </span>
       <span className={styles.rowEnd}>{end ?? <Icon name="chevron_right" size={20} />}</span>
     </Link>
+  )
+}
+
+/** Check que se dibuja dentro de un círculo (estado «listo» / completado). */
+export function DoneCheck({ size = 72 }: { size?: number }) {
+  return (
+    <motion.svg
+      width={size}
+      height={size}
+      viewBox="0 0 72 72"
+      aria-hidden
+      initial={{ scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={spring.bouncy}
+    >
+      <motion.circle
+        cx="36"
+        cy="36"
+        r="32"
+        fill="var(--z-positive-container, color-mix(in srgb, var(--z-positive) 16%, transparent))"
+        stroke="var(--z-positive)"
+        strokeWidth="3"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.5, ease: ease.emphasized }}
+      />
+      <motion.path
+        d="M22 37 l10 10 l19 -21"
+        fill="none"
+        stroke="var(--z-positive)"
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.35, delay: 0.4, ease: ease.decelerate }}
+      />
+    </motion.svg>
   )
 }

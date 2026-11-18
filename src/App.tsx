@@ -1,6 +1,7 @@
 import { AnimatePresence, MotionConfig } from 'motion/react'
 import { type ReactNode, useLayoutEffect, useRef } from 'react'
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router'
+import { Confetti } from './components/Confetti'
 import { Toaster } from './components/Toaster'
 import { AppShell } from './layouts/AppShell'
 import { RouteMotion } from './layouts/RouteMotion'
@@ -134,6 +135,7 @@ export function App() {
         <AppStateProvider>
           <AnimatedRoutes />
           <Toaster />
+          <Confetti />
         </AppStateProvider>
       </MotionConfig>
     </HashRouter>

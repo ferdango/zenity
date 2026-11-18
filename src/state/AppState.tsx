@@ -173,11 +173,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const toast = useCallback(
     (message: string, icon?: string, action?: Toast['action']) => {
       const id = ++toastId.current
-      setToasts((list) => [...list.slice(-1), { id, message, icon, action }])
-      // Con acción («Deshacer») el aviso dura 5 segundos
-      window.setTimeout(() => dismissToast(id), action ? 5000 : 3200)
+      // Con acción («Deshacer») el aviso dura 5 segundos; el Toaster lleva la cuenta
+      // (se pausa mientras el usuario lo toca o pasa el cursor encima)
+      setToasts((list) => [...list.slice(-1), { id, message, icon, action, duration: action ? 5000 : 3200 }])
     },
-    [dismissToast],
+    [],
   )
 
   const switchBusiness = useCallback((id: string) => {

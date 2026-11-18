@@ -15,6 +15,8 @@ export interface Toast {
   icon?: string
   /** Botón del aviso (p. ej. «Deshacer») */
   action?: { label: string; onClick: () => void }
+  /** Milisegundos antes de cerrarse solo */
+  duration: number
 }
 
 /** Datos del usuario que se muestran en la app (saludo, menú, tarjetas). */

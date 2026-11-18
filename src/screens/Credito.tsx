@@ -199,7 +199,7 @@ export function Credito() {
             {perfil.montoSugerido > 0 ? (
               <>
                 <span className={styles.heroLabel}>Según tu flujo real, podrías pedir hasta</span>
-                <Money value={perfil.montoSugerido} className={styles.heroAmount} />
+                <Money animated value={perfil.montoSugerido} className={styles.heroAmount} />
                 <span className={styles.heroMeta}>
                   A {perfil.plazoSugerido} meses, con una cuota de unos {fmtSolesCorto(Math.round(cuotaMensual(perfil.montoSugerido, perfil.tea, perfil.plazoSugerido)))}{' '}
                   al mes. Pre-evaluación con reglas de ejemplo de Zenity: la decisión y la tasa reales son del BCP.
