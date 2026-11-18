@@ -9,9 +9,8 @@ import { LessonCard, Money, NoDemoData, Pill, SectionHead } from '../components/
 import styles from '../components/zen/zen.module.css'
 import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
-import { type Cobranza, diasPromedioCobro, linkWhatsApp, mensajeCobro, TRAMO_LABEL, tonoDe, totalCobranzas } from '../domain/collections'
+import { type Cobranza, linkWhatsApp, mensajeCobro, TRAMO_LABEL, tonoDe, totalCobranzas } from '../domain/collections'
 import { abonosDe } from '../domain/engine'
-import { cobrosTrasRecordatorio } from '../domain/metricas'
 import { docLabel, tipoLabel } from '../domain/reconciliation'
 import { addDays, addMonths, fmtFecha, fmtSolesCorto } from '../domain/util'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
@@ -54,10 +53,6 @@ export function Cobrar() {
 
   const total = totalCobranzas(lista)
   const vencidas = lista.filter((c) => c.diasVencidos > 0)
-  const mes = HOY.slice(0, 7)
-  const promedio = diasPromedioCobro(a, mes)
-  const promedioAnterior = diasPromedioCobro(a, addMonths(mes, -1))
-  const recordados = cobrosTrasRecordatorio(a, demo.recordatorios)
   const recordar1 = (c: Cobranza, canal: 'whatsapp' | 'copiado') => registrarRecordatorio(c.comprobante.id, { tono: tonoDe(c.diasVencidos), tramo: c.tramo, canal })
 
   const pagar = (c: Cobranza) => {
@@ -87,44 +82,10 @@ export function Cobrar() {
           </span>
         </motion.section>
 
-        <motion.div className={styles.grid2} variants={fadeUp}>
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>
-              <Icon name="timer" size={16} /> Días promedio de cobro
-            </span>
-            <span className={styles.statValue}>{promedio ?? '—'} días</span>
-            <span className={styles.muted}>
-              {promedioAnterior !== null ? `El mes pasado: ${promedioAnterior} días` : 'Este mes'}
-              {promedio !== null && promedioAnterior !== null && (promedio <= promedioAnterior ? ' · mejoraste 👏' : ' · cobras más lento')}
-            </span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statLabel}>
-              <Icon name="event_available" size={16} /> Promesas de pago
-            </span>
-            <span className={styles.statValue}>{lista.filter((c) => c.promesa).length}</span>
-            <span className={styles.muted}>Aparecen en tu proyección de caja</span>
-          </div>
-        </motion.div>
-
-        {recordados.recordados > 0 && (
-          <motion.p className={styles.banner} variants={fadeUp}>
-            <Icon name="mark_chat_read" size={20} />
-            <span>
-              Cobraste{' '}
-              <strong>
-                {recordados.cobrados} de {recordados.recordados}
-              </strong>{' '}
-              comprobante{recordados.recordados === 1 ? '' : 's'} después de recordar{recordados.recordados === 1 ? 'lo' : 'los'} por WhatsApp
-              {recordados.dias !== null && (recordados.dias === 0 ? ', el mismo día' : ` (en ${recordados.dias} día${recordados.dias === 1 ? '' : 's'} en promedio)`)}.
-            </span>
-          </motion.p>
-        )}
-
         <LessonCard id="L07" />
 
         <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Quién te debe" hint="Primero lo más urgente" />
+          <SectionHead title="Quién te debe" hint="Lo más urgente primero" />
           {lista.length === 0 && (
             <div className={styles.empty}>
               <span className={styles.celebrate}>🙌</span>
@@ -197,7 +158,6 @@ export function Cobrar() {
             ))}
             </AnimatePresence>
           </motion.div>
-          <p className={styles.muted}>«Simular que pagó» es solo para la demo: inserta un abono de ejemplo y Zenity lo concilia solo.</p>
         </motion.section>
       </motion.div>
 

@@ -39,7 +39,10 @@ const FUENTE_LABEL: Record<FuenteCaja, string> = {
 }
 
 const CERTEZA_TONE: Record<Certeza, 'alta' | 'media' | 'baja'> = { ALTA: 'alta', MEDIA: 'media', BAJA: 'baja' }
-const CERTEZA_LABEL: Record<Certeza, string> = { ALTA: 'Alta', MEDIA: 'Media', BAJA: 'Baja' }
+const CERTEZA_LABEL: Record<Certeza, string> = { ALTA: 'Seguro', MEDIA: 'Probable', BAJA: 'Incierto' }
+
+/** Eventos que se muestran sin abrir «Ver todos»: los de mayor monto. */
+const EVENTOS_VISIBLES = 6
 
 /** F-06 · Proyección de caja 30/60/90. */
 export function Caja() {
@@ -48,6 +51,7 @@ export function Caja() {
   const [dias, setDias] = useState<Dias>('60')
   const [ajustes, setAjustes] = useState(false)
   const [colchon, setColchon] = useState('')
+  const [verTodo, setVerTodo] = useState(false)
   const caja = useCaja(Number(dias))
   const businessId = a?.business.id
   const alerta = caja?.alerta
@@ -71,9 +75,12 @@ export function Caja() {
   }
 
   const eventos = caja.eventos
+  // Por defecto solo los más grandes (lo que mueve la caja); el resto con «Ver todos»
+  const grandes = new Set([...eventos].sort((x, y) => Math.abs(y.monto) - Math.abs(x.monto)).slice(0, EVENTOS_VISIBLES))
+  const visibles = verTodo ? eventos : eventos.filter((e) => grandes.has(e))
   // Eventos agrupados por mes: «Noviembre 2026», «Diciembre 2026»…
   const grupos = new Map<string, CashEvent[]>()
-  for (const e of eventos) {
+  for (const e of visibles) {
     const mes = `${MONTHS[Number(e.fecha.slice(5, 7)) - 1]} ${e.fecha.slice(0, 4)}`
     grupos.set(mes, [...(grupos.get(mes) ?? []), e])
   }
@@ -123,7 +130,7 @@ export function Caja() {
             <Icon name="verified" size={20} />
             <span>
               <strong className={styles.bannerTitle}>Tu caja no baja del colchón en los próximos {dias} días</strong>
-              Igual revisa los picos de gratificación, CTS e impuestos en la tabla.
+              Mira abajo los pagos grandes que vienen.
             </span>
           </motion.p>
         )}
@@ -132,7 +139,7 @@ export function Caja() {
           <motion.section className={styles.section} variants={fadeUp}>
             <SectionHead title="Qué puedes hacer" />
             <div className={styles.list}>
-              {caja.acciones.map((ac) =>
+              {caja.acciones.filter((ac) => !ac.disabled).map((ac) =>
                 ac.to ? (
                   <Link key={ac.id} to={ac.to} className={`${styles.row} ${styles.rowWrap}`} data-ripple="">
                     <span className={styles.rowIcon}>
@@ -179,7 +186,16 @@ export function Caja() {
         <LessonCard id="L08" />
 
         <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Lo que viene" hint={`${eventos.length} eventos`} />
+          <SectionHead
+            title="Lo que viene"
+            action={
+              eventos.length > EVENTOS_VISIBLES ? (
+                <Button size="sm" variant="text" onClick={() => setVerTodo(!verTodo)}>
+                  {verTodo ? 'Ver menos' : `Ver los ${eventos.length}`}
+                </Button>
+              ) : undefined
+            }
+          />
           {meses.map(([mes, lista]) => (
             <div key={mes} className={styles.list}>
               <p className={styles.monthHead}>{mes}</p>
@@ -191,23 +207,16 @@ export function Caja() {
                   </span>
                   <span className={styles.rowText}>
                     <span className={styles.rowTitle}>{e.concepto}</span>
-                    <span className={styles.rowSub}>
-                      {FUENTE_LABEL[e.fuente]}
-                      {e.montoPesimista !== undefined && ` · pesimista ${fmtSolesCorto(Math.round(e.montoPesimista))}`}
-                    </span>
+                    <span className={styles.rowSub}>{FUENTE_LABEL[e.fuente]}</span>
                   </span>
                   <span className={styles.rowEnd}>
                     <Money value={e.monto} sign="always" className={e.monto > 0 ? styles.amountPos : undefined} />
-                    <Pill tone={CERTEZA_TONE[e.certeza]}>{CERTEZA_LABEL[e.certeza]}</Pill>
+                    {e.certeza !== 'ALTA' && <Pill tone={CERTEZA_TONE[e.certeza]}>{CERTEZA_LABEL[e.certeza]}</Pill>}
                   </span>
                 </div>
               ))}
             </div>
           ))}
-          <p className={styles.muted}>
-            Escenario base: certeza alta y media. Las cobranzas vencidas (certeza baja) solo suman cuando registras una promesa de pago. Vencimientos SUNAT según el
-            último dígito de tu RUC (cronograma de ejemplo).
-          </p>
         </motion.section>
       </motion.div>
 

@@ -230,7 +230,7 @@ export function Home() {
         />
       </header>
 
-      <div className={styles.layout}>
+      <div className={styles.layout} data-simple={!FEATURES.inicioClasico || undefined}>
         <motion.div className={styles.primary} variants={staggerContainer(0.06)} initial="hidden" animate="show">
           <motion.section className={styles.greeting} variants={fadeUp} data-tour="greeting">
             {dayPart === 'morning' ? (
@@ -261,75 +261,70 @@ export function Home() {
 
           <InicioOla1 />
 
-          <motion.div className={styles.period} variants={fadeUp}>
-            <div data-tour="period">
-              <PeriodPicker />
-            </div>
-          </motion.div>
+          {FEATURES.inicioClasico && (
+            <motion.div className={styles.period} variants={fadeUp}>
+              <div data-tour="period">
+                <PeriodPicker />
+              </div>
+            </motion.div>
+          )}
 
           {ledger.empty ? (
-            <>
-              <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
-                <div className={styles.empty}>
-                  <span className={styles.emptyIcon}>
-                    <Icon name="add_card" size={28} />
-                  </span>
-                  <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
-                  <p className={styles.emptyText}>
-                    Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.
-                  </p>
-                  <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
-                    Conectar cuenta
-                  </Button>
-                </div>
-              </motion.div>
-              {tiles}
-            </>
-          ) : (
-            <>
-              <motion.div variants={fadeUp} data-tour="accounts">
-                <Carousel />
-              </motion.div>
-
-              <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-                <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
-                  Agregar una conexión
+            <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
+              <div className={styles.empty}>
+                <span className={styles.emptyIcon}>
+                  <Icon name="add_card" size={28} />
+                </span>
+                <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
+                <p className={styles.emptyText}>Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.</p>
+                <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
+                  Conectar cuenta
                 </Button>
-              </motion.div>
-              {tiles}
-            </>
+              </div>
+            </motion.div>
+          ) : (
+            FEATURES.inicioClasico && (
+              <>
+                <motion.div variants={fadeUp} data-tour="accounts">
+                  <Carousel />
+                </motion.div>
+                <motion.div variants={fadeUp} style={{ display: 'grid' }}>
+                  <Button variant="tonal" size="lg" icon="add" className={styles.addButton} to="/conexiones/nueva" data-tour="add-account">
+                    Agregar una conexión
+                  </Button>
+                </motion.div>
+              </>
+            )
           )}
+          {!ledger.empty && (
+            <motion.h2 className={styles.monthTitle} variants={fadeUp}>
+              Cómo te va en {month.toLowerCase()}
+            </motion.h2>
+          )}
+          {tiles}
         </motion.div>
 
-        <div className={styles.secondary}>
-          {ledger.empty ? (
-            <section className={styles.emptyInsights}>
-              <SectionHeader title="Resumen al día de hoy" tourId="insights" />
-              <p className={styles.emptyText}>
-                Cuando conectes una cuenta, Zenity analizará los movimientos de {name} y te explicará lo más importante.
+        {FEATURES.inicioClasico && (
+          <div className={styles.secondary}>
+            {ledger.empty ? (
+              <section className={styles.emptyInsights}>
+                <SectionHeader title="Resumen al día de hoy" tourId="insights" />
+                <p className={styles.emptyText}>Cuando conectes una cuenta, Zenity analizará los movimientos de {name} y te explicará lo más importante.</p>
+              </section>
+            ) : (
+              <InsightList key={business.id} insights={insights} title="Resumen al día de hoy" tourId="insights" />
+            )}
+            <div className={styles.report} hidden={ledger.empty}>
+              <Button variant="tonal" size="lg" fullWidth className={styles.reportButton} icon={<Spark size={22} />} onClick={openReport} data-tour="report">
+                Ver reporte de {month.toLowerCase()}
+              </Button>
+              <p className={styles.reportNote}>
+                <Icon name="autorenew" size={16} />
+                Zenity lo genera solo cada mes y lo actualiza a diario
               </p>
-            </section>
-          ) : (
-            <InsightList key={business.id} insights={insights} title="Resumen al día de hoy" tourId="insights" />
-          )}
-          <div className={styles.report} hidden={ledger.empty}>
-            <Button
-              variant="tonal"
-              size="lg"
-              fullWidth
-              className={styles.reportButton}
-              icon={<Spark size={22} />}
-              onClick={openReport}
-              data-tour="report"
-            >
-              Ver reporte de {month.toLowerCase()}
-            </Button>
-            <p className={styles.reportNote}>
-              <Icon name="autorenew" size={16} />
-              Zenity lo genera solo cada mes y lo actualiza a diario
-            </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {tourActive && <Tour steps={TOUR_STEPS} firstName={profile.firstName} onFinish={finishTour} />}

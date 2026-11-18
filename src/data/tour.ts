@@ -18,34 +18,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Te saludamos con el estado de tus cuentas. Toca el ojo para ocultar o mostrar tus saldos.',
   },
   {
-    target: 'period',
-    title: 'Elige el periodo',
-    body: 'Cambia el mes y el año para ver los números de otro periodo en toda la app.',
-  },
-  {
-    target: 'accounts',
-    title: 'Tus cuentas conectadas',
-    body: 'Desliza para ver cada cuenta, tarjeta, API o Excel. Toca una para ver su detalle y movimientos.',
-  },
-  {
-    target: 'add-account',
-    title: 'Agregar una conexión',
-    body: 'Conecta bancos, billeteras, APIs o archivos para consolidar todo en un solo lugar.',
-  },
-  {
     target: 'summary',
     title: 'Tu negocio en 5 segundos',
-    body: 'Cuánto entró, cuánto salió y cuánto te queda en el mes. Toca cualquiera para ver el detalle.',
-  },
-  {
-    target: 'insights',
-    title: 'Resumen con IA',
-    body: 'Zenity analiza tus movimientos todos los días y te explica lo más importante.',
-  },
-  {
-    target: 'report',
-    title: 'Reporte completo',
-    body: 'Zenity arma solo el reporte de cada mes, con gráficos y explicaciones. Tócalo para verlo.',
+    body: 'Cuánto entró, cuánto salió y cuánto te queda en el mes.',
   },
   {
     target: 'notifications',
@@ -55,7 +30,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'menu',
     title: 'Menú',
-    body: 'Tus negocios, lo que Zenity revisó por ti y los ajustes de tu cuenta: calificación, preguntas frecuentes y este tutorial.',
+    body: 'Tus negocios y los ajustes de tu cuenta, con este tutorial.',
   },
   {
     target: 'nav-inicio',
@@ -80,6 +55,6 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'nav-mas',
     title: 'Más',
-    body: 'Conciliación, personal vs negocio, simulador de régimen, tu contador y Aprende.',
+    body: 'Cierre de caja, gasto personal, crédito, tu contador y los ajustes.',
   },
 ]
