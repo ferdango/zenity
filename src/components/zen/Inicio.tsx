@@ -26,6 +26,7 @@ export function InicioOla1() {
   const preguntas = demo.comments.filter((c) => c.businessId === a.business.id && c.pregunta && !c.respondida).length
   const porRevisar = a.porRevisar.length + preguntas
   const personal = round2(personalesDelMes(a, HOY.slice(0, 7)).reduce((s, m) => s - m.monto, 0))
+  const vencidas = cobranzas.filter((c) => c.diasVencidos > 0).length
   const leccion = lecciones?.activas.find((id) => !demo.leccionesCerradas.includes(`${business.id}:${id}`))
 
   return (
@@ -49,31 +50,50 @@ export function InicioOla1() {
         </motion.div>
       )}
 
-      <motion.div className={styles.grid2} style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }} variants={fadeUp} data-tour="ola1">
-        <Link to="/revisar" className={styles.stat} data-ripple="">
-          <span className={styles.statLabel}>
-            <Icon name="fact_check" size={16} /> Por revisar
-          </span>
-          <span className={styles.statValue}>{porRevisar === 0 ? '¡Al día!' : `Tienes ${porRevisar}`}</span>
-          <span className={styles.muted}>{porRevisar === 0 ? 'Nada pendiente' : `~${Math.max(1, Math.ceil((porRevisar * 10) / 60))} min`}</span>
-        </Link>
-        <Link to="/cobrar" className={styles.stat} data-ripple="">
-          <span className={styles.statLabel}>
-            <Icon name="payments" size={16} /> Te deben
-          </span>
-          <Money value={totalCobranzas(cobranzas)} className={styles.statValue} />
-          <span className={styles.muted}>
-            {cobranzas.length} comprobante{cobranzas.length === 1 ? '' : 's'}
-          </span>
-        </Link>
-        <Link to="/personal" className={styles.stat} data-ripple="">
-          <span className={styles.statLabel}>
-            <Icon name="person" size={16} /> Gasto personal este mes
-          </span>
-          <Money value={personal} className={styles.statValue} />
-          <span className={styles.muted}>Salió de la cuenta del negocio</span>
-        </Link>
-      </motion.div>
+      <motion.section className={styles.section} variants={fadeUp} data-tour="ola1">
+        <div className={styles.sectionHead}>
+          <h2 className={styles.sectionTitle}>Para hoy</h2>
+        </div>
+        <div className={styles.list}>
+          <Link to="/revisar" className={styles.todo} data-ripple="">
+            <span className={`${styles.rowIcon} ${porRevisar ? styles.toneInfo : styles.tonePositive}`}>
+              <Icon name={porRevisar ? 'fact_check' : 'task_alt'} size={20} />
+            </span>
+            <span className={styles.rowText}>
+              <span className={styles.todoValue}>{porRevisar ? `Tienes ${porRevisar} por revisar` : '¡Todo revisado!'}</span>
+              <span className={styles.rowSub}>{porRevisar ? `Te toma ~${Math.max(1, Math.ceil((porRevisar * 10) / 60))} minuto${porRevisar > 6 ? 's' : ''}` : 'Zenity clasificó todo'}</span>
+            </span>
+            <Icon name="chevron_right" size={20} />
+          </Link>
+          <Link to="/cobrar" className={styles.todo} data-ripple="">
+            <span className={`${styles.rowIcon} ${vencidas ? styles.toneWarning : styles.tonePositive}`}>
+              <Icon name="payments" size={20} />
+            </span>
+            <span className={styles.rowText}>
+              <span className={styles.todoValue}>
+                Te deben <Money value={totalCobranzas(cobranzas)} />
+              </span>
+              <span className={styles.rowSub}>
+                {cobranzas.length} comprobante{cobranzas.length === 1 ? '' : 's'}
+                {vencidas ? ` · ${vencidas} vencido${vencidas === 1 ? '' : 's'}` : ''}
+              </span>
+            </span>
+            <Icon name="chevron_right" size={20} />
+          </Link>
+          <Link to="/personal" className={styles.todo} data-ripple="">
+            <span className={`${styles.rowIcon} ${styles.toneViolet}`}>
+              <Icon name="person" size={20} />
+            </span>
+            <span className={styles.rowText}>
+              <span className={styles.todoValue}>
+                Gasto personal: <Money value={personal} />
+              </span>
+              <span className={styles.rowSub}>Salió este mes de la cuenta del negocio</span>
+            </span>
+            <Icon name="chevron_right" size={20} />
+          </Link>
+        </div>
+      </motion.section>
 
       {leccion && (
         <motion.div variants={fadeUp}>

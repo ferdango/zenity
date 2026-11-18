@@ -160,11 +160,11 @@
   margin-left: auto;
   padding: 6px 10px;
   border-radius: var(--z-radius-full);
-  color: #0b57d0;
+  color: var(--z-inverse-primary);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .toastAction:hover {
-  background: rgb(11 87 208 / 0.08);
+  background: color-mix(in srgb, var(--z-inverse-primary) 12%, transparent);
 }

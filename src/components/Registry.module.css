@@ -191,13 +191,13 @@
 }
 
 .pill[data-tone='good'] {
-  background: rgb(134 239 172 / 0.12);
-  color: #86efac;
+  background: var(--z-positive-container);
+  color: var(--z-positive);
 }
 
 .pill[data-tone='bad'] {
-  background: rgb(252 165 165 / 0.14);
-  color: #fca5a5;
+  background: var(--z-negative-container);
+  color: var(--z-negative);
 }
 
 .dot {

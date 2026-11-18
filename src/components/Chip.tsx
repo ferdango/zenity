@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'motion/react'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import { cn } from '../lib/cn'
 import { ease } from '../lib/motion'
 import styles from './Chip.module.css'
 import { Icon } from './Icon'
 
 interface ChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  ref?: Ref<HTMLButtonElement>
   selected?: boolean
   /** Muestra un check animado al seleccionarse (filter chip de Material 3) */
   showCheck?: boolean

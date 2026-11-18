@@ -9,9 +9,9 @@ import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import styles from './Splash.module.css'
 
 const FLOATING = [
-  { className: styles.f1, icon: 'trending_up', text: '+12% ingresos', color: 'var(--z-positive)', delay: 0.9 },
-  { className: styles.f2, icon: 'account_balance_wallet', text: 'S/ 3,890.20', color: 'var(--z-primary)', delay: 1.05 },
-  { className: styles.f3, icon: 'auto_awesome', text: '8 por revisar', color: 'var(--z-purple)', delay: 1.2 },
+  { className: styles.f1, icon: 'task_alt', text: '62% conciliado', color: 'var(--z-positive)', delay: 0.9 },
+  { className: styles.f2, icon: 'payments', text: 'Te deben S/ 9,300', color: 'var(--z-primary)', delay: 1.05 },
+  { className: styles.f3, icon: 'auto_awesome', text: '6 por revisar', color: 'var(--z-purple)', delay: 1.2 },
 ]
 
 /** Splash / bienvenida (Figma: Splash). */
@@ -65,7 +65,7 @@ export function Splash() {
           Conecta tus finanzas <GradientText>en un solo lugar</GradientText>
         </motion.h1>
         <motion.p className={styles.subtitle} variants={fadeUp}>
-          Tu asistente con IA para entender ingresos, egresos y balances de todas tus cuentas.
+          Ordena la plata de tu negocio y aprende con tus propios números: Zenity concilia, te avisa y te explica.
         </motion.p>
         <motion.div variants={fadeUp}>
           <Button size="lg" fullWidth to="/login?modo=registro">
@@ -75,6 +75,11 @@ export function Splash() {
         <motion.div variants={fadeUp}>
           <Button size="lg" fullWidth variant="outlined" to="/login">
             Conectarse
+          </Button>
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <Button size="lg" fullWidth variant="text" icon="play_circle" to="/inicio">
+            Ver la demo
           </Button>
         </motion.div>
       </motion.div>

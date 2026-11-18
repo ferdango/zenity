@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
@@ -8,6 +8,7 @@ import { Icon } from '../components/Icon'
 import { SegmentedTabs } from '../components/SegmentedTabs'
 import { TopBar } from '../components/TopBar'
 import { ConfidenceBadge, LessonCard, Money, NoDemoData, Pill, ProgressBar, SectionHead, Why } from '../components/zen'
+import { TONE_CLASS, type Tone } from '../components/zen/tone'
 import styles from '../components/zen/zen.module.css'
 import { CATEGORIAS } from '../config/categories'
 import { HOY, MESES_DEMO } from '../config/demo'
@@ -32,6 +33,16 @@ const ESTADO_ICON: Record<Estado, string> = {
   SIN_CATEGORIA_SEGURA: 'help',
 }
 
+const ESTADO_TONE: Record<Estado, Tone> = {
+  CONCILIADO: 'positive',
+  COBRADO_SIN_COMPROBANTE: 'warning',
+  COMPROBANTE_SIN_COBRO: 'warning',
+  PAGADO_SIN_FACTURA: 'warning',
+  FACTURA_SIN_PAGO: 'negative',
+  POSIBLE_PERSONAL: 'violet',
+  SIN_CATEGORIA_SEGURA: 'info',
+}
+
 const REGLA_LABEL: Record<Regla, string> = {
   EXACTO: 'Monto exacto',
   DETRACCION: 'Detracción',
@@ -52,6 +63,11 @@ export function Conciliacion() {
   const [mes, setMes] = useState<string>(MESES_DEMO[MESES_DEMO.length - 1])
   const [detalle, setDetalle] = useState<EstadoItem | null>(null)
   const resumen = useMemo(() => (a ? resumenMes(a, mes) : null), [a, mes])
+  const chipRef = useRef<HTMLButtonElement>(null)
+  const estadoParam = params.get('estado')
+  useEffect(() => {
+    chipRef.current?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+  }, [estadoParam, mes])
 
   if (!a || !resumen) {
     return (
@@ -65,7 +81,9 @@ export function Conciliacion() {
   }
 
   const pedido = params.get('estado') as Estado | null
-  const estado: Estado = pedido && ESTADOS.includes(pedido) ? pedido : 'CONCILIADO'
+  // Sin estado en la URL, abre en lo primero que pide atención (o en «Todo cuadra» si no hay nada)
+  const pendiente = ESTADOS.find((e) => e !== 'CONCILIADO' && resumen.porEstado[e].count > 0)
+  const estado: Estado = pedido && ESTADOS.includes(pedido) ? pedido : (pendiente ?? 'CONCILIADO')
   const bucket = resumen.porEstado[estado]
   const elegir = (e: Estado) => setParams({ estado: e }, { replace: true })
 
@@ -101,7 +119,15 @@ export function Conciliacion() {
 
         <motion.div className={styles.chips} variants={fadeUp} role="tablist" aria-label="Estados">
           {ESTADOS.map((e) => (
-            <Chip key={e} selected={e === estado} onClick={() => elegir(e)} icon={ESTADO_ICON[e]} role="tab" aria-selected={e === estado}>
+            <Chip
+              key={e}
+              selected={e === estado}
+              onClick={() => elegir(e)}
+              icon={ESTADO_ICON[e]}
+              role="tab"
+              aria-selected={e === estado}
+              ref={e === estado ? chipRef : undefined}
+            >
               {ESTADO_LABEL[e]} · {resumen.porEstado[e].count}
               {resumen.porEstado[e].count > 0 && ` · ${fmtSolesCorto(resumen.porEstado[e].monto)}`}
             </Chip>
@@ -139,7 +165,7 @@ function ItemRow({ a, item, onOpen }: { a: Analysis; item: EstadoItem; onOpen: (
     const c = a.comprobantesById.get(item.id)!
     return (
       <button type="button" className={styles.row} onClick={onOpen} data-ripple="">
-        <span className={styles.rowIcon}>
+        <span className={`${styles.rowIcon} ${TONE_CLASS[ESTADO_TONE[a.comprobanteEstado.get(c.id) ?? 'CONCILIADO']]}`}>
           <Icon name="description" size={20} />
         </span>
         <span className={styles.rowText}>
@@ -159,7 +185,7 @@ function ItemRow({ a, item, onOpen }: { a: Analysis; item: EstadoItem; onOpen: (
   const match = a.matchByMovement.get(m.id)
   return (
     <button type="button" className={styles.row} onClick={onOpen} data-ripple="">
-      <span className={styles.rowIcon}>
+      <span className={`${styles.rowIcon} ${TONE_CLASS[ESTADO_TONE[cl.estado]]}`}>
         <Icon name={CATEGORIAS[cl.categoriaId].icon} size={20} />
       </span>
       <span className={styles.rowText}>

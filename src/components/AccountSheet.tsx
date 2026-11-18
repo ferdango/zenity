@@ -8,6 +8,7 @@ import { cn } from '../lib/cn'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
 import styles from './AccountSheet.module.css'
+import { ThemeSwitch } from './zen/ThemeSwitch'
 import { InitialsAvatar } from './Avatars'
 import { BottomSheet } from './BottomSheet'
 import { Button } from './Button'
@@ -157,6 +158,11 @@ export function AccountSheet() {
                     {businessName(business)} · RUC {business.ruc}
                   </span>
                 </span>
+              </div>
+
+              <div className={styles.theme}>
+                <span className={styles.themeLabel}>Apariencia</span>
+                <ThemeSwitch />
               </div>
 
               <motion.ul className={styles.list} variants={staggerContainer(0.04)} initial="hidden" animate="show">

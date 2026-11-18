@@ -6,12 +6,19 @@
 
 .notification {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px 1fr auto;
   gap: 12px;
   align-items: center;
+  width: 100%;
   padding: 12px;
   border-radius: var(--z-radius-lg);
   background: var(--z-surface-low);
+  text-align: left;
+  transition: background var(--z-dur-short) var(--z-ease-standard);
+}
+
+button.notification:not(:disabled):hover {
+  background: var(--z-surface-high);
 }
 
 .notifIcon {

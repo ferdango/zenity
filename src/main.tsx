@@ -8,6 +8,7 @@ import './styles/layout.css'
 import { App } from './App'
 import { POSTHOG_OPTIONS, POSTHOG_TOKEN } from './lib/analytics'
 import { installRipple } from './lib/ripple'
+import './lib/theme'
 
 // Las pantallas restauran su propio scroll al animarse (ver layouts/transitions.ts).
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'

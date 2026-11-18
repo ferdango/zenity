@@ -59,7 +59,7 @@ export function Cobrar() {
 
   return (
     <div className="z-page">
-      <TopBar title="Cobrar" subtitle={businessName(business)} />
+      <TopBar title="Cobrar" subtitle={businessName(business)} hideBack />
       <motion.div className={`z-container ${styles.page}`} variants={staggerContainer(0.05)} initial="hidden" animate="show">
         <motion.section className={styles.hero} variants={fadeUp} aria-live="polite">
           <span className={styles.heroLabel}>Te deben</span>
@@ -103,9 +103,12 @@ export function Cobrar() {
           )}
           <div className={styles.list}>
             {lista.map((c) => (
-              <article key={c.comprobante.id} className={styles.card}>
+              <article
+                key={c.comprobante.id}
+                className={`${styles.card} ${c.diasVencidos > 30 ? styles.urgent : c.diasVencidos > 0 ? styles.soon : styles.calm}`}
+              >
                 <div className={styles.row} style={{ padding: 0, background: 'none', minHeight: 0 }}>
-                  <span className={styles.rowIcon}>
+                  <span className={`${styles.rowIcon} ${c.diasVencidos > 30 ? styles.toneNegative : c.diasVencidos > 0 ? styles.toneWarning : styles.toneInfo}`}>
                     <Icon name="request_quote" size={20} />
                   </span>
                   <span className={styles.rowText}>
@@ -127,13 +130,13 @@ export function Cobrar() {
                 </p>
                 <div className={styles.actions}>
                   <Button size="sm" icon="chat" onClick={() => setRecordar({ c, texto: mensajeCobro(c, a.business) })}>
-                    Recordar
+                    Recordar por WhatsApp
                   </Button>
                   <Button size="sm" variant="tonal" icon="event_available" onClick={() => setPromesa({ c, fecha: c.promesa?.fecha ?? addDays(HOY, 7), monto: String(c.promesa?.monto ?? c.monto) })}>
-                    Registrar promesa
+                    Promesa de pago
                   </Button>
-                  <Button size="sm" variant="text" icon="bolt" onClick={() => pagar(c)}>
-                    Simular que pagó
+                  <Button size="sm" variant="text" icon="bolt" onClick={() => pagar(c)} title="Solo para la demo">
+                    Simular pago
                   </Button>
                 </div>
               </article>

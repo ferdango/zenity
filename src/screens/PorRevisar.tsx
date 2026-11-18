@@ -129,6 +129,7 @@ export function PorRevisar() {
       <TopBar
         title="Por revisar"
         subtitle={businessName(business)}
+        hideBack
         end={
           <IconButton icon={whatsapp ? 'view_agenda' : 'chat'} label={whatsapp ? 'Ver como tarjeta' : 'Ver en WhatsApp'} variant="tonal" onClick={() => setWhatsapp(!whatsapp)} />
         }
@@ -293,7 +294,7 @@ function ReviewCard({
         </p>
       </div>
       <div className={styles.suggest}>
-        <span className={styles.rowIcon}>
+        <span className={`${styles.rowIcon} ${styles.toneInfo}`}>
           <Icon name={CATEGORIAS[sugerida].icon} size={20} />
         </span>
         <span className={styles.rowText}>
@@ -334,7 +335,7 @@ function VistaWhatsApp({ movement: m }: { movement: BankMovement }) {
   return (
     <section className={styles.section} aria-label="Vista previa en WhatsApp">
       <div className={styles.whatsapp}>
-        <span className={styles.muted} style={{ color: '#8696a0', textAlign: 'center' }}>
+        <span className={styles.muted} style={{ color: 'var(--z-wa-meta)', textAlign: 'center' }}>
           Zenity · WhatsApp (vista previa)
         </span>
         <p className={styles.waBubble}>
