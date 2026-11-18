@@ -21,6 +21,7 @@ import { docLabel, tipoLabel } from '../domain/reconciliation'
 import type { Estado, Match } from '../domain/types'
 import { fmtFecha, fmtSolesCorto } from '../domain/util'
 import { track } from '../lib/analytics'
+import { FEATURES } from '../lib/features'
 import { MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
@@ -130,7 +131,7 @@ export function Conciliacion() {
           </span>
         </motion.section>
 
-        <motion.div className={styles.grid2} variants={fadeUp}>
+        <motion.div className={FEATURES.cierreCaja ? styles.grid2 : undefined} variants={fadeUp}>
           <button type="button" className={styles.cardButton} onClick={() => abrirSubir(true)} data-ripple="">
             <span className={`${styles.rowIcon} ${styles.toneInfo}`}>
               <Icon name="upload_file" size={20} />
@@ -138,6 +139,7 @@ export function Conciliacion() {
             <span className={styles.rowTitle}>Subir extracto del banco</span>
             <span className={styles.rowSub}>{importados ? `${importados} movimientos subidos` : 'Excel o CSV de tu banca por internet'}</span>
           </button>
+          {FEATURES.cierreCaja && (
           <Link to="/cierre-caja" className={styles.cardButton} data-ripple="">
             <span className={`${styles.rowIcon} ${styles.tonePositive}`}>
               <Icon name="point_of_sale" size={20} />
@@ -145,6 +147,7 @@ export function Conciliacion() {
             <span className={styles.rowTitle}>Cierre de caja</span>
             <span className={styles.rowSub}>Tus ventas en efectivo del día</span>
           </Link>
+          )}
         </motion.div>
 
         <motion.div className={styles.chips} variants={fadeUp} role="tablist" aria-label="Estados">

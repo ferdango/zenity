@@ -25,7 +25,9 @@ export const PRIMARY_NAV: NavItem[] = [
 
 /** Herramientas del dueño (menú lateral): solo lo que usa en el día a día. */
 export const TOOLS_NAV: NavItem[] = [
-  { id: 'cierre-caja', label: 'Cierre de caja', short: 'Cierre', icon: 'point_of_sale', to: '/cierre-caja', match: (p) => p === '/cierre-caja' },
+  ...(FEATURES.cierreCaja
+    ? [{ id: 'cierre-caja', label: 'Cierre de caja', short: 'Cierre', icon: 'point_of_sale', to: '/cierre-caja', match: (p: string) => p === '/cierre-caja' }]
+    : []),
   { id: 'personal', label: 'Gasto personal', short: 'Personal', icon: 'person', to: '/personal', match: (p) => p === '/personal' },
   { id: 'credito', label: 'Crédito BCP', short: 'Crédito', icon: 'credit_score', to: '/credito', match: (p) => p === '/credito' },
   { id: 'mi-contador', label: 'Mi contador', short: 'Contador', icon: 'support_agent', to: '/mi-contador', match: (p) => p === '/mi-contador' },
