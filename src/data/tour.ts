@@ -18,6 +18,16 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Te saludamos con el estado de tus cuentas. Toca el ojo para ocultar o mostrar tus saldos.',
   },
   {
+    target: 'accounts',
+    title: 'Tus conexiones',
+    body: 'Desliza para ver cada banco, billetera, API o Excel. Toca una para ver su detalle y movimientos.',
+  },
+  {
+    target: 'add-account',
+    title: 'Ver y agregar conexiones',
+    body: 'Todas tus conexiones en una lista, con su estado. Desde aquí conectas bancos, Yape, Plin, APIs o archivos.',
+  },
+  {
     target: 'summary',
     title: 'Tu negocio en 5 segundos',
     body: 'Cuánto entró, cuánto salió y cuánto te queda en el mes.',
@@ -55,6 +65,6 @@ export const TOUR_STEPS: TourStep[] = [
   {
     target: 'nav-mas',
     title: 'Más',
-    body: 'Gasto personal, crédito, tu contador y los ajustes.',
+    body: 'Conexiones, gasto personal, crédito, tu contador y los ajustes.',
   },
 ]

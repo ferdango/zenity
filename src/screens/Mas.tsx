@@ -22,7 +22,7 @@ import { useZen } from '../state/useZen'
 /** «Más»: las herramientas del día a día, los ajustes y la demo (contador, BCP y reinicio). */
 export function Mas() {
   const navigate = useNavigate()
-  const { business } = useApp()
+  const { business, connections } = useApp()
   const { a, demo } = useZen()
   const [confirmar, setConfirmar] = useState(false)
   const pct = a ? Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100) : null
@@ -35,6 +35,14 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
+            <LinkRow
+              tone="info"
+              to="/conexiones"
+              icon="link"
+              title="Conexiones"
+              sub="Bancos, Yape, Plin, APIs y archivos"
+              end={<Pill tone="neutral">{connections.length}</Pill>}
+            />
             {FEATURES.cierreCaja && (
               <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="Anota el efectivo que contaste hoy" />
             )}
@@ -66,7 +74,6 @@ export function Mas() {
               <LinkRow tone="negative" to="/movimientos/egresos" icon="trending_down" title="Egresos" />
               <LinkRow tone="info" to="/resumen" icon="bar_chart" title="Balance" />
               <LinkRow tone="positive" to="/revisado" icon="checklist" title="Revisado por Zenity" />
-              <LinkRow tone="info" to="/conexiones/nueva" icon="add_link" title="Nueva conexión" />
             </div>
           </motion.section>
         )}

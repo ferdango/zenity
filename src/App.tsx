@@ -28,6 +28,7 @@ import { PorRevisar } from './screens/PorRevisar'
 import { Regimen } from './screens/Regimen'
 import { Chat } from './screens/Chat'
 import { ConnectionDetail } from './screens/ConnectionDetail'
+import { Conexiones } from './screens/Conexiones'
 import { ConnectionResult } from './screens/ConnectionResult'
 import { Home } from './screens/Home'
 import { Login } from './screens/Login'
@@ -51,6 +52,7 @@ function isShellPath(path: string) {
     path === '/inicio' ||
     path === '/resumen' ||
     path === '/chat' ||
+    path === '/conexiones' ||
     path === '/conexiones/nueva' ||
     path === '/negocios/nuevo' ||
     path.startsWith('/movimientos/') ||
@@ -112,6 +114,7 @@ function AnimatedRoutes() {
           <Route path="/cierre-caja" element={<CierreCaja />} />
           <Route path="/permisos" element={<PermisosDatos />} />
           <Route path="/metricas" element={<Metricas />} />
+          <Route path="/conexiones" element={<Conexiones />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
           <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
