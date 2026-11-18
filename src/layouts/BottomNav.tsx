@@ -41,11 +41,28 @@ export function BottomNav() {
                   aria-current={active ? 'page' : undefined}
                   data-ripple=""
                   data-tour={`nav-${item.id}`}
+                  onClick={() => {
+                    // Volver a tocar la pestaña activa sube al inicio de la pantalla
+                    if (active) window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
                 >
                   <span className={styles.circle}>
                     {active && <motion.span layoutId="bottom-nav-indicator" className={styles.indicator} transition={spring.snappy} />}
                     {item.icon === 'spark' ? <Spark size={22} /> : <Icon name={item.icon} size={22} fill={active} />}
-                    {count > 0 && <span className={styles.count}>{count}</span>}
+                    <AnimatePresence>
+                      {count > 0 && (
+                        <motion.span
+                          key={count}
+                          className={styles.count}
+                          initial={{ scale: 0.4 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={spring.bouncy}
+                        >
+                          {count}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </span>
                   {item.short}
                 </Link>

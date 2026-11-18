@@ -77,7 +77,7 @@ export function Personal() {
       <motion.div className={`z-container ${styles.page}`} variants={staggerContainer(0.05)} initial="hidden" animate="show">
         <motion.section className={styles.hero} variants={fadeUp}>
           <span className={styles.heroLabel}>Este mes salieron del negocio para gastos personales</span>
-          <Money value={total} className={styles.heroAmount} />
+          <Money animated value={total} className={styles.heroAmount} />
           <span className={styles.heroMeta}>
             {lista.length} movimiento{lista.length === 1 ? '' : 's'} · Si baja mes a mes, estás separando mejor tus cuentas.
           </span>

@@ -34,7 +34,7 @@ export function InicioOla1() {
     <div className={styles.inicio}>
       <motion.section className={styles.hero} variants={fadeUp} data-tour="saldo">
         <span className={styles.heroLabel}>Saldo actual · BCP cuenta corriente</span>
-        <Money value={a.saldoActual} className={styles.heroAmount} />
+        <Money animated value={a.saldoActual} className={styles.heroAmount} />
         <span className={styles.heroMeta}>Al {fmtFecha(HOY)} · se actualiza solo</span>
       </motion.section>
 
@@ -67,6 +67,9 @@ export function InicioOla1() {
       <motion.section className={styles.section} variants={fadeUp} data-tour="ola1">
         <div className={styles.sectionHead}>
           <h2 className={styles.sectionTitle}>Para hoy</h2>
+          <span className={styles.sectionHint}>
+            {[porRevisar === 0, vencidas === 0].filter(Boolean).length} de 2 listos
+          </span>
         </div>
         <div className={styles.list}>
           <Link to="/revisar" className={styles.todo} data-ripple="">

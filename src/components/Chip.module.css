@@ -15,7 +15,12 @@
     background-color var(--z-dur-medium) var(--z-ease-standard),
     box-shadow var(--z-dur-medium) var(--z-ease-standard),
     color var(--z-dur-medium) var(--z-ease-standard),
-    padding var(--z-dur-medium) var(--z-ease-emphasized);
+    padding var(--z-dur-medium) var(--z-ease-emphasized),
+    transform var(--z-dur-short) var(--z-ease-standard);
+}
+
+.chip:active:not(:disabled) {
+  transform: scale(0.95);
 }
 
 .lg {

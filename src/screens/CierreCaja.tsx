@@ -1,5 +1,5 @@
-import { motion } from 'motion/react'
-import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useRef, useState } from 'react'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
@@ -9,7 +9,7 @@ import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
 import { boletasEnEfectivo, efectivoPorDepositar } from '../domain/cierres'
 import { addDays, fmtFecha, fmtSolesCorto, round2 } from '../domain/util'
-import { fadeUp, staggerContainer } from '../lib/motion'
+import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
 import { borrarCierreCaja, registrarCierreCaja } from '../state/demoStore'
 import { useCierres, useZen } from '../state/useZen'
@@ -24,6 +24,7 @@ export function CierreCaja() {
   const estados = useCierres()
   const [fecha, setFecha] = useState(HOY)
   const [efectivo, setEfectivo] = useState('')
+  const efectivoRef = useRef<HTMLInputElement>(null)
 
   if (!a) {
     return (
@@ -57,13 +58,20 @@ export function CierreCaja() {
       <motion.div className={`z-container ${styles.page}`} variants={staggerContainer(0.05)} initial="hidden" animate="show">
         <motion.section className={styles.hero} variants={fadeUp} aria-live="polite">
           <span className={styles.heroLabel}>Efectivo por depositar</span>
-          <Money value={porDepositar} className={styles.heroAmount} />
+          <Money animated value={porDepositar} className={styles.heroAmount} />
           <span className={styles.heroMeta}>
             De tus cierres de los últimos 7 días que todavía no llegan al banco. Entra a tu proyección de caja como depósito de mañana.
           </span>
         </motion.section>
 
-        <motion.section className={styles.card} variants={fadeUp}>
+        <motion.form
+          className={styles.card}
+          variants={fadeUp}
+          onSubmit={(e) => {
+            e.preventDefault()
+            guardar()
+          }}
+        >
           <span className="t-title-m">¿Cuánto efectivo contaste?</span>
           <div className={styles.grid2}>
             <label className={styles.field}>
@@ -72,7 +80,15 @@ export function CierreCaja() {
             </label>
             <label className={styles.field}>
               Efectivo (S/)
-              <input className={styles.input} inputMode="decimal" placeholder="0.00" value={efectivo} onChange={(e) => setEfectivo(e.target.value)} />
+              <input
+                ref={efectivoRef}
+                className={styles.input}
+                inputMode="decimal"
+                enterKeyHint="done"
+                placeholder="0.00"
+                value={efectivo}
+                onChange={(e) => setEfectivo(e.target.value)}
+              />
             </label>
           </div>
           <p className={styles.muted}>
@@ -80,8 +96,36 @@ export function CierreCaja() {
               ? `Ese día emitiste ${boletasDia.length} boleta${boletasDia.length === 1 ? '' : 's'} al contado por ${fmtSolesCorto(totalBoletasDia)}, sin contar Yape ni tarjeta.`
               : 'Ese día no emitiste boletas al contado en efectivo.'}
           </p>
+          <AnimatePresence initial={false}>
+            {(() => {
+              const monto = Number(efectivo.replace(/[^\d.]/g, ''))
+              if (!monto || !boletasDia.length) return null
+              const dif = round2(monto - totalBoletasDia)
+              const cuadra = Math.abs(dif) < 0.01
+              return (
+                <motion.p
+                  key="dif"
+                  className={styles.banner}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25, ease: ease.emphasized }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <Icon name={cuadra ? 'task_alt' : dif > 0 ? 'trending_up' : 'trending_down'} size={20} />
+                  <span>
+                    {cuadra
+                      ? 'Cuadra exacto con tus boletas. ¡Bien!'
+                      : dif > 0
+                        ? `Contaste ${fmtSolesCorto(dif)} más que tus boletas: puede ser una venta sin boleta.`
+                        : `Faltan ${fmtSolesCorto(-dif)} frente a tus boletas: revisa vueltos o pagos en efectivo.`}
+                  </span>
+                </motion.p>
+              )
+            })()}
+          </AnimatePresence>
           <div className={styles.actions}>
-            <Button icon="check" onClick={guardar} disabled={!Number(efectivo.replace(/[^\d.]/g, ''))}>
+            <Button type="submit" icon="check" disabled={!Number(efectivo.replace(/[^\d.]/g, ''))}>
               Guardar cierre
             </Button>
             {boletasDia.length > 0 && (
@@ -90,7 +134,7 @@ export function CierreCaja() {
               </Button>
             )}
           </div>
-        </motion.section>
+        </motion.form>
 
         {sugeridos.length > 0 && (
           <motion.section className={styles.section} variants={fadeUp}>
@@ -99,7 +143,12 @@ export function CierreCaja() {
               {sugeridos.map((d) => {
                 const bs = boletasEnEfectivo(a, d)
                 return (
-                  <button key={d} type="button" className={styles.row} data-ripple="" onClick={() => setFecha(d)}>
+                  <button key={d} type="button" className={styles.row} data-ripple="" onClick={() => {
+                      setFecha(d)
+                      // Lleva al formulario con el campo de efectivo listo para escribir
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                      window.setTimeout(() => efectivoRef.current?.focus({ preventScroll: true }), 350)
+                    }}>
                     <span className={`${styles.rowIcon} ${styles.toneWarning}`}>
                       <Icon name="event" size={20} />
                     </span>

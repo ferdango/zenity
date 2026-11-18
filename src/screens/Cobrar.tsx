@@ -1,7 +1,8 @@
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
+import { Chip } from '../components/Chip'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { LessonCard, Money, NoDemoData, Pill, SectionHead } from '../components/zen'
@@ -13,10 +14,21 @@ import { abonosDe } from '../domain/engine'
 import { cobrosTrasRecordatorio } from '../domain/metricas'
 import { docLabel, tipoLabel } from '../domain/reconciliation'
 import { addDays, addMonths, fmtFecha, fmtSolesCorto } from '../domain/util'
-import { fadeUp, staggerContainer } from '../lib/motion'
+import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
 import { registrarPromesa, registrarRecordatorio, simularPago } from '../state/demoStore'
 import { useCobranzas, useZen } from '../state/useZen'
+
+/** Atajos para fechar la promesa sin abrir el calendario. */
+const FECHAS_RAPIDAS = [
+  { label: 'En 3 días', fecha: () => addDays(HOY, 3) },
+  { label: 'En 1 semana', fecha: () => addDays(HOY, 7) },
+  { label: 'En 15 días', fecha: () => addDays(HOY, 15) },
+  {
+    label: 'Fin de mes',
+    fecha: () => addDays(`${addMonths(HOY.slice(0, 7), 1)}-01`, -1),
+  },
+]
 
 const TONO_LABEL = { AMABLE: 'Tono amable', DIRECTO: 'Tono directo', FIRME: 'Tono firme' } as const
 
@@ -27,6 +39,7 @@ export function Cobrar() {
   const lista = useCobranzas()
   const [recordar, setRecordar] = useState<{ c: Cobranza; texto: string } | null>(null)
   const [promesa, setPromesa] = useState<{ c: Cobranza; fecha: string; monto: string } | null>(null)
+  const [copiado, setCopiado] = useState(false)
 
   if (!a) {
     return (
@@ -67,7 +80,7 @@ export function Cobrar() {
       <motion.div className={`z-container ${styles.page}`} variants={staggerContainer(0.05)} initial="hidden" animate="show">
         <motion.section className={styles.hero} variants={fadeUp} aria-live="polite">
           <span className={styles.heroLabel}>Te deben</span>
-          <Money value={total} className={styles.heroAmount} />
+          <Money animated value={total} className={styles.heroAmount} />
           <span className={styles.heroMeta}>
             {lista.length} comprobante{lista.length === 1 ? '' : 's'} sin cobrar
             {vencidas.length > 0 && ` · ${vencidas.length} vencido${vencidas.length === 1 ? '' : 's'} por ${fmtSolesCorto(totalCobranzas(vencidas))}`}
@@ -119,10 +132,14 @@ export function Cobrar() {
               <p className={styles.muted}>Todas tus facturas y boletas están cobradas.</p>
             </div>
           )}
-          <div className={styles.list}>
+          <motion.div className={styles.list} layout>
+            <AnimatePresence initial={false}>
             {lista.map((c) => (
-              <article
+              <motion.article
                 key={c.comprobante.id}
+                layout
+                exit={{ opacity: 0, x: 80, height: 0, marginTop: 0, paddingTop: 0, paddingBottom: 0, transition: { duration: 0.35, ease: ease.emphasized } }}
+                style={{ overflow: 'hidden' }}
                 className={`${styles.card} ${c.diasVencidos > 30 ? styles.urgent : c.diasVencidos > 0 ? styles.soon : styles.calm}`}
               >
                 <div className={styles.row} style={{ padding: 0, background: 'none', minHeight: 0 }}>
@@ -159,7 +176,14 @@ export function Cobrar() {
                   ) : null
                 })()}
                 <div className={styles.actions}>
-                  <Button size="sm" icon="chat" onClick={() => setRecordar({ c, texto: mensajeCobro(c, a.business) })}>
+                  <Button
+                    size="sm"
+                    icon="chat"
+                    onClick={() => {
+                      setCopiado(false)
+                      setRecordar({ c, texto: mensajeCobro(c, a.business) })
+                    }}
+                  >
                     Recordar por WhatsApp
                   </Button>
                   <Button size="sm" variant="tonal" icon="event_available" onClick={() => setPromesa({ c, fecha: c.promesa?.fecha ?? addDays(HOY, 7), monto: String(c.promesa?.monto ?? c.monto) })}>
@@ -169,9 +193,10 @@ export function Cobrar() {
                     Simular pago
                   </Button>
                 </div>
-              </article>
+              </motion.article>
             ))}
-          </div>
+            </AnimatePresence>
+          </motion.div>
           <p className={styles.muted}>«Simular que pagó» es solo para la demo: inserta un abono de ejemplo y Zenity lo concilia solo.</p>
         </motion.section>
       </motion.div>
@@ -206,18 +231,19 @@ export function Cobrar() {
             <Button
               size="lg"
               variant="text"
-              icon="content_copy"
+              icon={copiado ? 'check' : 'content_copy'}
               onClick={() => {
                 navigator.clipboard?.writeText(recordar.texto).then(
                   () => {
                     recordar1(recordar.c, 'copiado')
+                    setCopiado(true)
                     toast('Mensaje copiado', 'content_copy')
                   },
                   () => toast('No se pudo copiar', 'error'),
                 )
               }}
             >
-              Copiar mensaje
+              {copiado ? 'Copiado' : 'Copiar mensaje'}
             </Button>
           </div>
         )}
@@ -229,6 +255,16 @@ export function Cobrar() {
             <p className={styles.small}>
               {promesa.c.comprobante.nombreContraparte} prometió pagar. La promesa aparece en tu proyección de caja con certeza media.
             </p>
+            <div className={styles.chipsWrap} role="group" aria-label="Fechas rápidas">
+              {FECHAS_RAPIDAS.map((f) => {
+                const fecha = f.fecha()
+                return (
+                  <Chip key={f.label} selected={promesa.fecha === fecha} showCheck onClick={() => setPromesa({ ...promesa, fecha })}>
+                    {f.label}
+                  </Chip>
+                )
+              })}
+            </div>
             <label className={styles.field}>
               Fecha
               <input className={styles.input} type="date" min={HOY} value={promesa.fecha} onChange={(e) => setPromesa({ ...promesa, fecha: e.target.value })} />
@@ -237,9 +273,30 @@ export function Cobrar() {
               Monto (S/)
               <input className={styles.input} inputMode="decimal" value={promesa.monto} onChange={(e) => setPromesa({ ...promesa, monto: e.target.value })} />
             </label>
-            <Button size="lg" icon="check" onClick={guardarPromesa}>
-              Guardar promesa
-            </Button>
+            {(() => {
+              const monto = Number(promesa.monto.replace(/[^\d.]/g, ''))
+              const excede = monto > promesa.c.monto + 0.005
+              return (
+                <>
+                  <div className={styles.chipsWrap} role="group" aria-label="Monto rápido">
+                    <Chip selected={monto === promesa.c.monto} showCheck onClick={() => setPromesa({ ...promesa, monto: String(promesa.c.monto) })}>
+                      Todo ({fmtSolesCorto(promesa.c.monto)})
+                    </Chip>
+                    <Chip
+                      selected={monto === Math.round(promesa.c.monto / 2)}
+                      showCheck
+                      onClick={() => setPromesa({ ...promesa, monto: String(Math.round(promesa.c.monto / 2)) })}
+                    >
+                      La mitad
+                    </Chip>
+                  </div>
+                  {excede && <p className={styles.small} style={{ color: 'var(--z-negative)' }}>Es más de lo que debe ({fmtSolesCorto(promesa.c.monto)}).</p>}
+                  <Button size="lg" icon="check" onClick={guardarPromesa} disabled={!monto || !promesa.fecha || excede}>
+                    Guardar promesa
+                  </Button>
+                </>
+              )
+            })()}
           </div>
         )}
       </BottomSheet>
