@@ -7,16 +7,18 @@ import { TIPO_CAMBIO_MOCK } from '../config/taxParams2026.ts'
 import { categorize, type CategorizeContext } from './categorization.ts'
 import { personalScore, type PersonalScore, UMBRAL_PERSONAL } from './personal.ts'
 import { reconcile } from './reconciliation.ts'
-import type { BankMovement, BusinessData, Classification, Comprobante, Correction, DemoBusiness, Estado, Match, Rule } from './types.ts'
+import type { BankMovement, BusinessData, CierreCaja, Classification, Comprobante, Correction, DemoBusiness, Estado, Match, Rule } from './types.ts'
 import { monthOf, round2 } from './util.ts'
 
 export interface UserInputs {
   corrections: Correction[]
   rules: Rule[]
-  /** Movimientos insertados por la demo («Simular que pagó») */
+  /** Movimientos que agrega el usuario: extracto subido, «Simular que pagó», desembolso de un crédito */
   extraMovements: BankMovement[]
-  /** Ajustes del dueño sobre su negocio (sueldo, colchón, régimen laboral) */
-  overrides?: Partial<Pick<DemoBusiness, 'sueldoDueno' | 'colchonCaja' | 'regimenLaboral'>>
+  /** Ajustes del dueño sobre su negocio (sueldo, colchón, planilla) */
+  overrides?: Partial<Pick<DemoBusiness, 'sueldoDueno' | 'colchonCaja' | 'regimenLaboral' | 'trabajadores' | 'sueldoPromedio'>>
+  /** Cierres de caja de las ventas en efectivo */
+  cierres?: CierreCaja[]
 }
 
 export interface Analysis {
@@ -71,6 +73,7 @@ export function analyze(data: BusinessData, user: UserInputs): Analysis {
     posSales: data.posSales,
     posBatches: data.posBatches,
     tipoCambio,
+    cierres: (user.cierres ?? []).filter((c) => c.businessId === id),
   })
   const matchByMovement = new Map<string, Match>()
   const matchByComprobante = new Map<string, Match>()
@@ -110,10 +113,13 @@ export function analyze(data: BusinessData, user: UserInputs): Analysis {
     if (!match && estado !== 'POSIBLE_PERSONAL' && guess.fuente !== 'MANUAL' && guess.confianza < 0.9) porRevisar.push(m)
   }
 
+  // Un comprobante con abonos parciales sigue abierto hasta que los abonos suman el total
   const comprobanteEstado = new Map<string, Estado>()
   for (const c of data.comprobantes) {
     if (c.tipo !== 'FACTURA' && c.tipo !== 'BOLETA') continue
-    comprobanteEstado.set(c.id, matchByComprobante.has(c.id) ? 'CONCILIADO' : c.direccion === 'VENTA' ? 'COMPROBANTE_SIN_COBRO' : 'FACTURA_SIN_PAGO')
+    const match = matchByComprobante.get(c.id)
+    const abierto = !match || (match.pendiente ?? 0) > 0
+    comprobanteEstado.set(c.id, !abierto ? 'CONCILIADO' : c.direccion === 'VENTA' ? 'COMPROBANTE_SIN_COBRO' : 'FACTURA_SIN_PAGO')
   }
 
   const ultimo = [...all].sort((a, b) => a.fecha.localeCompare(b.fecha) || a.id.localeCompare(b.id)).at(-1)
@@ -210,4 +216,19 @@ export function comprobantesEn(a: Analysis, estado: 'COMPROBANTE_SIN_COBRO' | 'F
 export function totalNeto(a: Analysis, c: Comprobante): number {
   const notas = a.data.comprobantes.filter((n) => n.tipo === 'NOTA_CREDITO' && n.referenciaId === c.id)
   return round2(c.total - notas.reduce((acc, n) => acc + n.total, 0))
+}
+
+/** Abonos parciales de un comprobante abierto (regla PARCIAL), o null si no tiene. */
+export function abonosDe(a: Analysis, c: Comprobante): { pagado: number; movimientos: BankMovement[] } | null {
+  const match = a.matchByComprobante.get(c.id)
+  if (!match || match.regla !== 'PARCIAL' || !match.pendiente) return null
+  const movimientos = match.movementIds.map((id) => a.movementsById.get(id)!).filter(Boolean)
+  return { pagado: round2(movimientos.reduce((acc, m) => acc + Math.abs(m.monto), 0)), movimientos }
+}
+
+/** Lo que falta cobrar o pagar de un comprobante: neto de notas de crédito y de abonos parciales. */
+export function saldoPendiente(a: Analysis, c: Comprobante): number {
+  const match = a.matchByComprobante.get(c.id)
+  if (match?.regla === 'PARCIAL' && match.pendiente !== undefined) return match.pendiente
+  return totalNeto(a, c)
 }

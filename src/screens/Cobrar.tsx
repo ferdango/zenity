@@ -9,11 +9,13 @@ import styles from '../components/zen/zen.module.css'
 import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
 import { type Cobranza, diasPromedioCobro, linkWhatsApp, mensajeCobro, TRAMO_LABEL, tonoDe, totalCobranzas } from '../domain/collections'
+import { abonosDe } from '../domain/engine'
+import { cobrosTrasRecordatorio } from '../domain/metricas'
 import { docLabel, tipoLabel } from '../domain/reconciliation'
 import { addDays, addMonths, fmtFecha, fmtSolesCorto } from '../domain/util'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
-import { registrarPromesa, simularPago } from '../state/demoStore'
+import { registrarPromesa, registrarRecordatorio, simularPago } from '../state/demoStore'
 import { useCobranzas, useZen } from '../state/useZen'
 
 const TONO_LABEL = { AMABLE: 'Tono amable', DIRECTO: 'Tono directo', FIRME: 'Tono firme' } as const
@@ -21,7 +23,7 @@ const TONO_LABEL = { AMABLE: 'Tono amable', DIRECTO: 'Tono directo', FIRME: 'Ton
 /** F-05 · Cobranza asistida. */
 export function Cobrar() {
   const { business, toast } = useApp()
-  const { a } = useZen()
+  const { a, demo } = useZen()
   const lista = useCobranzas()
   const [recordar, setRecordar] = useState<{ c: Cobranza; texto: string } | null>(null)
   const [promesa, setPromesa] = useState<{ c: Cobranza; fecha: string; monto: string } | null>(null)
@@ -42,6 +44,8 @@ export function Cobrar() {
   const mes = HOY.slice(0, 7)
   const promedio = diasPromedioCobro(a, mes)
   const promedioAnterior = diasPromedioCobro(a, addMonths(mes, -1))
+  const recordados = cobrosTrasRecordatorio(a, demo.recordatorios)
+  const recordar1 = (c: Cobranza, canal: 'whatsapp' | 'copiado') => registrarRecordatorio(c.comprobante.id, { tono: tonoDe(c.diasVencidos), tramo: c.tramo, canal })
 
   const pagar = (c: Cobranza) => {
     simularPago(a.business.id, c.comprobante, c.monto)
@@ -90,6 +94,20 @@ export function Cobrar() {
           </div>
         </motion.div>
 
+        {recordados.recordados > 0 && (
+          <motion.p className={styles.banner} variants={fadeUp}>
+            <Icon name="mark_chat_read" size={20} />
+            <span>
+              Cobraste{' '}
+              <strong>
+                {recordados.cobrados} de {recordados.recordados}
+              </strong>{' '}
+              comprobante{recordados.recordados === 1 ? '' : 's'} después de recordar{recordados.recordados === 1 ? 'lo' : 'los'} por WhatsApp
+              {recordados.dias !== null && (recordados.dias === 0 ? ', el mismo día' : ` (en ${recordados.dias} día${recordados.dias === 1 ? '' : 's'} en promedio)`)}.
+            </span>
+          </motion.p>
+        )}
+
         <LessonCard id="L07" />
 
         <motion.section className={styles.section} variants={fadeUp}>
@@ -127,7 +145,19 @@ export function Cobrar() {
                 <p className={styles.muted}>
                   {c.diasVencidos > 0 ? `${c.diasVencidos} días de atraso` : c.diasVencidos === 0 ? 'Vence hoy' : `Vence en ${-c.diasVencidos} días`}
                   {c.promesa && ` · Prometió pagar ${fmtSolesCorto(c.promesa.monto)} el ${fmtFecha(c.promesa.fecha)}`}
+                  {demo.recordatorios[c.comprobante.id] && ` · Le recordaste el ${fmtFecha(demo.recordatorios[c.comprobante.id])}`}
                 </p>
+                {(() => {
+                  const abonos = abonosDe(a, c.comprobante)
+                  return abonos ? (
+                    <p className={styles.small}>
+                      <Pill tone="info" icon="splitscreen">
+                        Pago en partes
+                      </Pill>{' '}
+                      Ya abonó {fmtSolesCorto(abonos.pagado)} de {fmtSolesCorto(abonos.pagado + c.monto)}: faltan <strong>{fmtSolesCorto(c.monto)}</strong>.
+                    </p>
+                  ) : null
+                })()}
                 <div className={styles.actions}>
                   <Button size="sm" icon="chat" onClick={() => setRecordar({ c, texto: mensajeCobro(c, a.business) })}>
                     Recordar por WhatsApp
@@ -167,6 +197,7 @@ export function Cobrar() {
               disabled={!recordar.c.telefono}
               onClick={() => {
                 window.open(linkWhatsApp(recordar.c.telefono!, recordar.texto), '_blank', 'noopener')
+                recordar1(recordar.c, 'whatsapp')
                 setRecordar(null)
               }}
             >
@@ -178,7 +209,10 @@ export function Cobrar() {
               icon="content_copy"
               onClick={() => {
                 navigator.clipboard?.writeText(recordar.texto).then(
-                  () => toast('Mensaje copiado', 'content_copy'),
+                  () => {
+                    recordar1(recordar.c, 'copiado')
+                    toast('Mensaje copiado', 'content_copy')
+                  },
                   () => toast('No se pudo copiar', 'error'),
                 )
               }}

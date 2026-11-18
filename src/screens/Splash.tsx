@@ -78,7 +78,7 @@ export function Splash() {
           </Button>
         </motion.div>
         <motion.div variants={fadeUp}>
-          <Button size="lg" fullWidth variant="text" icon="play_circle" to="/inicio">
+          <Button size="lg" fullWidth variant="text" icon="play_circle" to="/bienvenida">
             Ver la demo
           </Button>
         </motion.div>

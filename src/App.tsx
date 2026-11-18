@@ -10,7 +10,9 @@ import { AddConnection } from './screens/AddConnection'
 import { Analyzing } from './screens/Analyzing'
 import { Aprende } from './screens/Aprende'
 import { Bcp, BcpExpediente } from './screens/Bcp'
+import { Bienvenida, PermisosDatos } from './screens/Bienvenida'
 import { Caja } from './screens/Caja'
+import { CierreCaja } from './screens/CierreCaja'
 import { Cobrar } from './screens/Cobrar'
 import { Conciliacion } from './screens/Conciliacion'
 import { Contador } from './screens/Contador'
@@ -18,6 +20,7 @@ import { Credito } from './screens/Credito'
 import { ContadorCliente } from './screens/ContadorCliente'
 import { DatosEntrenamiento } from './screens/DatosEntrenamiento'
 import { Mas } from './screens/Mas'
+import { Metricas } from './screens/Metricas'
 import { MiContador } from './screens/MiContador'
 import { Personal } from './screens/Personal'
 import { PorRevisar } from './screens/PorRevisar'
@@ -38,7 +41,7 @@ import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Pantallas de la primera ola que viven dentro del layout del dueño. */
-const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito']
+const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
@@ -86,6 +89,7 @@ function AnimatedRoutes() {
         <Route path="/notificaciones" element={screen(<NotificationsPrompt />)} />
         <Route path="/analizando" element={screen(<Analyzing />)} />
         <Route path="/conexiones/resultado" element={screen(<ConnectionResult />)} />
+        <Route path="/bienvenida" element={screen(<Bienvenida />)} />
         <Route element={screen(<AppShell />)}>
           <Route path="/inicio" element={<Home />} />
           <Route path="/movimientos/:tab" element={<Movements />} />
@@ -104,6 +108,9 @@ function AnimatedRoutes() {
           <Route path="/mi-contador" element={<MiContador />} />
           <Route path="/mas" element={<Mas />} />
           <Route path="/credito" element={<Credito />} />
+          <Route path="/cierre-caja" element={<CierreCaja />} />
+          <Route path="/permisos" element={<PermisosDatos />} />
+          <Route path="/metricas" element={<Metricas />} />
           <Route path="/conexiones/nueva" element={<AddConnection />} />
           <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
@@ -14,7 +14,8 @@ import { describeRule, ruleMatches } from '../domain/categorization'
 import { type Analysis, ESTADO_LABEL, resumenMes } from '../domain/engine'
 import { REGIMEN_NOMBRE } from '../domain/taxSimulator'
 import type { BankMovement, CategoriaId, Rule, RuleCondition } from '../domain/types'
-import { fmtFecha, monthOf } from '../domain/util'
+import { diffDays, fmtFecha, lastDayOfMonth, monthOf } from '../domain/util'
+import { track } from '../lib/analytics'
 import { formatMoney, MONTHS_SHORT } from '../lib/format'
 import { useApp } from '../state/context'
 import {
@@ -22,10 +23,12 @@ import {
   analysisFor,
   asignarCuenta,
   borrarRegla,
+  cerrarMes,
   comentar,
   corregir,
   crearRegla,
   permisosDe,
+  reabrirMes,
   setCierre,
   useDemoState,
 } from '../state/demoStore'
@@ -50,6 +53,9 @@ export function ContadorCliente() {
   const [tab, setTab] = useState<Tab>('movimientos')
   const [mes, setMes] = useState<string>(HOY.slice(0, 7))
   const resumido = CARTERA_RESUMIDA.find((c) => c.id === id)
+  useEffect(() => {
+    track('contador_cliente_abierto', { completo: !!a })
+  }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!a) {
     return (
@@ -451,9 +457,14 @@ function Cierre({ a, mes }: { a: Analysis; mes: string }) {
     { id: 'falt', label: `Comprobantes faltantes pedidos al cliente (${faltantes})`, auto: false, ok: !!demo.cierre[key('falt')] },
   ]
   const listo = items.every((i) => i.ok)
+  const cerrado = demo.mesesCerrados[`${a.business.id}:${mes}`]
+  const finDeMes = lastDayOfMonth(mes)
   return (
     <section className={styles.card}>
-      <SectionHead title={`Cierre de ${mesLabel(mes).toLowerCase()}`} action={listo ? <Pill tone="alta">Listo para cerrar</Pill> : <Pill tone="media">En proceso</Pill>} />
+      <SectionHead
+        title={`Cierre de ${mesLabel(mes).toLowerCase()}`}
+        action={cerrado ? <Pill tone="alta" icon="lock">Cerrado</Pill> : listo ? <Pill tone="alta">Listo para cerrar</Pill> : <Pill tone="media">En proceso</Pill>}
+      />
       {items.map((i) => (
         <label key={i.id} className={styles.check}>
           <input type="checkbox" checked={i.ok} disabled={i.auto} onChange={(e) => setCierre(key(i.id), e.target.checked)} />
@@ -463,6 +474,25 @@ function Cierre({ a, mes }: { a: Analysis; mes: string }) {
           </span>
         </label>
       ))}
+      {cerrado ? (
+        <div className={styles.actions}>
+          <p className={styles.small}>
+            Cerrado el {fmtFecha(cerrado)}: <strong>{diffDays(finDeMes, cerrado.slice(0, 10))} días</strong> después del fin de mes.
+          </p>
+          <Button size="sm" variant="text" icon="lock_open" onClick={() => reabrirMes(a.business.id, mes)}>
+            Reabrir
+          </Button>
+        </div>
+      ) : (
+        <div className={styles.actions}>
+          <Button icon="lock" variant={listo ? 'filled' : 'tonal'} disabled={HOY <= finDeMes} onClick={() => cerrarMes(a.business.id, mes, !listo)}>
+            {listo ? 'Cerrar el mes' : 'Cerrar con pendientes'}
+          </Button>
+          <span className={styles.muted}>
+            {HOY <= finDeMes ? 'El mes todavía no termina.' : `Van ${diffDays(finDeMes, HOY)} días desde el fin de mes.${listo ? '' : ' Lo pendiente queda anotado para el próximo cierre.'}`}
+          </span>
+        </div>
+      )}
     </section>
   )
 }
@@ -479,6 +509,7 @@ function Exportar({ a, mes }: { a: Analysis; mes: string }) {
     link.download = `asientos-${a.business.ruc}-${mes}.csv`
     link.click()
     URL.revokeObjectURL(url)
+    track('contador_csv_exportado', { lineas: lineas.length })
   }
   return (
     <section className={styles.section}>

@@ -72,6 +72,17 @@ Decisiones tomadas durante la construcción:
 - **Decisiones:** pedir prestado nunca mejora el perfil (el desembolso no cuenta como liquidez y la cuota nueva suma a la deuda); el perfil es del dueño y el banco solo lo ve con consentimiento vigente; eventos de PostHog sin montos (`credito_*`).
 - **Pendiente:** texto legal real del consentimiento, tarifa y política del BCP, comisión por crédito colocado y la mora de los créditos originados.
 
+## Huecos del MVP (18/11/2026)
+
+- **Extracto en Excel o CSV** (`src/domain/extracto.ts`, `src/lib/tabla.ts`): lee .xlsx (ZIP + XML con `DecompressionStream`, sin dependencias), tablas HTML con extensión .xls y CSV (UTF-8 o Windows-1252). Reconoce las columnas por nombre (Fecha, Descripción, Monto o Cargo/Abono, Saldo, N.° de operación, Hora), deduce canal y contraparte de la glosa y no duplica lo que ya está. «Probar con un extracto de ejemplo» arma uno con el formato de la Banca por Internet BCP. El .xls binario antiguo pide guardarlo como .xlsx o .csv.
+- **Pagos en partes** (regla `PARCIAL`): varios abonos de la misma contraparte que suman el total (0.85; 0.92 si coinciden con las cuotas) o pagos a cuenta (0.7, solo con RUC o nombre muy parecido). El comprobante sigue abierto con lo que falta (`saldoPendiente`), que es lo que usan Cobrar y Caja. También se agregó el **cobro atrasado**: mismo monto y misma contraparte hasta 90 días después de la ventana (`EXACTO`, 0.9).
+- **Cierre de caja** (regla `CIERRE`, `src/domain/cierres.ts`, `/cierre-caja`): el dueño anota el efectivo contado; el depósito de 1 a 3 cierres de los últimos 4 días se explica con 0.95 (0.85 si depositó al menos el 80%). Muestra lo vendido sin boleta, el faltante frente a las boletas y lo que quedó en caja, que entra a la proyección como «Efectivo en caja».
+- **Configuración inicial** (`/bienvenida`): permisos de datos por fuente (texto en `src/config/legal.ts`, borrador para revisión legal según la Ley N.° 29733) y planilla (régimen laboral, trabajadores, sueldo). «Ver la demo» pasa por aquí; Más → **Permisos de datos** revoca por fuente.
+- **Confianza media** en «Por revisar»: sección aparte para confirmar o consultar al contador; no cambia el contador de pendientes (la decisión de abrir con 6 tarjetas se mantiene).
+- **Nota del contador** junto al movimiento en el detalle de Conciliación.
+- **Métricas:** eventos de PostHog sin montos para cada feature (`src/lib/analytics.ts`) y la pantalla **Métricas del piloto** (`/metricas`, `src/domain/metricas.ts`). El error de la proyección se mide con la proyección a 7 días guardada (en la demo la fecha está fija). El contador puede **cerrar el mes** (también con pendientes) y así se miden los días de cierre.
+- **Pendiente:** reporte de retención semanal en PostHog, razón social, correo de derechos ARCO e inscripción del banco de datos para el texto legal.
+
 ## Pendientes / TODO
 
 - Cronograma de vencimientos SUNAT y tipo de cambio: tablas mock, reemplazar por las oficiales.

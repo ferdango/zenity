@@ -2,7 +2,13 @@
 
 Para BCP e inversionistas. Todo sale del seed determinístico (hoy = **18/11/2026**). Los números de abajo son los que muestra la demo recién reiniciada.
 
-**Antes de empezar:** Más → **Reiniciar demo** (o abre `https://ferdango.github.io/zenity/` en una ventana privada y toca **«Ver la demo»** en la bienvenida, sin pasar por el login). Para el dueño usa el celular o la vista de 375 px; para el contador, una pantalla de escritorio.
+**Antes de empezar:** Más → **Reiniciar demo** (o abre `https://ferdango.github.io/zenity/` en una ventana privada y toca **«Ver la demo»** en la bienvenida, sin pasar por el login).
+
+## 0. Antes de empezar (configuración inicial) · 20 s
+
+- **«Ver la demo»** abre la configuración del negocio en 2 pasos. **1 · Tus datos:** Zenity lee la cuenta BCP, SUNAT y Yape/POS solo con permiso, en solo lectura y revocable (texto completo en «Leer la autorización completa», borrador para revisión legal). **Acepto y continúo**.
+- **2 · Tu planilla:** Pequeña empresa (REMYPE), 4 trabajadores, S/ 1,400 → «Gratificación de diciembre: S/ 3,052 · CTS de mayo: S/ 1,400». **Guardar y ver mi negocio**.
+- Con «Ahora no», Inicio muestra la tarjeta «Termina de configurar Zenity». Los permisos se revocan por fuente en Más → **Permisos de datos**. Para el dueño usa el celular o la vista de 375 px; para el contador, una pantalla de escritorio.
 
 **Apariencia:** la app abre en tema claro. En Más → **Apariencia** (o en Ajustes de la cuenta) se cambia a Oscuro o Automático; se mantiene al reiniciar la demo.
 
@@ -62,7 +68,16 @@ Para BCP e inversionistas. Todo sale del seed determinístico (hoy = **18/11/202
 4. **Reglas del contador**: crea una (contraparte contiene… → categoría + cuenta PCGE) y mira cuántos movimientos reclasifica.
 5. **Exportar asientos** → **Descargar CSV** (`fecha, glosa, cuenta_pcge, debe, haber, comprobante, ruc_contraparte`), con debe = haber.
 
-## 9. Crédito BCP (F3) · 60 s
+## 9. Huecos del MVP cerrados · 60 s
+
+1. Más → **Conciliación** → **Subir extracto del banco** → **Probar con un extracto de ejemplo** (formato de la Banca por Internet BCP; también acepta tu propio .xlsx o .csv): 3 nuevos y 1 que ya estaba. **Agregar 3 movimientos** → «Zenity concilió 3»: Rímac paga la mitad (**Pago en partes**, faltan S/ 1,475), Las Gardenias paga 10 días tarde (**Monto exacto**) y se paga a Pinturas Andinas.
+2. **Cobrar:** «Te deben» baja a **S/ 6,645** y Rímac muestra «Ya abonó S/ 1,475 de S/ 2,950». **Recordar por WhatsApp** y luego **Simular pago**: «Cobraste 1 de 1 comprobante después de recordarlo».
+3. **Cierre de caja** (desde Conciliación o Más): «Días sin cierre» → **13/11** (6 boletas por S/ 795.50) → cuenta **S/ 915.50** → el depósito del 14/11 queda explicado: «S/ 120 sin boleta» y «S/ 120 quedaron en caja», que entran a la proyección.
+4. **Por revisar** → «Conciliados con confianza media»: **Está bien** o **Preguntar a mi contador**. En Conciliación, el detalle muestra la **nota de tu contador** junto al movimiento.
+5. Como contador → cliente → **Cierre del mes** → **Cerrar con pendientes**: «18 días después del fin de mes».
+6. Más → **Métricas del piloto**: las 5 de defensa y las de cada feature, con el evento de PostHog que las mide (sin montos ni datos personales).
+
+## 10. Crédito BCP (F3) · 60 s
 
 1. Más → **Crédito BCP** (o en Caja: «Ver cuánto crédito BCP puede pagar tu negocio»): «Según tu flujo real, podrías pedir hasta **S/ 14,500**» a 12 meses, cuota ≈ S/ 1,389.
 2. **Así ve el banco a tu negocio:** puntaje **72**, segmento B (riesgo moderado), con 6 componentes explicados (capacidad de pago, ventas −15%, 99.7% con comprobante, 13 días de caja, S/ 4,130 vencidos, impuestos a tiempo).
@@ -76,6 +91,6 @@ Para BCP e inversionistas. Todo sale del seed determinístico (hoy = **18/11/202
 ### Verificación técnica
 
 ```bash
-npm test        # 62 tests: 14 casos de conciliación, 3 regímenes laborales, 3 casos del simulador, cobranza, lecciones, contador y crédito
+npm test        # 82 tests: 14 casos de conciliación, pagos en partes, cierre de caja, extracto (CSV y .xlsx), métricas, 3 regímenes laborales, simulador, cobranza, lecciones, contador y crédito
 npm run build
 ```

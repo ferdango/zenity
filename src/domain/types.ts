@@ -51,6 +51,8 @@ export interface BankMovement {
   saldoDespues: number
   /** Movimiento insertado por la demo («Simular que pagó») */
   simulado?: boolean
+  /** Vino de un extracto que subió el dueño (Excel o CSV) */
+  importado?: boolean
 }
 
 export type TipoComprobante = 'FACTURA' | 'BOLETA' | 'NOTA_CREDITO' | 'RETENCION'
@@ -106,7 +108,18 @@ export interface YapePayment {
   numeroOperacion: string
 }
 
-export type Regla = 'EXACTO' | 'DETRACCION' | 'RETENCION' | 'AGRUPADO' | 'MONEDA' | 'SUGERIDO' | 'MANUAL'
+/** Cierre de caja del día: el efectivo que el dueño contó al cerrar (ventas en efectivo). */
+export interface CierreCaja {
+  id: string
+  businessId: string
+  /** "2026-11-13" */
+  fecha: string
+  /** S/ contados en caja */
+  efectivo: number
+  registrado: string
+}
+
+export type Regla = 'EXACTO' | 'DETRACCION' | 'RETENCION' | 'AGRUPADO' | 'PARCIAL' | 'MONEDA' | 'CIERRE' | 'SUGERIDO' | 'MANUAL'
 
 export type Estado =
   | 'CONCILIADO'
@@ -133,6 +146,14 @@ export interface Match {
   retencion?: number
   /** Tipo de cambio usado (regla MONEDA) */
   tipoCambio?: number
+  /** Regla PARCIAL: lo que falta cobrar o pagar del comprobante (0 si los abonos ya suman el total) */
+  pendiente?: number
+  /** Regla CIERRE: días de caja que cubre el depósito */
+  cierreFechas?: string[]
+  /** Regla CIERRE: efectivo contado que no tiene boleta */
+  sinBoleta?: number
+  /** Regla CIERRE: efectivo contado que no se depositó (quedó en caja) */
+  enCaja?: number
 }
 
 export type CategoriaId =
@@ -238,6 +259,7 @@ export type FuenteCaja =
   | 'GRATIFICACION'
   | 'CTS'
   | 'CREDITO'
+  | 'EFECTIVO'
 
 export interface CashEvent {
   fecha: string

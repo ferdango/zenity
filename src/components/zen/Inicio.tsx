@@ -7,6 +7,7 @@ import { personalesDelMes } from '../../domain/personal'
 import { fmtFecha, round2 } from '../../domain/util'
 import { fadeUp } from '../../lib/motion'
 import { useApp } from '../../state/context'
+import { inicioCompleto } from '../../state/demoStore'
 import { useCaja, useCobranzas, useLecciones, useZen } from '../../state/useZen'
 import { Icon } from '../Icon'
 import { LessonCard, Money } from './index'
@@ -36,6 +37,19 @@ export function InicioOla1() {
         <Money value={a.saldoActual} className={styles.heroAmount} />
         <span className={styles.heroMeta}>Al {fmtFecha(HOY)} · se actualiza solo</span>
       </motion.section>
+
+      {!inicioCompleto(demo, a.business.id) && (
+        <motion.div variants={fadeUp} style={{ display: 'grid' }}>
+          <Link to="/bienvenida" className={styles.banner} data-ripple="">
+            <Icon name="verified_user" size={22} />
+            <span style={{ flex: 1 }}>
+              <strong className={styles.bannerTitle}>Termina de configurar Zenity</strong>
+              {demo.inicio[a.business.id]?.permisos ? 'Falta confirmar tu planilla: cambia la gratificación y la CTS de tu caja.' : 'Autoriza qué datos lee Zenity y confirma tu planilla (2 pasos).'}
+            </span>
+            <Icon name="chevron_right" size={20} />
+          </Link>
+        </motion.div>
+      )}
 
       {caja?.alerta && (
         <motion.div variants={fadeUp} style={{ display: 'grid' }}>
