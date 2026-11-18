@@ -23,7 +23,7 @@ export function Analyzing() {
   const { finishSync } = useApp()
   const [step, setStep] = useState(0)
   const cuenta = params.get('cuenta')
-  const next = cuenta ? `/revisar?cuenta=${cuenta}` : '/revisar'
+  const next = cuenta ? `/revisado?cuenta=${cuenta}` : '/revisado'
 
   useEffect(() => {
     const timers = STEPS.map((_, i) => window.setTimeout(() => setStep(i), i * STEP_MS))

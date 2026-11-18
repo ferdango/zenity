@@ -13,6 +13,7 @@ import { SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
+import { InicioOla1 } from '../components/zen/Inicio'
 import { businessName } from '../data/businesses'
 import { movementInsights } from '../data/insights'
 import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
@@ -255,6 +256,8 @@ export function Home() {
               {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
             </button>
           </motion.section>
+
+          <InicioOla1 />
 
           <motion.div className={styles.period} variants={fadeUp}>
             <div data-tour="period">
