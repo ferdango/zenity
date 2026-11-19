@@ -1411,7 +1411,8 @@ textarea.input {
   font-weight: 700;
 }
 
-/* El escenario pesimista, en una línea debajo del gráfico */
+/* Pie del gráfico de barras y el escenario pesimista, en una línea cada uno */
+.chartPie,
 .chartNota {
   font-size: 0.8125rem;
   line-height: 1.125rem;

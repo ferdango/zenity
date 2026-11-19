@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 import { seedFerreteria } from '../data/seed/ferreteria.ts'
 import { ctsSemestral, gratificacion, proximoVencimiento, vencimientoSunat } from './calendar.ts'
-import { proyectarCaja, tramoBajoColchon } from './cashflow.ts'
+import { proyectarCaja, semanasDeCaja, tramoBajoColchon } from './cashflow.ts'
 import { analyze } from './engine.ts'
 import type { RegimenLaboral } from './types.ts'
 
@@ -86,6 +86,23 @@ describe('gráfico de caja en una frase', () => {
 
   test('si nunca baja del colchón, no hay tramo', () => {
     assert.equal(tramoBajoColchon([p('2026-11-18', 9000), p('2026-11-19', 8000)], 7659), null)
+  })
+})
+
+describe('caja por semanas (gráfico de barras)', () => {
+  test('agrupa de 7 en 7 desde hoy y guarda el día más bajo de cada semana', () => {
+    const serie = Array.from({ length: 10 }, (_, i) => ({ fecha: `2026-11-${String(18 + i).padStart(2, '0')}`, base: 9000 - (i === 3 ? 3000 : 0) - (i === 8 ? 500 : 0), pesimista: 0 }))
+    const s = semanasDeCaja(serie)
+    assert.equal(s.length, 2)
+    assert.deepEqual([s[0].desde, s[0].hasta], ['2026-11-18', '2026-11-24'])
+    assert.equal(s[0].minimo.fecha, '2026-11-21')
+    assert.equal(s[0].minimo.base, 6000)
+    assert.deepEqual([s[1].desde, s[1].hasta], ['2026-11-25', '2026-11-27'])
+    assert.equal(s[1].minimo.base, 8500)
+  })
+
+  test('con el seed, 60 días son 9 semanas', () => {
+    assert.equal(semanasDeCaja(proyectarCaja(conRegimen('PEQUENA_REMYPE'), [], HOY, 60).serie).length, 9)
   })
 })
 

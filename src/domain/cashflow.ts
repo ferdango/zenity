@@ -339,6 +339,25 @@ export function tramoBajoColchon(serie: CashPoint[], colchon: number): { desde: 
   return { desde: serie[i].fecha, hasta: serie[j].fecha }
 }
 
+export interface SemanaCaja {
+  /** Primer y último día de la semana (desde hoy, de 7 en 7) */
+  desde: string
+  hasta: string
+  /** El día más bajo de la semana en el escenario base */
+  minimo: CashPoint
+}
+
+/** La proyección en semanas: lo más bajo que llega la caja en cada una (para el gráfico de barras). */
+export function semanasDeCaja(serie: CashPoint[]): SemanaCaja[] {
+  const semanas: SemanaCaja[] = []
+  for (let i = 0; i < serie.length; i += 7) {
+    const dias = serie.slice(i, i + 7)
+    const minimo = dias.reduce((m, p) => (p.base < m.base ? p : m))
+    semanas.push({ desde: dias[0].fecha, hasta: dias[dias.length - 1].fecha, minimo })
+  }
+  return semanas
+}
+
 /** «El 20/12 tu caja baja a S/ 6,437 por la gratificación y el IGV.» */
 export function textoAlerta(a: CashAlert): string {
   const motivos = a.motivos.length === 2 ? `${a.motivos[0]} y ${a.motivos[1]}` : (a.motivos[0] ?? 'tus pagos')
