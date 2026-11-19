@@ -151,13 +151,15 @@ function igvDelPeriodo(comps: Comprobante[], mes: string): { igv: number; ventas
 /** Impuestos de un periodo según el régimen: IGV + pago a cuenta de renta + EsSalud. */
 export function impuestosEstimados(b: DemoBusiness, comps: Comprobante[], periodo: string, mesActual: string): { igv: number; renta: number; essalud: number } {
   const essalud = round2(planillaMensual(b) * TAX_2026.essalud)
+  // Un periodo completo usa sus comprobantes; uno en curso o futuro, el promedio de los 3 últimos completos
+  const periodos = periodo < mesActual ? [periodo] : [addMonths(mesActual, -1), addMonths(mesActual, -2), addMonths(mesActual, -3)]
   if (b.regimenTributario === 'NRUS') {
-    const ventas = comps.filter((c) => monthOf(c.fechaEmision) === periodo && c.direccion === 'VENTA').reduce((s, c) => s + c.total, 0)
+    // La cuota del Nuevo RUS depende de la categoría: con un mes a medias saldría siempre la más baja
+    const ventasDe = (mes: string) => comps.filter((c) => monthOf(c.fechaEmision) === mes && c.direccion === 'VENTA').reduce((s, c) => s + c.total, 0)
+    const ventas = media(periodos.map(ventasDe))
     return { igv: 0, renta: ventas > TAX_2026.nrus.categorias[0].topeMensual ? 50 : 20, essalud: b.trabajadores ? essalud : 0 }
   }
   const tasa = b.regimenTributario === 'RMT' ? TAX_2026.rmt.pagoACuenta : b.regimenTributario === 'RER' ? TAX_2026.rer.tasa : TAX_2026.general.pagoACuenta
-  // Un periodo completo usa sus comprobantes; uno en curso o futuro, el promedio de los 3 últimos completos
-  const periodos = periodo < mesActual ? [periodo] : [addMonths(mesActual, -1), addMonths(mesActual, -2), addMonths(mesActual, -3)]
   const calc = periodos.map((p) => igvDelPeriodo(comps, p))
   return {
     igv: round2(media(calc.map((c) => c.igv))),
