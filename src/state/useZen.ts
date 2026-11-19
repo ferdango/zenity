@@ -6,6 +6,7 @@ import { estadoCierres, eventoEfectivo } from '../domain/cierres'
 import { porCobrar } from '../domain/collections'
 import type { Analysis } from '../domain/engine'
 import { evaluarLecciones } from '../domain/lessons'
+import { camino, progreso, siguientePaso } from '../domain/progreso'
 import { avisoLimite, datosSimulador } from '../domain/taxSimulator'
 import { useApp } from './context'
 import { analysisFor, type DemoState, useDemoState } from './demoStore'
@@ -50,6 +51,29 @@ export function useSimulador() {
     const datos = datosSimulador(a, HOY)
     return { datos, aviso: avisoLimite(a.business.regimenTributario, datos.ingresosAnuales) }
   }, [a])
+}
+
+/** Avance en educación financiera (XP, racha, nivel) y el camino del negocio activo. */
+export function useProgreso() {
+  const { a, demo } = useZen()
+  const { connections } = useApp()
+  return useMemo(() => {
+    const entrada = {
+      corrections: demo.corrections,
+      recordatorios: demo.recordatorios,
+      promesas: demo.promesas,
+      lessonEvents: demo.lessonEvents,
+      datos: demo.datos,
+      inicio: demo.inicio,
+      overrides: demo.overrides,
+      importaciones: demo.importaciones,
+      confirmados: demo.confirmados,
+      regimenRevisado: demo.regimenRevisado,
+      hitos: demo.hitos,
+    }
+    const unidades = a ? camino(a, entrada, connections.length) : []
+    return { ...progreso(entrada), unidades, siguiente: siguientePaso(unidades) }
+  }, [a, demo, connections.length])
 }
 
 export function useLecciones() {

@@ -13,6 +13,11 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'El saldo de tu cuenta BCP, la alerta de caja si se viene un mes apretado y lo que tienes pendiente.',
   },
   {
+    target: 'avance',
+    title: 'Tu avance',
+    body: 'Cada tarea que haces te enseña algo y suma XP: cumple tu meta del día, cuida tu racha y sube de nivel. Toca aquí para ver tu camino.',
+  },
+  {
     target: 'greeting',
     title: 'Tu resumen del día',
     body: 'Te saludamos con el estado de tus cuentas. Toca el ojo para ocultar o mostrar tus saldos.',

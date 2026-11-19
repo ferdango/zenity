@@ -15,12 +15,13 @@ import { FEATURES } from '../lib/features'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { resetDemo } from '../lib/resetDemo'
 import { useApp } from '../state/context'
-import { useZen } from '../state/useZen'
+import { useProgreso, useZen } from '../state/useZen'
 
 /** «Más»: las herramientas del día a día, los ajustes y reiniciar la demo. */
 export function Mas() {
   const { business, connections } = useApp()
   const { a, demo } = useZen()
+  const progreso = useProgreso()
   const [confirmar, setConfirmar] = useState(false)
   const pct = a ? Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100) : null
 
@@ -31,6 +32,14 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
+            <LinkRow
+              tone="warning"
+              to="/progreso"
+              icon="school"
+              title="Tu camino"
+              sub={`Nivel ${progreso.nivel.numero} · ${progreso.nivel.nombre} · racha de ${progreso.racha} días`}
+              end={<Pill tone="media">{progreso.xp} XP</Pill>}
+            />
             <LinkRow
               tone="info"
               to="/conexiones"

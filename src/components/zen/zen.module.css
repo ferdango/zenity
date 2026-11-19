@@ -978,6 +978,92 @@ textarea.input {
   transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
+/* XP que da una tarea (estilo Duolingo) */
+.xpChip {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--z-radius-full);
+  background: color-mix(in srgb, #ffb14a 18%, transparent);
+  color: color-mix(in srgb, #c46a00 80%, var(--z-on-surface));
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* «Tu avance» en el Inicio: racha, nivel, meta del día y siguiente paso */
+.avance {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px 14px 14px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+  color: var(--z-on-surface-variant);
+  transition: transform var(--z-dur-short) var(--z-ease-standard);
+}
+
+.avance:active {
+  transform: scale(0.985);
+}
+
+.racha {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  width: 52px;
+  padding: 6px 0 4px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-high);
+  color: var(--z-outline);
+  line-height: 1;
+}
+
+.racha strong {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--z-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.racha[data-activa] {
+  background: color-mix(in srgb, #ff9f43 18%, transparent);
+  color: #ff8a1f;
+}
+
+.avanceTexto {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.avanceTitulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+.avanceXp {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: color-mix(in srgb, #c46a00 80%, var(--z-on-surface));
+  font-variant-numeric: tabular-nums;
+}
+
+.avance .progressFill {
+  background: linear-gradient(90deg, #ffd66b, #ff9f43);
+}
+
 /* Pago mensual a SUNAT: tarjeta pequeña que se abre para ver el desglose */
 .sunat {
   border-radius: var(--z-radius-xl);

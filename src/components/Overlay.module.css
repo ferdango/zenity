@@ -203,3 +203,30 @@
 .toastAction:hover {
   background: color-mix(in srgb, var(--z-inverse-primary) 12%, transparent);
 }
+
+/* «+10 XP» que sube y se desvanece al completar una tarea */
+.xpLayer {
+  position: fixed;
+  top: calc(76px + var(--z-safe-top));
+  left: 0;
+  right: 0;
+  z-index: 85;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+}
+
+.xpBurst {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px 8px 10px;
+  border-radius: var(--z-radius-full);
+  background: linear-gradient(160deg, #ffd66b, #ff9f43);
+  color: #4a2300;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 10px 24px -12px rgb(255 140 40 / 0.9);
+}

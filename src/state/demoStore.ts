@@ -91,6 +91,8 @@ export interface DemoState {
   inicio: Record<string, InicioNegocio>
   importaciones: Importacion[]
   proyecciones: ProyeccionGuardada[]
+  /** Hitos del camino de aprendizaje («negocio:caja», «negocio:sunat») → fecha */
+  hitos: Record<string, string>
   /** Conciliaciones de confianza media que el dueño confirmó (o marcó para consultar) */
   confirmados: Record<string, 'OK' | 'CONSULTA'>
 }
@@ -116,6 +118,7 @@ function initial(): DemoState {
     inicio: {},
     importaciones: [],
     proyecciones: [],
+    hitos: {},
     confirmados: {},
   }
 }
@@ -421,6 +424,13 @@ export function omitirInicio(businessId: string) {
 export function inicioCompleto(s: DemoState, businessId: string): boolean {
   const i = s.inicio[businessId]
   return !!i?.permisos && !!i?.planilla
+}
+
+/** Marca un hito del camino de aprendizaje (una sola vez por negocio). */
+export function marcarHito(businessId: string, hito: 'caja' | 'sunat') {
+  const clave = `${businessId}:${hito}`
+  if (getDemoState().hitos[clave]) return
+  setDemoState((s) => ({ ...s, hitos: { ...s.hitos, [clave]: AHORA } }))
 }
 
 /** Restaura el seed: borra todo lo que hizo el usuario en la demo. */
