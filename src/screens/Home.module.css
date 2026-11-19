@@ -65,7 +65,7 @@
   justify-items: center;
   gap: 4px;
   margin-top: calc(-1 * var(--home-header));
-  padding: calc(var(--home-header) + 12px) var(--z-gutter) 76px;
+  padding: calc(var(--home-header) + 12px) var(--z-gutter) 30px;
   border-radius: 0 0 36px 36px;
   background: var(--z-hero-bg);
   color: var(--z-on-hero);
@@ -133,19 +133,31 @@ button.bandPill:hover {
   background: var(--z-hero-chip-hover);
 }
 
-/* ── Acciones rápidas: tarjeta blanca que flota sobre la banda ── */
+/* ── Atajos: tarjeta con las acciones rápidas, después de la información ── */
 .quick {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
-  margin: -56px var(--z-gutter) 0;
+  margin: 16px var(--z-gutter) 0;
   padding: 18px 6px 14px;
   border-radius: var(--z-radius-2xl);
   background: var(--z-surface);
   border: 1px solid var(--z-divider);
-  box-shadow: var(--z-float-shadow);
+  box-shadow: var(--z-card-shadow);
+}
+
+/* Grupo de tarjetas del Inicio (alerta, decisión, SUNAT…): desaparece si no tiene nada que mostrar */
+.bloque {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px var(--z-gutter) 0;
+}
+
+.bloque:empty {
+  display: none;
 }
 
 .quickItem {
@@ -346,13 +358,8 @@ button.bandPill:hover {
   /* En escritorio la banda es una tarjeta dentro de la columna */
   .band {
     margin: 4px var(--z-gutter) 0;
-    padding: 28px var(--z-gutter) 80px;
+    padding: 28px var(--z-gutter) 32px;
     border-radius: var(--z-radius-3xl);
-  }
-
-  /* La tarjeta de acciones queda un poco más adentro que la banda */
-  .quick {
-    margin-inline: calc(var(--z-gutter) + 24px);
   }
 
   /* Escritorio: el selector de negocio y la campana alineados con el contenido */
