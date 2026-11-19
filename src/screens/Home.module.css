@@ -1,4 +1,6 @@
 .home {
+  /* Alto del encabezado: la banda violeta sube por detrás de él en el celular */
+  --home-header: calc(64px + var(--z-safe-top));
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -12,8 +14,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-height: var(--home-header);
   padding: calc(8px + var(--z-safe-top)) 12px 8px;
-  transition: background-color var(--z-dur-medium) var(--z-ease-standard);
+  transition:
+    background-color var(--z-dur-medium) var(--z-ease-standard),
+    color var(--z-dur-medium) var(--z-ease-standard);
+}
+
+/* Sobre la banda violeta (celular, sin scroll): íconos blancos */
+@media (max-width: 1023.98px) {
+  .header[data-on-band='true'] {
+    color: var(--z-on-hero);
+  }
+
+  /* Al bajar un poco, el encabezado toma el violeta del borde superior de la banda */
+  .header[data-on-band='true'][data-scrolled='true'] {
+    background: color-mix(in srgb, var(--z-hero-top) 90%, transparent);
+    box-shadow: none;
+  }
 }
 
 .header[data-scrolled='true'] {
@@ -39,38 +57,149 @@
   min-width: 0;
 }
 
-.greeting {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 12px;
-  padding: 4px var(--z-gutter) 0;
-}
-
-.live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.875rem;
-  color: var(--z-on-surface-variant);
-}
-
-.hello {
-  font-size: 1.375rem;
-  line-height: 1.875rem;
-  font-weight: 450;
-  letter-spacing: -0.01em;
-}
-
-.eye {
+.band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   justify-items: center;
-  gap: 2px;
-  padding: 4px 6px;
-  border-radius: var(--z-radius-md);
-  color: var(--z-on-surface-variant);
-  font-size: 0.625rem;
-  line-height: 0.75rem;
+  gap: 4px;
+  margin-top: calc(-1 * var(--home-header));
+  padding: calc(var(--home-header) + 12px) var(--z-gutter) 76px;
+  border-radius: 0 0 36px 36px;
+  background: var(--z-hero-bg);
+  color: var(--z-on-hero);
+  text-align: center;
+}
+
+/* Barras suaves al fondo de la banda (guiño al gráfico de gasto) */
+.band::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 58%;
+  background: linear-gradient(to top, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.01));
+  -webkit-mask: linear-gradient(90deg, #000 0 22px, transparent 22px 34px) 6px 100% / 34px 100% repeat-x;
+  mask: linear-gradient(90deg, #000 0 22px, transparent 22px 34px) 6px 100% / 34px 100% repeat-x;
+  clip-path: polygon(0 55%, 9% 40%, 18% 62%, 27% 30%, 36% 52%, 45% 20%, 54% 46%, 63% 8%, 72% 36%, 81% 18%, 90% 50%, 100% 28%, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.bandHello {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+  color: var(--z-on-hero);
+}
+
+.bandLabel {
+  margin-top: 10px;
+  font-size: 0.875rem;
+  color: var(--z-on-hero-muted);
+}
+
+.bandAmount {
+  font-size: clamp(2.5rem, 12vw, 3.25rem);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bandPills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.bandPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-hero-chip);
+  color: var(--z-on-hero);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background-color var(--z-dur-short) var(--z-ease-standard);
+}
+
+button.bandPill:hover {
+  background: var(--z-hero-chip-hover);
+}
+
+/* ── Acciones rápidas: tarjeta blanca que flota sobre la banda ── */
+.quick {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: -56px var(--z-gutter) 0;
+  padding: 18px 6px 14px;
+  border-radius: var(--z-radius-2xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-float-shadow);
+}
+
+.quickItem {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 2px;
+  border-radius: var(--z-radius-lg);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  font-weight: 500;
+  color: var(--z-on-surface);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quickIcon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--z-radius-full);
+  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
+}
+
+.quickItem:active .quickIcon {
+  transform: scale(0.9);
+}
+
+@media (hover: hover) {
+  .quickItem:hover .quickIcon {
+    transform: translateY(-3px);
+  }
+}
+
+.qViolet {
+  background: var(--z-chip-violet);
+  color: #fff;
+  box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--z-chip-violet) 80%, transparent);
+}
+
+.qBlue {
+  background: color-mix(in srgb, var(--z-chip-blue) 14%, transparent);
+  color: color-mix(in srgb, var(--z-chip-blue) 75%, var(--z-on-surface));
+}
+
+.qMagenta {
+  background: color-mix(in srgb, var(--z-magenta) 16%, transparent);
+  color: var(--z-on-surface);
+}
+
+.qGray {
+  background: var(--z-surface-high);
+  color: var(--z-on-surface);
 }
 
 .period {
@@ -172,8 +301,19 @@
 
 .tiles {
   display: grid;
-  gap: 8px;
-  padding: 16px var(--z-gutter) 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 4px var(--z-gutter) 8px;
+}
+
+.tiles > * {
+  display: grid;
+  min-width: 0;
+}
+
+/* La utilidad ocupa las dos columnas */
+.tileWide {
+  grid-column: 1 / -1;
 }
 
 .report {
@@ -199,6 +339,18 @@
 @media (min-width: 1024px) {
   .menuButton {
     display: none;
+  }
+
+  /* En escritorio la banda es una tarjeta dentro de la columna */
+  .band {
+    margin: 4px var(--z-gutter) 0;
+    padding: 28px var(--z-gutter) 80px;
+    border-radius: var(--z-radius-3xl);
+  }
+
+  /* La tarjeta de acciones queda un poco más adentro que la banda */
+  .quick {
+    margin-inline: calc(var(--z-gutter) + 24px);
   }
 
   /* Escritorio: el selector de negocio y la campana alineados con el contenido */
@@ -255,8 +407,8 @@
 }
 
 .monthTitle {
-  margin: 20px 4px 8px;
-  font-size: 1rem;
-  font-weight: 500;
+  margin: 20px var(--z-gutter) 8px;
+  font-size: 1.0625rem;
+  font-weight: 600;
   color: var(--z-on-surface);
 }

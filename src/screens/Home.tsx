@@ -1,7 +1,6 @@
 import { motion } from 'motion/react'
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { GradientText } from '../components/AiText'
+import { type RefObject, useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { BusinessSwitcher } from '../components/Business'
 import { Button } from '../components/Button'
 import { AccountCard } from '../components/Cards'
@@ -12,7 +11,9 @@ import { SummaryTile } from '../components/Metrics'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
+import { Money } from '../components/zen'
 import { InicioOla1 } from '../components/zen/Inicio'
+import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
 import { movementInsights } from '../data/insights'
 import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
@@ -26,11 +27,21 @@ import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
 import { useAvisos } from '../state/useAvisos'
+import { useZen } from '../state/useZen'
+import { fmtFecha } from '../domain/util'
 import { ChatPanel } from './Chat'
 import styles from './Home.module.css'
 
 /** Desde este ancho el Inicio muestra el chat a la derecha (en móvil no cambia nada). */
 const CHAT_PANEL_QUERY = '(min-width: 1180px)'
+
+/** Acciones rápidas del dueño (lo que no está en la barra inferior). */
+const ACCIONES = [
+  { to: '/conexiones/nueva', icon: 'add_link', label: 'Conectar', tone: 'qViolet' },
+  { to: '/conciliacion?subir=1', icon: 'upload_file', label: 'Extracto', tone: 'qBlue' },
+  { to: '/chat', icon: 'spark', label: 'Pregúntale', tone: 'qMagenta' },
+  { to: '/mas', icon: 'more_horiz', label: 'Más', tone: 'qGray' },
+] as const
 
 function useScrolled() {
   const [scrolled, setScrolled] = useState(false)
@@ -41,6 +52,29 @@ function useScrolled() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
   return scrolled
+}
+
+/**
+ * En el celular, mientras la banda violeta sigue detrás del encabezado, este va transparente
+ * y en blanco; al salir de la banda pasa al vidrio normal.
+ */
+function useOnBand(band: RefObject<HTMLElement | null>, enabled: boolean) {
+  const [onBand, setOnBand] = useState(true)
+  useEffect(() => {
+    if (!enabled) return
+    const update = () => {
+      const rect = band.current?.getBoundingClientRect()
+      setOnBand(Boolean(rect && rect.bottom > 72))
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [band, enabled])
+  return enabled && onBand
 }
 
 function Carousel() {
@@ -122,8 +156,13 @@ export function Home() {
     ledger,
   } = useApp()
   const scrolled = useScrolled()
+  // Saldo de la banda violeta: el de la cuenta BCP (demo) o, si no hay, el de las conexiones
+  const { a } = useZen()
+  const saldoInicio = a ? { saldo: a.saldoActual, fecha: fmtFecha(HOY) } : null
   // En escritorio, el chat «Pregúntale a Zenity» vive a la derecha del Inicio
   const chatPanel = useMediaQuery(CHAT_PANEL_QUERY)
+  const bandRef = useRef<HTMLElement>(null)
+  const onBand = useOnBand(bandRef, useMediaQuery('(max-width: 1023.98px)'))
   const avisos = useAvisos()
   const sire = useSire()
   const taxPeriod = sirePeriod(sire, periodKey)
@@ -133,6 +172,7 @@ export function Home() {
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
   const margen = period.ingresos ? Math.round((neto / period.ingresos) * 100) : null
   const name = businessName(business)
+  const saldoConexiones = connections.reduce((sum, c) => sum + c.balance, 0)
   // Insights del negocio: los del Figma para el negocio base; para el resto, generados de sus datos
   const insights =
     ledger.insights ??
@@ -191,7 +231,7 @@ export function Home() {
           delta={variation(ledger, periodKey, 'egresos')}
         />
       </motion.div>
-      <motion.div variants={fadeUp}>
+      <motion.div variants={fadeUp} className={styles.tileWide}>
         <SummaryTile
           kind="total"
           label="Utilidad"
@@ -218,7 +258,7 @@ export function Home() {
   return (
     <div className={`z-page ${styles.home}`} data-chat={chatPanel || undefined}>
       <div className={styles.column}>
-        <header className={styles.header} data-scrolled={scrolled}>
+        <header className={styles.header} data-scrolled={scrolled} data-on-band={onBand}>
           <IconButton
             icon="menu"
             label="Abrir menú"
@@ -238,21 +278,45 @@ export function Home() {
 
         <div className={styles.layout} data-simple={!FEATURES.inicioClasico || undefined}>
           <motion.div className={styles.primary} variants={staggerContainer(0.06)} initial="hidden" animate="show">
-            <motion.section className={styles.greeting} variants={fadeUp} data-tour="greeting">
-              <div>
-                <span className={styles.live}>
-                  <span className="fx-live-dot" aria-hidden />
-                  Resumen
-                </span>
-                <h1 className={styles.hello}>
-                  {greeting.text}, <GradientText>{profile.firstName}</GradientText>
-                </h1>
+            {/* Banda violeta: saludo, saldo y fecha (estilo «Digital Wallet») */}
+            <motion.section ref={bandRef} className={styles.band} variants={fadeUp} data-tour="saldo">
+              <h1 className={styles.bandHello} data-tour="greeting">
+                {greeting.text}, {profile.firstName}
+              </h1>
+              <span className={styles.bandLabel}>{saldoInicio ? 'Saldo actual · BCP cuenta corriente' : 'Saldo en tus conexiones'}</span>
+              <Money animated value={saldoInicio?.saldo ?? saldoConexiones} className={styles.bandAmount} />
+              <div className={styles.bandPills}>
+                {saldoInicio && <span className={styles.bandPill}>Al {saldoInicio.fecha}</span>}
+                <button type="button" className={styles.bandPill} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
+                  <Icon name={hideBalances ? 'visibility' : 'visibility_off'} size={16} />
+                  {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
+                </button>
               </div>
-              <button type="button" className={styles.eye} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
-                <Icon name={hideBalances ? 'visibility' : 'visibility_off'} size={26} />
-                {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
-              </button>
             </motion.section>
+
+            {/* Acciones rápidas: tarjeta que flota sobre la banda */}
+            <motion.nav className={styles.quick} variants={fadeUp} aria-label="Acciones rápidas">
+              {ACCIONES.map((accion) => (
+                <Link
+                  key={accion.to}
+                  to={accion.to}
+                  className={styles.quickItem}
+                  data-ripple=""
+                  onClick={(event) => {
+                    // En escritorio, «Pregúntale» lleva al chat de la derecha sin salir del Inicio
+                    if (accion.to === '/chat' && chatPanel) {
+                      event.preventDefault()
+                      document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Mensaje para Zenity"]')?.focus()
+                    }
+                  }}
+                >
+                  <span className={`${styles.quickIcon} ${styles[accion.tone]}`}>
+                    {accion.icon === 'spark' ? <Spark size={24} /> : <Icon name={accion.icon} size={24} />}
+                  </span>
+                  {accion.label}
+                </Link>
+              ))}
+            </motion.nav>
 
             <InicioOla1 />
 

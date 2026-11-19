@@ -12,60 +12,63 @@
 .nav {
   pointer-events: auto;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   gap: 4px;
   width: 100%;
-  max-width: 560px;
-  padding: 10px 12px calc(12px + max(var(--z-safe-bottom), 12px));
-  border-radius: var(--z-radius-3xl) var(--z-radius-3xl) 0 0;
-  background: var(--z-surface-glass);
+  padding: 8px 8px calc(8px + max(var(--z-safe-bottom), 10px));
+  background: color-mix(in srgb, var(--z-surface) 94%, transparent);
   -webkit-backdrop-filter: blur(18px) saturate(150%);
   backdrop-filter: blur(18px) saturate(150%);
   box-shadow:
     0 -1px 0 var(--z-divider),
-    0 -12px 32px -20px rgb(0 0 0 / 0.5);
+    0 -16px 32px -24px rgb(16 24 40 / 0.35);
 }
 
 .item {
+  position: relative;
   display: grid;
   justify-items: center;
-  gap: 4px;
+  gap: 2px;
   flex: 1;
-  max-width: 80px;
-  color: var(--z-on-surface-variant);
-  font-size: 0.6875rem;
+  max-width: 84px;
+  padding-top: 6px;
+  color: var(--z-on-surface-low);
+  font-size: 0.75rem;
   line-height: 1rem;
   font-weight: 500;
+  transition: color var(--z-dur-medium) var(--z-ease-standard);
   -webkit-tap-highlight-color: transparent;
 }
 
 .item[aria-current='page'] {
-  color: var(--z-on-surface);
+  color: var(--z-primary);
+  font-weight: 600;
 }
 
 .circle {
   position: relative;
-  isolation: isolate;
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--z-on-surface) 7%, transparent);
-  color: var(--z-on-surface);
-  transition: color var(--z-dur-medium) var(--z-ease-standard);
+  width: 44px;
+  height: 32px;
+  border-radius: var(--z-radius-full);
+  transition: transform var(--z-dur-short) var(--z-ease-standard);
 }
 
-.item[aria-current='page'] .circle {
-  color: var(--z-on-primary-fixed);
+.item:active .circle {
+  transform: scale(0.9);
 }
 
+/* Barra violeta que se desliza sobre la pestaña activa */
 .indicator {
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--z-primary-fixed);
-  z-index: -1;
+  top: -8px;
+  left: 50%;
+  width: 28px;
+  height: 3px;
+  margin-left: -14px;
+  border-radius: 0 0 3px 3px;
+  background: var(--z-primary);
 }
 
 .count {
@@ -82,6 +85,7 @@
   line-height: 20px;
   font-weight: 700;
   text-align: center;
+  box-shadow: 0 0 0 2px var(--z-surface);
 }
 
 @media (min-width: 1024px) {

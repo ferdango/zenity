@@ -58,8 +58,8 @@ export function CashChart({ serie, colchon, alerta }: { serie: CashPoint[]; colc
        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" onPointerMove={onMove} onPointerLeave={() => setHover(null)}>
         <defs>
           <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#4285f4" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#9b72cb" stopOpacity="0.06" />
+            <stop offset="0%" stopColor="var(--z-chart-band, #7c4dff)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--z-chart-band, #7c4dff)" stopOpacity="0.04" />
           </linearGradient>
         </defs>
         {ticks.map((t) => (

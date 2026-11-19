@@ -29,9 +29,10 @@
 }
 
 .sectionTitle {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   color: var(--z-on-surface);
 }
 
@@ -81,34 +82,61 @@ a.row .rowEnd {
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
-  gap: 4px;
-  padding: 20px;
+  gap: 6px;
+  padding: 22px 22px 24px;
   border-radius: var(--z-radius-2xl);
-  background:
-    radial-gradient(120% 120% at 0% 0%, rgb(66 133 244 / 0.18), transparent 60%),
-    radial-gradient(120% 140% at 100% 100%, rgb(155 114 203 / 0.16), transparent 55%),
-    var(--z-surface);
-  border: 1px solid var(--z-divider);
-  box-shadow: var(--z-card-shadow);
+  background: var(--z-hero-bg);
+  color: var(--z-on-hero);
+  box-shadow: var(--z-float-shadow);
+}
+
+/* Barras suaves al fondo, como el gráfico de gasto del mockup */
+.hero::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  bottom: 0;
+  z-index: -1;
+  width: 132px;
+  height: 64%;
+  background: linear-gradient(to top, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.02));
+  -webkit-mask: linear-gradient(90deg, #000 0 14px, transparent 14px 22px) 0 100% / 22px 100% repeat-x;
+  mask: linear-gradient(90deg, #000 0 14px, transparent 14px 22px) 0 100% / 22px 100% repeat-x;
+  clip-path: polygon(0 62%, 17% 48%, 33% 70%, 50% 30%, 67% 52%, 83% 0, 100% 38%, 100% 100%, 0 100%);
+  pointer-events: none;
 }
 
 .heroLabel {
   font-size: 0.875rem;
-  color: var(--z-on-surface-variant);
+  color: var(--z-on-hero-muted);
 }
 
 .heroAmount {
-  font-size: clamp(2rem, 8vw, 2.75rem);
+  font-size: clamp(2.125rem, 9vw, 2.875rem);
   line-height: 1.1;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 
 .heroMeta {
   font-size: 0.875rem;
-  color: var(--z-on-surface-low);
+  color: var(--z-on-hero-muted);
+}
+
+/* Lo que va dentro de la banda violeta usa el blanco de la marca */
+.hero .badge {
+  background: var(--z-hero-chip);
+  color: var(--z-on-hero);
+}
+
+.hero a:not([class]),
+.hero .why {
+  color: var(--z-on-hero);
 }
 
 .row {
@@ -276,10 +304,10 @@ a.row:hover {
 
 .banner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-radius: var(--z-radius-lg);
+  border-radius: var(--z-radius-xl);
   background: var(--z-primary-container);
   color: var(--z-on-primary-container);
   font-size: 0.875rem;
@@ -296,6 +324,47 @@ a.row:hover {
   composes: banner;
   background: var(--z-negative-container);
   color: var(--z-on-negative-container);
+}
+
+/* Ícono del aviso dentro de un círculo blanco (como el aviso promocional del mockup) */
+.bannerIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  box-shadow: 0 2px 8px rgb(16 24 40 / 0.06);
+}
+
+/* Avisos que llevan el ícono suelto: se pinta igual dentro de un círculo */
+.banner > :global(.z-icon):first-child {
+  box-sizing: content-box;
+  flex-shrink: 0;
+  padding: 10px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  box-shadow: 0 2px 8px rgb(16 24 40 / 0.06);
+}
+
+/* Tarjeta de gráfico sobre la banda violeta (como «Spending» del mockup):
+   el gráfico lee sus colores de estas variables, así que basta con cambiarlas aquí */
+.chartHero {
+  background: var(--z-hero-bg);
+  border-color: transparent;
+  box-shadow: var(--z-float-shadow);
+  color: var(--z-on-hero);
+  --z-primary: #ffffff;
+  --z-chart-band: #e6d6ff;
+  --z-divider: rgb(255 255 255 / 0.12);
+  --z-outline: rgb(255 255 255 / 0.45);
+  --z-on-surface: #ffffff;
+  --z-on-surface-variant: rgb(255 255 255 / 0.82);
+  --z-on-surface-low: rgb(255 255 255 / 0.64);
+  --z-surface-highest: #241066;
+  --z-warning: #ffd77a;
+  --z-negative: #ffb3c1;
 }
 
 .bannerTitle {
@@ -873,6 +942,40 @@ textarea.input {
 .toneViolet {
   background: color-mix(in srgb, var(--z-purple) 16%, transparent);
   color: var(--z-purple);
+}
+
+/* Lista plana con separadores (como «Recent transactions» del mockup) */
+.flatList {
+  display: grid;
+}
+
+.flatList > .row,
+.flatList > .todo {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 4px;
+}
+
+.flatList > * + * {
+  border-top: 1px solid var(--z-divider);
+}
+
+@media (hover: hover) {
+  .flatList > a.row:hover,
+  .flatList > a.todo:hover {
+    background: transparent;
+  }
+
+  .flatList > a:hover .rowIcon {
+    transform: scale(1.06);
+  }
+}
+
+.flatList .rowIcon {
+  width: 46px;
+  height: 46px;
+  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
 /* Fila grande de «Para hoy» en Inicio */

@@ -42,11 +42,19 @@
   min-width: 0;
 }
 
+/* Volver: círculo de superficie con sombra suave */
+.back {
+  --ib-bg: var(--z-surface);
+  box-shadow:
+    0 0 0 1px var(--z-divider),
+    0 6px 16px -8px rgb(16 24 40 / 0.25);
+}
+
 .title {
   text-align: center;
   font-size: 1.125rem;
   line-height: 1.5rem;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

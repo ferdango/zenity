@@ -1,51 +1,44 @@
 /* ── Tiles de resumen (Inicio) ──────────────────────────────
- * Cada tile tiene su propio "acento luminoso": relleno con degradado profundo,
- * una luz radial en la esquina, borde degradado de 1px y un halo del mismo color.
+ * Estilo «Categories spend»: tarjeta gris clara, etiqueta arriba, círculo de color sólido
+ * a la derecha y el monto grande en el color de la categoría. La utilidad va en violeta.
  */
 .summary {
+  --tile-chip: var(--z-chip-violet);
+  --tile-value: var(--z-on-surface);
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label icon'
+    'value value'
+    'foot foot';
+  align-items: start;
+  gap: 2px 10px;
   width: 100%;
-  padding: 12px 8px 12px 12px;
-  border: 1px solid transparent;
+  height: 100%;
+  min-height: 148px;
+  padding: 16px;
   border-radius: var(--z-radius-xl);
-  background:
-    var(--tile-fill) padding-box,
-    var(--tile-border) border-box;
-  box-shadow: var(--tile-glow);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
   text-align: left;
-  color: var(--tile-text, #fff);
+  color: var(--z-on-surface);
   transition:
     transform var(--z-dur-medium) var(--z-ease-emphasized),
     box-shadow var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
-/* Brillo que cruza el tile al pasar el cursor */
-.summary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.12) 50%, transparent 65%);
-  transform: translateX(-120%);
-  transition: transform 900ms var(--z-ease-emphasized);
-  pointer-events: none;
-}
-
 @media (hover: hover) {
   .summary:hover {
     transform: translateY(-2px);
-    box-shadow: var(--tile-glow-hover);
+    box-shadow: var(--z-float-shadow);
   }
-  .summary:hover::after {
-    transform: translateX(120%);
-  }
-  .summary:hover .summaryArrow {
-    transform: translateX(3px);
-    color: var(--tile-text, #fff);
+
+  .summary:hover .summaryIcon {
+    transform: rotate(-8deg) scale(1.06);
   }
 }
 
@@ -54,132 +47,88 @@
 }
 
 .income {
-  --tile-accent: #6ee7b7;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(52 211 153 / 0.34) 0%, transparent 55%),
-    linear-gradient(135deg, #0e3d30 0%, #0a2b26 55%, #08201f 100%);
-  --tile-border: linear-gradient(135deg, rgb(110 231 183 / 0.65), rgb(110 231 183 / 0.1) 45%, rgb(110 231 183 / 0.03));
-  --tile-glow: 0 18px 40px -24px rgb(16 185 129 / 0.75);
-  --tile-glow-hover: 0 22px 48px -20px rgb(16 185 129 / 0.85);
+  --tile-chip: var(--z-chip-green);
+  --tile-value: var(--z-positive);
 }
 
 .expense {
-  --tile-accent: #fda4af;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(251 113 133 / 0.34) 0%, transparent 55%),
-    linear-gradient(135deg, #4d1528 0%, #34101f 55%, #250b19 100%);
-  --tile-border: linear-gradient(135deg, rgb(253 164 175 / 0.65), rgb(253 164 175 / 0.1) 45%, rgb(253 164 175 / 0.03));
-  --tile-glow: 0 18px 40px -24px rgb(244 63 94 / 0.75);
-  --tile-glow-hover: 0 22px 48px -20px rgb(244 63 94 / 0.85);
+  --tile-chip: var(--z-chip-orange);
+  --tile-value: var(--z-negative);
 }
 
-/* Impuestos SUNAT: ámbar, para que el vencimiento llame la atención sin alarmar */
 .tax {
-  --tile-accent: #fcd34d;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(251 191 36 / 0.3) 0%, transparent 55%),
-    linear-gradient(135deg, #47330c 0%, #33240b 55%, #241a0a 100%);
-  --tile-border: linear-gradient(135deg, rgb(252 211 77 / 0.6), rgb(252 211 77 / 0.1) 45%, rgb(252 211 77 / 0.03));
-  --tile-glow: 0 18px 40px -24px rgb(245 158 11 / 0.7);
-  --tile-glow-hover: 0 22px 48px -20px rgb(245 158 11 / 0.8);
+  --tile-chip: var(--z-chip-amber);
 }
 
-/* El total es el protagonista: degradado de IA (azul → violeta → rosa) */
+/* La utilidad es la protagonista: ocupa el ancho y va sobre la banda violeta */
 .total {
-  --tile-accent: #c7d2fe;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(129 140 248 / 0.4) 0%, transparent 55%),
-    radial-gradient(90% 120% at 100% 100%, rgb(217 101 112 / 0.22) 0%, transparent 60%),
-    linear-gradient(135deg, #1c2a6c 0%, #251f5c 50%, #36194f 100%);
-  --tile-border: linear-gradient(120deg, #4285f4, #9b72cb 50%, #d96570);
-  --tile-glow: 0 18px 44px -22px rgb(99 102 241 / 0.8);
-  --tile-glow-hover: 0 22px 52px -18px rgb(99 102 241 / 0.9);
-}
-
-.summaryIcon {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--tile-accent) 16%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tile-accent) 28%, transparent);
-  color: var(--tile-accent);
-}
-
-.summaryText {
-  flex: 1;
-  display: grid;
-  min-width: 0;
-}
-
-/* "Ingresos · Entró en marzo" en una sola línea */
-.summaryHead {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
-  white-space: nowrap;
+  grid-column: 1 / -1;
+  min-height: 0;
+  background: var(--z-hero-bg);
+  border-color: transparent;
+  box-shadow: var(--z-float-shadow);
+  color: var(--z-on-hero);
+  --tile-chip: rgb(255 255 255 / 0.16);
+  --tile-value: var(--z-on-hero);
+  --tile-muted: var(--z-on-hero-muted);
+  --delta-good-bg: rgb(255 255 255 / 0.16);
+  --delta-good: #b7f7cf;
+  --delta-bad-bg: rgb(255 255 255 / 0.16);
+  --delta-bad: #ffc2c2;
 }
 
 .summaryLabel {
-  flex-shrink: 0;
+  grid-area: label;
+  padding-top: 2px;
   font-size: 0.9375rem;
   line-height: 1.25rem;
-  color: color-mix(in srgb, var(--tile-accent) 55%, var(--tile-text, #fff));
+  font-weight: 500;
+  text-wrap: balance;
 }
 
-.summaryCaption {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-  color: var(--tile-muted, rgb(255 255 255 / 0.62));
-}
-
-.summaryCaption::before {
-  content: '·';
-  margin-right: 6px;
-}
-
-.summaryLine {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 8px;
+.summaryIcon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--z-radius-full);
+  background: var(--tile-chip);
+  color: #fff;
+  box-shadow: 0 10px 18px -10px color-mix(in srgb, var(--tile-chip) 85%, transparent);
+  transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
 .summaryValue {
-  font-size: 1.4375rem;
+  grid-area: value;
+  align-self: end;
+  margin-top: 18px;
+  font-size: clamp(1.0625rem, 5vw, 1.5rem);
   line-height: 2rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--tile-text, #fff);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--tile-value);
 }
 
-.summaryArrow {
-  flex-shrink: 0;
-  color: var(--tile-muted, rgb(255 255 255 / 0.6));
-  transition:
-    transform var(--z-dur-medium) var(--z-ease-emphasized),
-    color var(--z-dur-medium) var(--z-ease-standard);
+.total .summaryValue {
+  margin-top: 6px;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
-/* Celulares angostos (360 px): las píldoras siguen junto al monto */
-@media (max-width: 370px) {
-  .summary {
-    gap: 8px;
-    padding-left: 10px;
-  }
-  .summaryIcon {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-  }
-  .summaryValue {
-    font-size: 1.375rem;
-  }
+.summaryFoot {
+  grid-area: foot;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.summaryCaption {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--tile-muted, var(--z-on-surface-low));
 }
 
 /* Variación vs. mes anterior: píldora verde si es buena, roja si es mala */
@@ -189,8 +138,8 @@
   gap: 2px;
   padding: 0 8px 0 5px;
   border-radius: var(--z-radius-full);
-  background: var(--delta-good-bg, rgb(134 239 172 / 0.14));
-  color: var(--delta-good, #86efac);
+  background: var(--delta-good-bg, var(--z-positive-container));
+  color: var(--delta-good, var(--z-positive));
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25rem;
@@ -201,8 +150,8 @@
 }
 
 .delta[data-negative='true'] {
-  background: var(--delta-bad-bg, rgb(252 165 165 / 0.14));
-  color: var(--delta-bad, #fca5a5);
+  background: var(--delta-bad-bg, var(--z-negative-container));
+  color: var(--delta-bad, var(--z-negative));
 }
 
 /* ── Tarjetas de métricas (Movimientos) ───────────────────── */
@@ -251,54 +200,4 @@
 
 .metricIcon {
   margin-bottom: 6px;
-}
-
-/* ── Tema claro: los tiles pasan a tonos pastel con texto oscuro ── */
-:global([data-theme='light']) .summary {
-  --tile-text: #172033;
-  --tile-muted: rgb(23 32 51 / 0.6);
-  --delta-good-bg: rgb(13 143 80 / 0.12);
-  --delta-good: #0b6b3c;
-  --delta-bad-bg: rgb(210 59 59 / 0.1);
-  --delta-bad: #a32626;
-}
-
-:global([data-theme='light']) .income {
-  --tile-accent: #0d8f50;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(52 211 153 / 0.22) 0%, transparent 55%),
-    linear-gradient(135deg, #f2fbf6 0%, #e2f5ea 100%);
-  --tile-border: linear-gradient(135deg, rgb(13 143 80 / 0.45), rgb(13 143 80 / 0.14) 50%, rgb(13 143 80 / 0.06));
-  --tile-glow: 0 10px 26px -18px rgb(13 143 80 / 0.5);
-  --tile-glow-hover: 0 14px 32px -16px rgb(13 143 80 / 0.55);
-}
-
-:global([data-theme='light']) .expense {
-  --tile-accent: #c2334d;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(251 113 133 / 0.2) 0%, transparent 55%),
-    linear-gradient(135deg, #fff4f6 0%, #fde6ea 100%);
-  --tile-border: linear-gradient(135deg, rgb(194 51 77 / 0.42), rgb(194 51 77 / 0.12) 50%, rgb(194 51 77 / 0.05));
-  --tile-glow: 0 10px 26px -18px rgb(194 51 77 / 0.45);
-  --tile-glow-hover: 0 14px 32px -16px rgb(194 51 77 / 0.5);
-}
-
-:global([data-theme='light']) .tax {
-  --tile-accent: #a86200;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(251 191 36 / 0.22) 0%, transparent 55%),
-    linear-gradient(135deg, #fffaf0 0%, #fdf0d8 100%);
-  --tile-border: linear-gradient(135deg, rgb(168 98 0 / 0.4), rgb(168 98 0 / 0.12) 50%, rgb(168 98 0 / 0.05));
-  --tile-glow: 0 10px 26px -18px rgb(168 98 0 / 0.4);
-  --tile-glow-hover: 0 14px 32px -16px rgb(168 98 0 / 0.45);
-}
-
-:global([data-theme='light']) .total {
-  --tile-accent: #4f46e5;
-  --tile-fill:
-    radial-gradient(120% 140% at 0% 0%, rgb(129 140 248 / 0.22) 0%, transparent 55%),
-    radial-gradient(90% 120% at 100% 100%, rgb(217 101 112 / 0.12) 0%, transparent 60%),
-    linear-gradient(135deg, #f4f5ff 0%, #ece8fd 100%);
-  --tile-glow: 0 10px 28px -18px rgb(79 70 229 / 0.45);
-  --tile-glow-hover: 0 14px 34px -16px rgb(79 70 229 / 0.5);
 }

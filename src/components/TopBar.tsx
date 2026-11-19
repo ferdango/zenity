@@ -30,7 +30,7 @@ export function TopBar({ title, subtitle, backTo = '/inicio', onBack, hideBack, 
   return (
     <header className={cn(styles.topBar, className)} data-scrolled={scrolled}>
       <div className={styles.start}>
-        {start ?? (!hideBack && <IconButton icon="arrow_back" label="Volver" variant="tonal" onClick={onBack ?? back} />)}
+        {start ?? (!hideBack && <IconButton icon="arrow_back" label="Volver" variant="tonal" className={styles.back} onClick={onBack ?? back} />)}
       </div>
       <div>
         {title && <h1 className={styles.title}>{title}</h1>}
