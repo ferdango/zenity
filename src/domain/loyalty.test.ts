@@ -49,6 +49,21 @@ describe('recompensas', () => {
     assert.equal(progreso({ ...vacio, bonus }).xp, XP_PREVIO + bonus)
   })
 
+  test('los resultados del negocio se logran con números reales, no con uso de la app', () => {
+    const sinResultados = logros(datos, [])
+    assert.ok(sinResultados.filter((l) => l.tipo === 'resultado').every((l) => !l.logrado))
+    const conResultados = logros({ ...datos, cobrosRecibidos: 1, conciliadoPct: 92, sueldoDefinido: true, cajaConColchon: true }, [])
+    assert.ok(conResultados.filter((l) => l.tipo === 'resultado').every((l) => l.logrado))
+    const mes = logros({ ...datos, conciliadoPct: 62 }, []).find((l) => l.id === 'mes-en-orden')!
+    assert.equal(mes.actual, 62)
+    assert.equal(mes.formato, 'pct')
+  })
+
+  test('hay logros de resultados y de hábitos', () => {
+    assert.ok(LOGROS.some((l) => l.tipo === 'resultado'))
+    assert.ok(LOGROS.some((l) => l.tipo === 'habito'))
+  })
+
   test('los ids de los logros no se repiten', () => {
     assert.equal(new Set(LOGROS.map((l) => l.id)).size, LOGROS.length)
   })

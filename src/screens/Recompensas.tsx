@@ -3,9 +3,9 @@ import { Link } from 'react-router'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
-import { ProgressBar } from '../components/zen'
+import { ProgressBar, SectionHead } from '../components/zen'
 import { businessName } from '../data/businesses'
-import type { Logro } from '../domain/loyalty'
+import type { Logro, TipoLogro } from '../domain/loyalty'
 import { celebrateFrom } from '../lib/celebrate'
 import { haptic } from '../lib/haptics'
 import { fadeUp, staggerContainer } from '../lib/motion'
@@ -17,7 +17,15 @@ import styles from './Loyalty.module.css'
 /** Primero lo que se puede reclamar, luego lo que está en camino y al final lo ya reclamado. */
 const orden = (l: Logro) => (l.logrado && !l.reclamado ? 0 : !l.logrado ? 1 : 2)
 
-/** «Recompensas»: logros que se desbloquean con tareas reales y dan XP extra al reclamarlos. */
+const GRUPOS: { tipo: TipoLogro; titulo: string; pista: string }[] = [
+  { tipo: 'resultado', titulo: 'Resultados en tu negocio', pista: 'Lo que mejora en tus números cuando aplicas lo que aprendes.' },
+  { tipo: 'habito', titulo: 'Hábitos', pista: 'La constancia que hace que lleguen los resultados.' },
+]
+
+/**
+ * «Recompensas»: logros que dan XP extra al reclamarlos. Primero los resultados reales del negocio
+ * (cobrar, tener colchón, pagarse un sueldo, conciliar el mes) y luego los hábitos que los hacen posibles.
+ */
 export function Recompensas() {
   const { business } = useApp()
   const p = useProgreso()
@@ -37,7 +45,7 @@ export function Recompensas() {
           <span className={styles.saldoMeta}>
             {p.porReclamar > 0
               ? `Tienes ${p.porReclamar} recompensa${p.porReclamar === 1 ? '' : 's'} por reclamar`
-              : 'Sigue haciendo tareas para desbloquear más'}
+              : 'Mejora tus números y desbloquea más'}
           </span>
           <Link to="/tienda" className={styles.saldoLink}>
             Gasta tus {p.puntos} XP en la tienda
@@ -45,11 +53,20 @@ export function Recompensas() {
           </Link>
         </motion.section>
 
-        <motion.div className={styles.logros} variants={fadeUp}>
-          {lista.map((l) => (
-            <LogroCard key={l.id} logro={l} />
-          ))}
-        </motion.div>
+        {GRUPOS.map((g) => {
+          const delGrupo = lista.filter((l) => l.tipo === g.tipo)
+          return (
+            <motion.section key={g.tipo} className={styles.section} variants={fadeUp}>
+              <SectionHead title={g.titulo} hint={`${delGrupo.filter((l) => l.logrado).length} de ${delGrupo.length}`} />
+              <p className={styles.grupoPista}>{g.pista}</p>
+              <div className={styles.logros}>
+                {delGrupo.map((l) => (
+                  <LogroCard key={l.id} logro={l} />
+                ))}
+              </div>
+            </motion.section>
+          )
+        })}
       </motion.div>
     </div>
   )
@@ -73,9 +90,7 @@ function LogroCard({ logro: l }: { logro: Logro }) {
         {!l.logrado && (
           <span className={styles.logroAvance}>
             <ProgressBar value={l.actual / l.meta} label={`Avance de ${l.titulo}`} />
-            <span>
-              {l.actual}/{l.meta}
-            </span>
+            <span>{l.formato === 'pct' ? `${l.actual}% de ${l.meta}%` : `${l.actual}/${l.meta}`}</span>
           </span>
         )}
       </span>

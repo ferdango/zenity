@@ -260,6 +260,67 @@
   opacity: 0.05;
 }
 
+/* «Tu negocio: 62% conciliado · meta 90%»: el número real que mueve la unidad */
+.dato {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: var(--z-radius-md);
+  background: rgb(255 255 255 / 0.16);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+.datoTexto {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.datoTexto > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.datoTexto strong {
+  font-weight: 700;
+}
+
+.datoBarra {
+  display: block;
+  height: 6px;
+  border-radius: var(--z-radius-full);
+  background: rgb(255 255 255 / 0.24);
+  overflow: hidden;
+}
+
+.datoBarra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd66b, #ffb14a);
+  transition: width var(--z-dur-long) var(--z-ease-emphasized);
+}
+
+.dato[data-logrado] .datoBarra > span {
+  background: #fff;
+}
+
+/* Unidad bloqueada: sobre gris, en tonos de superficie */
+.unidad[data-estado='bloqueada'] .dato {
+  background: var(--z-surface-highest);
+  color: var(--z-on-surface-variant);
+}
+
+.unidad[data-estado='bloqueada'] .datoBarra {
+  background: var(--z-surface);
+}
+
+.unidad[data-estado='bloqueada'] .datoBarra > span {
+  background: var(--z-outline);
+}
+
 .unidadCandado {
   display: inline-flex;
   align-items: center;
@@ -293,13 +354,13 @@
   opacity: 0.85;
 }
 
-.unidadTexto strong {
+.unidadTexto > strong {
   font-size: 1.0625rem;
   line-height: 1.5rem;
   font-weight: 600;
 }
 
-.unidadTexto > span:last-child {
+.unidadMeta {
   font-size: 0.8125rem;
   line-height: 1.125rem;
   opacity: 0.85;

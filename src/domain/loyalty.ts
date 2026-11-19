@@ -78,28 +78,51 @@ export interface DatosLogros {
   recordatorios: number
   lecciones: number
   unidadesCompletas: string[]
+  /* Resultados en el negocio activo (opcionales: sin datos, cuentan como 0) */
+  /** Pagos de clientes que te debían, recibidos desde Zenity */
+  cobrosRecibidos?: number
+  /** Conciliado del mes, de 0 a 100 */
+  conciliadoPct?: number
+  sueldoDefinido?: boolean
+  /** La caja de los próximos 60 días no baja del colchón */
+  cajaConColchon?: boolean
 }
+
+/**
+ * «resultado»: algo mejoró en los números del negocio (lo que más importa al dueño).
+ * «habito»: constancia usando Zenity (racha, meta, lecciones).
+ */
+export type TipoLogro = 'resultado' | 'habito'
 
 export interface DefLogro {
   id: string
+  tipo: TipoLogro
   titulo: string
   detalle: string
   icon: string
   /** XP que da al reclamarlo */
   xp: number
   meta: number
+  /** Cómo mostrar el avance: «3/6» (por defecto) o «62% de 90%» */
+  formato?: 'pct'
   actual: (d: DatosLogros) => number
 }
 
 export const LOGROS: DefLogro[] = [
-  { id: 'primer-paso', titulo: 'Primer paso del día', detalle: 'Haz tu primera tarea de hoy', icon: 'flag', xp: 10, meta: 1, actual: (d) => (d.xpHoy > 0 ? 1 : 0) },
-  { id: 'meta-dia', titulo: 'Meta cumplida', detalle: 'Llega a tu meta de XP del día', icon: 'bolt', xp: 25, meta: 1, actual: (d) => (d.metaCumplida ? 1 : 0) },
-  { id: 'conciliador', titulo: 'Conciliador', detalle: 'Revisa 6 movimientos', icon: 'fact_check', xp: 30, meta: 6, actual: (d) => d.revisados },
-  { id: 'estudiante', titulo: 'Buen estudiante', detalle: 'Aprueba 3 lecciones', icon: 'school', xp: 30, meta: 3, actual: (d) => d.lecciones },
-  { id: 'cobrador', titulo: 'Cobrador puntual', detalle: 'Recuérdale el pago a 2 clientes', icon: 'payments', xp: 30, meta: 2, actual: (d) => d.recordatorios },
-  { id: 'plata-ordenada', titulo: 'Plata ordenada', detalle: 'Completa la unidad «Ordena tu plata»', icon: 'account_balance_wallet', xp: 50, meta: 1, actual: (d) => (d.unidadesCompletas.includes('ordena') ? 1 : 0) },
-  { id: 'racha-7', titulo: 'Una semana seguida', detalle: 'Haz tareas 7 días seguidos', icon: 'local_fire_department', xp: 50, meta: 7, actual: (d) => d.racha },
-  { id: 'nivel-3', titulo: 'Previsor', detalle: 'Llega al nivel 3', icon: 'military_tech', xp: 40, meta: 3, actual: (d) => d.nivel },
+  // Resultados en el negocio: lo que el dueño gana de verdad al aprender
+  { id: 'plata-vuelve', tipo: 'resultado', titulo: 'La plata vuelve', detalle: 'Recibe el pago de un cliente que te debía', icon: 'savings', xp: 40, meta: 1, actual: (d) => d.cobrosRecibidos ?? 0 },
+  { id: 'caja-colchon', tipo: 'resultado', titulo: 'Caja con colchón', detalle: 'Que tu caja de los próximos 60 días no baje de tu colchón', icon: 'shield', xp: 50, meta: 1, actual: (d) => (d.cajaConColchon ? 1 : 0) },
+  { id: 'sueldo-dueno', tipo: 'resultado', titulo: 'Te pagas un sueldo', detalle: 'Define un sueldo fijo de dueño: tu casa y tu negocio, separados', icon: 'person', xp: 30, meta: 1, actual: (d) => (d.sueldoDefinido ? 1 : 0) },
+  { id: 'mes-en-orden', tipo: 'resultado', titulo: 'Mes en orden', detalle: 'Llega a 90% conciliado este mes', icon: 'task_alt', xp: 50, meta: 90, formato: 'pct', actual: (d) => d.conciliadoPct ?? 0 },
+  // Hábitos: la constancia que hace que los resultados lleguen
+  { id: 'primer-paso', tipo: 'habito', titulo: 'Primer paso del día', detalle: 'Haz tu primera tarea de hoy', icon: 'flag', xp: 10, meta: 1, actual: (d) => (d.xpHoy > 0 ? 1 : 0) },
+  { id: 'meta-dia', tipo: 'habito', titulo: 'Meta cumplida', detalle: 'Llega a tu meta de XP del día', icon: 'bolt', xp: 25, meta: 1, actual: (d) => (d.metaCumplida ? 1 : 0) },
+  { id: 'conciliador', tipo: 'habito', titulo: 'Conciliador', detalle: 'Revisa 6 movimientos', icon: 'fact_check', xp: 30, meta: 6, actual: (d) => d.revisados },
+  { id: 'estudiante', tipo: 'habito', titulo: 'Buen estudiante', detalle: 'Aprueba 3 lecciones', icon: 'school', xp: 30, meta: 3, actual: (d) => d.lecciones },
+  { id: 'cobrador', tipo: 'habito', titulo: 'Cobrador puntual', detalle: 'Recuérdale el pago a 2 clientes', icon: 'payments', xp: 30, meta: 2, actual: (d) => d.recordatorios },
+  { id: 'plata-ordenada', tipo: 'habito', titulo: 'Plata ordenada', detalle: 'Completa la unidad «Ordena tu plata»', icon: 'account_balance_wallet', xp: 50, meta: 1, actual: (d) => (d.unidadesCompletas.includes('ordena') ? 1 : 0) },
+  { id: 'racha-7', tipo: 'habito', titulo: 'Una semana seguida', detalle: 'Haz tareas 7 días seguidos', icon: 'local_fire_department', xp: 50, meta: 7, actual: (d) => d.racha },
+  { id: 'nivel-3', tipo: 'habito', titulo: 'Previsor', detalle: 'Llega al nivel 3', icon: 'military_tech', xp: 40, meta: 3, actual: (d) => d.nivel },
 ]
 
 /** XP extra de los logros ya reclamados. */

@@ -8,8 +8,9 @@ import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { NoDemoData, ProgressBar } from '../components/zen'
 import { LESSONS } from '../config/lessons'
-import { QUIZ } from '../config/quiz'
+import { preguntaDe } from '../config/quiz'
 import { businessName } from '../data/businesses'
+import type { Indicador, UnidadId } from '../domain/indicadores'
 import type { Paso, Unidad } from '../domain/progreso'
 import { celebrateFrom } from '../lib/celebrate'
 import { haptic } from '../lib/haptics'
@@ -17,7 +18,7 @@ import { ease, fadeUp, spring, staggerContainer } from '../lib/motion'
 import { SPARK_MASK } from '../lib/sparkPath'
 import { useApp } from '../state/context'
 import { registrarLeccion } from '../state/demoStore'
-import { useLecciones, useProgreso } from '../state/useZen'
+import { useIndicadores, useLecciones, useProgreso } from '../state/useZen'
 import styles from './Progreso.module.css'
 
 /** Posición en zigzag de cada paso (como el camino de Duolingo). */
@@ -54,6 +55,7 @@ function useAbrirPaso(onLeccion: (p: Paso) => void) {
 export function Progreso() {
   const { business } = useApp()
   const p = useProgreso()
+  const ind = useIndicadores()
   const [leccion, setLeccion] = useState<Paso | null>(null)
   const abrirPaso = useAbrirPaso(setLeccion)
   const siguiente = p.siguiente?.paso
@@ -116,7 +118,17 @@ export function Progreso() {
         {!p.unidades.length ? (
           <NoDemoData feature="El camino de aprendizaje" />
         ) : (
-          p.unidades.map((u, i) => <UnidadCamino key={u.id} unidad={u} numero={i + 1} anterior={p.unidades[i - 1]} siguienteId={siguiente?.id} onAbrir={abrirPaso} />)
+          p.unidades.map((u, i) => (
+            <UnidadCamino
+              key={u.id}
+              unidad={u}
+              numero={i + 1}
+              anterior={p.unidades[i - 1]}
+              siguienteId={siguiente?.id}
+              indicador={ind?.[u.id as UnidadId]}
+              onAbrir={abrirPaso}
+            />
+          ))
         )}
 
         {p.unidades.length > 0 && !siguiente && (
@@ -156,12 +168,15 @@ function UnidadCamino({
   numero,
   anterior,
   siguienteId,
+  indicador,
   onAbrir,
 }: {
   unidad: Unidad
   numero: number
   anterior?: Unidad
   siguienteId?: string
+  /** El número real del negocio que mueve esta unidad */
+  indicador?: Indicador
   onAbrir: (p: Paso) => void
 }) {
   const { toast } = useApp()
@@ -188,7 +203,8 @@ function UnidadCamino({
             Unidad {numero} · {u.estado === 'completa' ? 'Completa' : `${u.hechos} de ${u.pasos.length}`}
           </span>
           <strong>{u.titulo}</strong>
-          <span>{u.meta}</span>
+          <span className={styles.unidadMeta}>{u.meta}</span>
+          {indicador && <DatoNegocio indicador={indicador} />}
           {bloqueada && anterior && (
             <span className={styles.unidadCandado}>
               <Icon name="lock" size={14} />
@@ -254,6 +270,25 @@ function UnidadCamino({
   )
 }
 
+/** «Tu negocio: 62% conciliado · meta 90%» con su barra: lo que esta unidad mejora en tus números. */
+function DatoNegocio({ indicador: i }: { indicador: Indicador }) {
+  return (
+    <span className={styles.dato} data-logrado={i.logrado || undefined}>
+      <span className={styles.datoTexto}>
+        <Icon name={i.logrado ? 'check_circle' : 'insights'} size={16} fill={i.logrado} />
+        <span>
+          Tu negocio: <strong>{i.texto}</strong> · {i.meta}
+        </span>
+      </span>
+      {i.progreso !== null && (
+        <span className={styles.datoBarra} role="progressbar" aria-label="Avance hacia la meta" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(i.progreso * 100)}>
+          <span style={{ width: `${Math.round(i.progreso * 100)}%` }} />
+        </span>
+      )}
+    </span>
+  )
+}
+
 /**
  * Centro de cada nodo dentro de la lista, para dibujar el sendero punteado entre pasos. Se mide con
  * offsetTop (no le afectan las transformaciones de las transiciones) y se recalcula al cambiar el tamaño.
@@ -291,8 +326,10 @@ function HojaLeccion({ paso, onClose }: { paso: Paso | null; onClose: () => void
   const { business } = useApp()
   const lecciones = useLecciones()
   const [elegida, setElegida] = useState<number | null>(null)
+  const navigate = useNavigate()
   const id = paso?.lessonId
-  const quiz = id ? QUIZ[id] : undefined
+  // La pregunta usa los números del negocio (responder la lección no cambia esos números)
+  const quiz = id ? preguntaDe(id, lecciones?.context ?? null) : undefined
   const contenido = id && lecciones ? LESSONS[id](lecciones.context) : null
   const acerto = elegida !== null && quiz ? elegida === quiz.correcta : null
 
@@ -367,9 +404,26 @@ function HojaLeccion({ paso, onClose }: { paso: Paso | null; onClose: () => void
                     </strong>
                     <span>{quiz.explicacion}</span>
                     {acerto ? (
-                      <Button size="lg" fullWidth onClick={cerrar}>
-                        Continuar
-                      </Button>
+                      <>
+                        <Button size="lg" fullWidth onClick={cerrar}>
+                          Continuar
+                        </Button>
+                        {/* Del aprendizaje a la acción: aplicarlo en sus propios números */}
+                        {contenido?.accion && (
+                          <Button
+                            size="lg"
+                            variant="text"
+                            fullWidth
+                            trailingIcon="arrow_forward"
+                            onClick={() => {
+                              cerrar()
+                              navigate(contenido.accion.to)
+                            }}
+                          >
+                            Aplícalo: {contenido.accion.label.charAt(0).toLowerCase() + contenido.accion.label.slice(1)}
+                          </Button>
+                        )}
+                      </>
                     ) : (
                       <Button size="lg" variant="tonal" fullWidth onClick={() => setElegida(null)}>
                         Intentar de nuevo

@@ -3,11 +3,14 @@ import { useMemo } from 'react'
 import { HOY } from '../config/demo'
 import { proyectarCaja } from '../domain/cashflow'
 import { estadoCierres, eventoEfectivo } from '../domain/cierres'
-import { porCobrar } from '../domain/collections'
-import type { Analysis } from '../domain/engine'
+import { porCobrar, totalCobranzas } from '../domain/collections'
+import { type Analysis, resumenMes } from '../domain/engine'
+import { indicadores } from '../domain/indicadores'
 import { evaluarLecciones } from '../domain/lessons'
 import { logros, puntosDisponibles, xpDeRecompensas } from '../domain/loyalty'
+import { personalesDelMes } from '../domain/personal'
 import { camino, progreso, siguientePaso } from '../domain/progreso'
+import { resumenSunat } from '../domain/sunat'
 import { avisoLimite, datosSimulador } from '../domain/taxSimulator'
 import { useApp } from './context'
 import { analysisFor, type DemoState, useDemoState } from './demoStore'
@@ -58,6 +61,7 @@ export function useSimulador() {
 export function useProgreso() {
   const { a, demo } = useZen()
   const { connections } = useApp()
+  const caja = useCaja(60)
   return useMemo(() => {
     const entrada = {
       corrections: demo.corrections,
@@ -86,6 +90,11 @@ export function useProgreso() {
         recordatorios: Object.keys(demo.recordatorios).length,
         lecciones: leccionesAprobadas,
         unidadesCompletas: unidades.filter((u) => u.estado === 'completa').map((u) => u.id),
+        // Resultados reales del negocio activo
+        cobrosRecibidos: a ? demo.extraMovements.filter((m) => m.simulado && m.monto > 0 && m.businessId === a.business.id).length : 0,
+        conciliadoPct: a ? Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100) : 0,
+        sueldoDefinido: !!a?.business.sueldoDueno,
+        cajaConColchon: !!caja && !caja.alerta,
       },
       demo.recompensas,
     )
@@ -99,7 +108,31 @@ export function useProgreso() {
       logros: listaLogros,
       porReclamar: listaLogros.filter((l) => l.logrado && !l.reclamado).length,
     }
-  }, [a, demo, connections.length])
+  }, [a, demo, connections.length, caja])
+}
+
+/**
+ * El número real del negocio que mueve cada unidad del camino («62% conciliado», «S/ 4,130 vencido»…):
+ * así el dueño ve qué gana en su negocio con lo que aprende.
+ */
+export function useIndicadores() {
+  const { a } = useZen()
+  const cobranzas = useCobranzas()
+  const caja = useCaja(60)
+  return useMemo(() => {
+    if (!a) return null
+    const mes = HOY.slice(0, 7)
+    const sunat = resumenSunat(a, HOY)
+    return indicadores({
+      conciliado: resumenMes(a, mes).conciliado,
+      gastoPersonalMes: personalesDelMes(a, mes).reduce((s, m) => s + Math.abs(m.monto), 0),
+      sueldoDueno: a.business.sueldoDueno ?? null,
+      porCobrar: totalCobranzas(cobranzas),
+      vencido: totalCobranzas(cobranzas.filter((c) => c.diasVencidos > 0)),
+      caja: caja ? { minimo: caja.minimo.base, colchon: caja.colchon } : null,
+      sunat: sunat.total > 0 ? { total: sunat.total, vence: sunat.vence, dias: sunat.dias } : null,
+    })
+  }, [a, cobranzas, caja])
 }
 
 export function useLecciones() {
