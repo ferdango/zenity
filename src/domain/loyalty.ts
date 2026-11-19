@@ -86,6 +86,8 @@ export interface DatosLogros {
   sueldoDefinido?: boolean
   /** La caja de los próximos 60 días no baja del colchón */
   cajaConColchon?: boolean
+  /** Decisiones de la semana tomadas */
+  decisiones?: number
 }
 
 /**
@@ -118,6 +120,7 @@ export const LOGROS: DefLogro[] = [
   { id: 'primer-paso', tipo: 'habito', titulo: 'Primer paso del día', detalle: 'Haz tu primera tarea de hoy', icon: 'flag', xp: 10, meta: 1, actual: (d) => (d.xpHoy > 0 ? 1 : 0) },
   { id: 'meta-dia', tipo: 'habito', titulo: 'Meta cumplida', detalle: 'Llega a tu meta de XP del día', icon: 'bolt', xp: 25, meta: 1, actual: (d) => (d.metaCumplida ? 1 : 0) },
   { id: 'conciliador', tipo: 'habito', titulo: 'Conciliador', detalle: 'Revisa 6 movimientos', icon: 'fact_check', xp: 30, meta: 6, actual: (d) => d.revisados },
+  { id: 'decide', tipo: 'habito', titulo: 'Decides con tus números', detalle: 'Toma tu decisión de la semana en el Inicio', icon: 'lightbulb', xp: 20, meta: 1, actual: (d) => d.decisiones ?? 0 },
   { id: 'estudiante', tipo: 'habito', titulo: 'Buen estudiante', detalle: 'Aprueba 3 lecciones', icon: 'school', xp: 30, meta: 3, actual: (d) => d.lecciones },
   { id: 'cobrador', tipo: 'habito', titulo: 'Cobrador puntual', detalle: 'Recuérdale el pago a 2 clientes', icon: 'payments', xp: 30, meta: 2, actual: (d) => d.recordatorios },
   { id: 'plata-ordenada', tipo: 'habito', titulo: 'Plata ordenada', detalle: 'Completa la unidad «Ordena tu plata»', icon: 'account_balance_wallet', xp: 50, meta: 1, actual: (d) => (d.unidadesCompletas.includes('ordena') ? 1 : 0) },

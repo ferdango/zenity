@@ -1422,3 +1422,173 @@ textarea.input {
 .chartNota strong {
   color: var(--z-on-surface);
 }
+
+/* ── Decisión de la semana (Inicio) ───────────────────────────── */
+.decision {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 18px 16px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+  overflow: hidden;
+}
+
+/* Franja con el degradado de la marca: es lo más importante de la semana */
+.decision::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--z-gradient-spark);
+}
+
+.decisionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.decisionKicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--z-primary);
+}
+
+.decisionPregunta {
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+.decisionContexto {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-low);
+}
+
+.decisionOpciones {
+  display: grid;
+  gap: 8px;
+}
+
+.decisionOpcion {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-low);
+  box-shadow: inset 0 0 0 1px var(--z-outline-variant);
+  text-align: left;
+  color: var(--z-on-surface);
+}
+
+.decisionOpcionTexto {
+  display: grid;
+  gap: 2px;
+}
+
+.decisionOpcionTexto strong {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+
+.decisionOpcionTexto span {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+/* El efecto en tus números: verde si deja bien al negocio, rojo si no */
+.decisionEfecto {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  font-weight: 600;
+  color: var(--z-negative);
+}
+
+.decisionEfecto[data-bueno] {
+  color: var(--z-positive);
+}
+
+.decisionResultado {
+  display: grid;
+  gap: 10px;
+}
+
+.decisionElegida,
+.decisionMejor {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--z-radius-md);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.decisionElegida {
+  background: var(--z-warning-container);
+  color: var(--z-on-warning-container);
+}
+
+.decisionElegida[data-mejor] {
+  background: var(--z-positive-container);
+  color: var(--z-on-positive-container);
+}
+
+.decisionMejor {
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+}
+
+.decisionElegida > :global(.z-icon),
+.decisionMejor > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.decisionPorque {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  color: var(--z-on-surface-variant);
+}
+
+.decisionAcciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* El problema de la decisión ya se arregló en los números */
+.decisionLograda {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--z-radius-md);
+  background: var(--z-gold-container);
+  color: var(--z-gold-text);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.decisionLograda > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+}

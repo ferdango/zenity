@@ -18,7 +18,7 @@ import { ease, fadeUp, spring, staggerContainer } from '../lib/motion'
 import { SPARK_MASK } from '../lib/sparkPath'
 import { useApp } from '../state/context'
 import { registrarLeccion } from '../state/demoStore'
-import { useIndicadores, useLecciones, useProgreso } from '../state/useZen'
+import { useIndicadores, useLecciones, useProgreso, useTuSemana } from '../state/useZen'
 import styles from './Progreso.module.css'
 
 /** Posición en zigzag de cada paso (como el camino de Duolingo). */
@@ -114,6 +114,8 @@ export function Progreso() {
             </Link>
           </div>
         </motion.section>
+
+        <TuSemana xpHoy={p.xpHoy} />
 
         {!p.unidades.length ? (
           <NoDemoData feature="El camino de aprendizaje" />
@@ -266,6 +268,48 @@ function UnidadCamino({
           )
         })}
       </ol>
+    </motion.section>
+  )
+}
+
+/** «Tu semana»: lo que aprendiste y lo que mejoró en tus números (cierra el ciclo de la fórmula). */
+function TuSemana({ xpHoy }: { xpHoy: number }) {
+  const t = useTuSemana()
+  if (!t) return null
+  return (
+    <motion.section className={styles.semana} variants={fadeUp} aria-label="Tu semana">
+      <header className={styles.semanaHead}>
+        <strong>Tu semana</strong>
+        <span>Lo que aprendiste y lo que mejoró</span>
+      </header>
+      <div className={styles.semanaStats}>
+        <span>
+          <strong>{t.lecciones}</strong> {t.lecciones === 1 ? 'lección' : 'lecciones'}
+        </span>
+        <span>
+          <strong>{t.decisiones}</strong> {t.decisiones === 1 ? 'decisión' : 'decisiones'}
+        </span>
+        <span>
+          <strong>+{xpHoy}</strong> XP
+        </span>
+      </div>
+      {t.cambios.length ? (
+        <ul className={styles.semanaCambios}>
+          {t.cambios.map((c) => (
+            <li key={c.etiqueta} data-mejoro={c.mejoro || undefined}>
+              <Icon name={c.mejoro ? 'trending_up' : 'trending_down'} size={18} />
+              <span className={styles.semanaEtiqueta}>{c.etiqueta}</span>
+              <span className={styles.semanaValores}>
+                {c.antes} → <strong>{c.ahora}</strong>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className={styles.semanaVacia}>
+          Todavía no cambian tus números. Empieza por tu <Link to="/inicio">decisión de la semana</Link>.
+        </p>
+      )}
     </motion.section>
   )
 }

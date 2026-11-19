@@ -86,3 +86,39 @@ export function indicadores(e: EntradaIndicadores): Record<UnidadId, Indicador> 
       : { texto: 'sin pago estimado', meta: 'autoriza SUNAT', progreso: null, logrado: false },
   }
 }
+
+export interface Cambio {
+  etiqueta: string
+  antes: string
+  ahora: string
+  /** true: mejoró · false: empeoró */
+  mejoro: boolean
+}
+
+/**
+ * «Tu semana»: qué cambió en los números del negocio desde el punto de partida. Solo lista lo que se
+ * movió, para que el dueño vea el efecto de lo que aprendió y decidió.
+ */
+export function cambiosDelNegocio(antes: EntradaIndicadores, ahora: EntradaIndicadores): Cambio[] {
+  const cambios: Cambio[] = []
+  const pct = (n: number) => Math.round(n * 100)
+  if (pct(antes.conciliado) !== pct(ahora.conciliado)) {
+    cambios.push({ etiqueta: 'Conciliado del mes', antes: fmtPct(antes.conciliado), ahora: fmtPct(ahora.conciliado), mejoro: ahora.conciliado > antes.conciliado })
+  }
+  if (Math.round(antes.vencido) !== Math.round(ahora.vencido)) {
+    cambios.push({ etiqueta: 'Vencido por cobrar', antes: fmtSolesCorto(Math.round(antes.vencido)), ahora: fmtSolesCorto(Math.round(ahora.vencido)), mejoro: ahora.vencido < antes.vencido })
+  }
+  if (antes.caja && ahora.caja && Math.round(antes.caja.minimo) !== Math.round(ahora.caja.minimo)) {
+    cambios.push({
+      etiqueta: 'Punto más bajo de tu caja',
+      antes: fmtSolesCorto(Math.round(antes.caja.minimo)),
+      ahora: fmtSolesCorto(Math.round(ahora.caja.minimo)),
+      mejoro: ahora.caja.minimo > antes.caja.minimo,
+    })
+  }
+  if (!antes.sueldoDueno && ahora.sueldoDueno) {
+    cambios.push({ etiqueta: 'Sueldo de dueño', antes: 'sin definir', ahora: fmtSolesCorto(ahora.sueldoDueno), mejoro: true })
+  }
+  return cambios
+}
+

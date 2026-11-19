@@ -4,16 +4,18 @@ import { HOY } from '../config/demo'
 import { proyectarCaja } from '../domain/cashflow'
 import { estadoCierres, eventoEfectivo } from '../domain/cierres'
 import { porCobrar, totalCobranzas } from '../domain/collections'
+import { decisionDeLaSemana, lunesDe, type TipoDecision } from '../domain/decision'
 import { type Analysis, resumenMes } from '../domain/engine'
-import { indicadores } from '../domain/indicadores'
+import { cambiosDelNegocio, type EntradaIndicadores, indicadores } from '../domain/indicadores'
 import { evaluarLecciones } from '../domain/lessons'
 import { logros, puntosDisponibles, xpDeRecompensas } from '../domain/loyalty'
 import { personalesDelMes } from '../domain/personal'
 import { camino, progreso, siguientePaso } from '../domain/progreso'
 import { resumenSunat } from '../domain/sunat'
 import { avisoLimite, datosSimulador } from '../domain/taxSimulator'
+import type { CashEvent, PromesaPago } from '../domain/types'
 import { useApp } from './context'
-import { analysisFor, type DemoState, useDemoState } from './demoStore'
+import { analysisFor, type DemoState, ESTADO_INICIAL, useDemoState } from './demoStore'
 
 export interface Zen {
   demo: DemoState
@@ -76,6 +78,7 @@ export function useProgreso() {
       regimenRevisado: demo.regimenRevisado,
       hitos: demo.hitos,
       bonus: xpDeRecompensas(demo.recompensas),
+      decisiones: demo.decisiones,
     }
     const unidades = a ? camino(a, entrada, connections.length) : []
     const p = progreso(entrada)
@@ -95,6 +98,7 @@ export function useProgreso() {
         conciliadoPct: a ? Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100) : 0,
         sueldoDefinido: !!a?.business.sueldoDueno,
         cajaConColchon: !!caja && !caja.alerta,
+        decisiones: Object.keys(demo.decisiones).length,
       },
       demo.recompensas,
     )
@@ -116,23 +120,46 @@ export function useProgreso() {
  * así el dueño ve qué gana en su negocio con lo que aprende.
  */
 export function useIndicadores() {
-  const { a } = useZen()
-  const cobranzas = useCobranzas()
-  const caja = useCaja(60)
+  const { a, demo } = useZen()
+  const cierres = useCierres()
+  return useMemo(() => (a ? indicadores(entradaIndicadores(a, demo.promesas, eventoEfectivo(cierres, HOY))) : null), [a, demo.promesas, cierres])
+}
+
+/** Los números que mueven las unidades del camino, calculados para un análisis. */
+function entradaIndicadores(a: Analysis, promesas: PromesaPago[], extras: CashEvent[]): EntradaIndicadores {
+  const mes = HOY.slice(0, 7)
+  const cobranzas = porCobrar(a, promesas, HOY)
+  const caja = proyectarCaja(a, promesas, HOY, 60, extras)
+  const sunat = resumenSunat(a, HOY)
+  return {
+    conciliado: resumenMes(a, mes).conciliado,
+    gastoPersonalMes: personalesDelMes(a, mes).reduce((s, m) => s + Math.abs(m.monto), 0),
+    sueldoDueno: a.business.sueldoDueno ?? null,
+    porCobrar: totalCobranzas(cobranzas),
+    vencido: totalCobranzas(cobranzas.filter((c) => c.diasVencidos > 0)),
+    caja: { minimo: caja.minimo.base, colchon: caja.colchon },
+    sunat: sunat.total > 0 ? { total: sunat.total, vence: sunat.vence, dias: sunat.dias } : null,
+  }
+}
+
+/**
+ * «Tu semana»: lo aprendido (lecciones, decisiones, XP) y lo que mejoró en los números del negocio
+ * desde el punto de partida de la demo.
+ */
+export function useTuSemana() {
+  const { a, demo, businessId } = useZen()
+  const cierres = useCierres()
   return useMemo(() => {
-    if (!a) return null
-    const mes = HOY.slice(0, 7)
-    const sunat = resumenSunat(a, HOY)
-    return indicadores({
-      conciliado: resumenMes(a, mes).conciliado,
-      gastoPersonalMes: personalesDelMes(a, mes).reduce((s, m) => s + Math.abs(m.monto), 0),
-      sueldoDueno: a.business.sueldoDueno ?? null,
-      porCobrar: totalCobranzas(cobranzas),
-      vencido: totalCobranzas(cobranzas.filter((c) => c.diasVencidos > 0)),
-      caja: caja ? { minimo: caja.minimo.base, colchon: caja.colchon } : null,
-      sunat: sunat.total > 0 ? { total: sunat.total, vence: sunat.vence, dias: sunat.dias } : null,
-    })
-  }, [a, cobranzas, caja])
+    const inicial = analysisFor(businessId, ESTADO_INICIAL)
+    if (!a || !inicial) return null
+    const lecciones = new Set(demo.lessonEvents.filter((l) => l.businessId === businessId && l.tipo === 'LEIDA').map((l) => l.lessonId)).size
+    const decisiones = Object.keys(demo.decisiones).filter((k) => k.startsWith(`${businessId}:`)).length
+    return {
+      lecciones,
+      decisiones,
+      cambios: cambiosDelNegocio(entradaIndicadores(inicial, [], []), entradaIndicadores(a, demo.promesas, eventoEfectivo(cierres, HOY))),
+    }
+  }, [a, demo, businessId, cierres])
 }
 
 export function useLecciones() {
@@ -155,3 +182,42 @@ export function useLecciones() {
     [a, caja, cobranzas, sim, demo.corrections],
   )
 }
+
+/**
+ * «Decisión de la semana» del negocio activo: la más urgente, con el efecto real de cada opción. Una
+ * vez elegida queda fija toda la semana; `resuelta` dice si el problema ya se arregló (p. ej. cobró y la
+ * caja ya no baja del colchón, así que la decisión de hoy sería otra).
+ */
+export function useDecision() {
+  const { a, demo, businessId } = useZen()
+  const cobranzas = useCobranzas()
+  const cierres = useCierres()
+  const caja = useCaja(60)
+  return useMemo(() => {
+    if (!a) return null
+    const actual = decisionDeLaSemana({
+      a,
+      promesas: demo.promesas,
+      hoy: HOY,
+      extras: eventoEfectivo(cierres, HOY),
+      cobranzas,
+      gastoPersonalMes: personalesDelMes(a, HOY.slice(0, 7)).reduce((s, m) => s + Math.abs(m.monto), 0),
+    })
+    const semana = `@${lunesDe(HOY)}`
+    const clave = Object.keys(demo.decisiones).find((k) => k.startsWith(`${businessId}:`) && k.endsWith(semana))
+    const tomada = clave ? demo.decisiones[clave] : null
+    if (tomada?.decision) {
+      // ¿El problema de la decisión ya no está en los números?
+      const resuelto: Record<TipoDecision, boolean> = {
+        caja: !!caja && !caja.alerta,
+        cobrar: !cobranzas.some((c) => c.diasVencidos > 0 && !c.promesa),
+        sueldo: !!a.business.sueldoDueno,
+        sunat: false,
+      }
+      return { decision: tomada.decision, tomada, resuelta: resuelto[tomada.decision.tipo] }
+    }
+    if (!actual) return null
+    return { decision: actual, tomada: null, resuelta: false }
+  }, [a, demo.promesas, demo.decisiones, businessId, cobranzas, cierres, caja])
+}
+
