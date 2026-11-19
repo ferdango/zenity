@@ -40,6 +40,15 @@ export function Mas() {
               sub={`Nivel ${progreso.nivel.numero} · ${progreso.nivel.nombre} · racha de ${progreso.racha} días`}
               end={<Pill tone="media">{progreso.xp} XP</Pill>}
             />
+            <LinkRow tone="violet" to="/tienda" icon="storefront" title="Tienda de puntos" sub={`Tienes ${progreso.puntos} XP para canjear`} />
+            <LinkRow
+              tone="positive"
+              to="/recompensas"
+              icon="redeem"
+              title="Recompensas"
+              sub="Logros que te dan XP extra"
+              end={progreso.porReclamar ? <Pill tone="alta">{progreso.porReclamar} por reclamar</Pill> : undefined}
+            />
             <LinkRow
               tone="info"
               to="/conexiones"

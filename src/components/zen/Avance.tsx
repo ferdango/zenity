@@ -30,7 +30,9 @@ export function Avance() {
           </span>
           <ProgressBar value={p.xpHoy / p.meta} label="Meta de XP de hoy" />
           <span className={styles.rowSub}>
-            {p.metaCumplida
+            {p.porReclamar > 0
+              ? `Tienes ${p.porReclamar} recompensa${p.porReclamar === 1 ? '' : 's'} por reclamar`
+              : p.metaCumplida
               ? '¡Meta de hoy cumplida! Sigue sumando para subir de nivel'
               : siguiente
                 ? `Siguiente: ${siguiente.titulo} · +${siguiente.xp} XP`

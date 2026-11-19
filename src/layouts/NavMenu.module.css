@@ -240,7 +240,7 @@
   padding: 0 6px;
   border-radius: var(--z-radius-full);
   background: var(--z-negative);
-  color: #3b0b05;
+  color: var(--z-on-negative);
   font-size: 0.75rem;
   line-height: 22px;
   font-weight: 700;

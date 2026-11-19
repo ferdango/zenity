@@ -111,20 +111,57 @@
   overflow: hidden;
   font-size: 0.75rem;
   line-height: 1rem;
-  color: var(--z-on-hero-muted);
+  color: rgb(255 255 255 / 0.92);
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* Accesos a la tienda de puntos y a las recompensas */
+.accesos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.acceso {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface);
+  color: var(--z-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.accesoBadge {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-negative);
+  color: var(--z-on-negative);
+  font-size: 0.6875rem;
+  font-weight: 700;
 }
 
 /* ── Unidades ─────────────────────────────────────────────────────── */
 .unidad {
   --u-accent: var(--z-chip-violet);
+  /* Tinta para texto e íconos sobre la superficie (contraste en claro y oscuro) */
+  --u-ink: var(--z-primary);
   display: grid;
   gap: 18px;
 }
 
 .unidad[data-estado='completa'] {
   --u-accent: var(--z-chip-green);
+  --u-ink: var(--z-positive);
 }
 
 .unidad[data-estado='bloqueada'] {
@@ -226,7 +263,7 @@
 /* Pendiente en una unidad abierta: blanco con borde del color de la unidad */
 .nodo:not([data-hecho]):not([data-bloqueado]) {
   background: var(--z-surface);
-  color: var(--u-accent);
+  color: var(--u-ink);
   box-shadow:
     inset 0 0 0 3px var(--u-accent),
     0 6px 0 color-mix(in srgb, var(--u-accent) 35%, var(--z-surface-highest));
@@ -239,7 +276,7 @@
 
 .nodo[data-bloqueado] {
   background: var(--z-surface-high);
-  color: var(--z-outline);
+  color: var(--z-on-surface-low);
   box-shadow: 0 6px 0 var(--z-surface-highest);
 }
 
@@ -280,7 +317,7 @@
   padding: 6px 12px;
   border-radius: var(--z-radius-md);
   background: var(--z-surface);
-  color: var(--u-accent);
+  color: var(--u-ink);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;

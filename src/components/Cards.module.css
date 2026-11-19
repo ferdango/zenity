@@ -1,13 +1,13 @@
 /* Temas de tarjetas (colores del Figma con degradado y brillo) */
 .purple {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #b48ce6 0%, #9467d3 42%, #6c55d6 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #7c52c4 0%, #6a43b5 42%, #553fbf 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.82);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .indigo {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #7d83ff 0%, #4d54e9 45%, #2f6bef 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #4a51e0 0%, #3a40c8 45%, #2a5ed8 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.82);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .light {
   --card-bg: radial-gradient(120% 140% at 0% 0%, #ffffff 0%, #e2eefe 45%, #c7dbfb 100%);
@@ -15,19 +15,19 @@
   --card-fg-2: rgb(15 18 22 / 0.64);
 }
 .green {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #4fdc9a 0%, #12b76a 45%, #0b8f7d 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #0b7d48 0%, #096b40 45%, #08635a 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.85);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .blue {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #7fb0ff 0%, #3186ff 45%, #2a5fd8 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #2a6ae0 0%, #2258c8 45%, #1d4bb0 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.85);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .navy {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #3b6fd9 0%, #0a3fa8 45%, #062a78 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #2f62cc 0%, #0a3fa8 45%, #062a78 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.82);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .yellow {
   --card-bg: radial-gradient(120% 140% at 0% 0%, #fff3a3 0%, #ffdd00 50%, #f2c200 100%);
@@ -35,24 +35,24 @@
   --card-fg-2: rgb(15 38 92 / 0.72);
 }
 .slate {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #6b7a8f 0%, #3c4656 50%, #262d38 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #56647a 0%, #3c4656 50%, #262d38 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.8);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .grape {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #b65ad0 0%, #742284 48%, #4a1263 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #8f3fab 0%, #742284 48%, #4a1263 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.82);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .red {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #ff6b6f 0%, #ec111a 45%, #9e0b10 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #d42a30 0%, #c20f17 45%, #8a0a0e 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.85);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 .teal {
-  --card-bg: radial-gradient(120% 140% at 0% 0%, #3fd3c9 0%, #0a9fb8 45%, #06607f 100%);
+  --card-bg: radial-gradient(120% 140% at 0% 0%, #087f94 0%, #077386 45%, #06566f 100%);
   --card-fg: #fff;
-  --card-fg-2: rgb(255 255 255 / 0.88);
+  --card-fg-2: rgb(255 255 255 / 0.9);
 }
 
 /* ── Tarjeta del carrusel (Home) ──────────────────────────── */

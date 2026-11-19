@@ -21,7 +21,7 @@
 
   --z-on-surface: #eef0f7;
   --z-on-surface-variant: #c6cbd9;
-  --z-on-surface-low: #949ab0;
+  --z-on-surface-low: #9ea4b9;
   --z-outline: #8a90a6;
   --z-outline-variant: #363d52;
   --z-divider: rgb(190 205 255 / 0.09);
@@ -42,6 +42,8 @@
   --z-on-positive-container: #c8f0d6;
   --z-negative: #ff9585;
   --z-negative-container: rgb(255 127 108 / 0.14);
+  /* Texto sobre --z-negative sólido (contadores, insignias) */
+  --z-on-negative: #3b0b05;
   --z-on-negative-container: #ffdcd5;
   --z-warning: #f7cf6a;
   --z-warning-container: rgb(247 207 106 / 0.13);
@@ -61,14 +63,19 @@
 
   /* ── Banda héroe violeta (saldo, totales) ───────────────────── */
   --z-hero-bg:
-    radial-gradient(110% 80% at 88% 0%, rgb(176 96 255 / 0.42), transparent 62%),
-    linear-gradient(172deg, #1c0a5c 0%, #2f0f93 52%, #4515bd 100%);
+    radial-gradient(110% 80% at 88% 0%, rgb(176 96 255 / 0.3), transparent 62%),
+    linear-gradient(172deg, #1c0a5c 0%, #2d0f8c 52%, #4013b3 100%);
   --z-hero-top: #1c0a5c;
   --z-on-hero: #ffffff;
-  --z-on-hero-muted: rgb(255 255 255 / 0.72);
+  --z-on-hero-muted: rgb(255 255 255 / 0.86);
   --z-hero-chip: rgb(255 255 255 / 0.14);
   --z-hero-chip-hover: rgb(255 255 255 / 0.22);
   --z-magenta: #cf6bff;
+
+  /* Dorado del XP y los logros: --z-gold para íconos sobre violeta, --z-gold-text para texto sobre superficies */
+  --z-gold: #ffc35c;
+  --z-gold-text: #ffc46b;
+  --z-gold-container: rgb(255 177 74 / 0.16);
 
   /* Íconos sólidos de las tarjetas por categoría */
   --z-chip-violet: #6d35f0;
@@ -207,8 +214,8 @@
 
   --z-on-surface: #172033;
   --z-on-surface-variant: #46506a;
-  --z-on-surface-low: #6a7491;
-  --z-outline: #8b94ab;
+  --z-on-surface-low: #5a6380;
+  --z-outline: #7d869c;
   --z-outline-variant: #d2d8e5;
   --z-divider: rgb(24 40 80 / 0.08);
 
@@ -221,13 +228,14 @@
   --z-secondary-container: #e6e2ff;
   --z-on-secondary-container: #251a6b;
 
-  --z-positive: #0d8f50;
+  --z-positive: #0a7a44;
   --z-positive-container: rgb(13 143 80 / 0.1);
   --z-on-positive-container: #0b5a35;
-  --z-negative: #d23b3b;
+  --z-negative: #b42828;
   --z-negative-container: rgb(210 59 59 / 0.09);
+  --z-on-negative: #ffffff;
   --z-on-negative-container: #8a1c1c;
-  --z-warning: #a86200;
+  --z-warning: #8f5200;
   --z-warning-container: rgb(245 166 35 / 0.15);
   --z-on-warning-container: #6b3f00;
   --z-error: #b3261e;
@@ -242,9 +250,11 @@
   --z-float-shadow: 0 22px 44px -24px rgb(43 12 140 / 0.38), 0 2px 8px rgb(16 24 40 / 0.05);
 
   --z-hero-bg:
-    radial-gradient(110% 80% at 88% 0%, rgb(190 110 255 / 0.55), transparent 62%),
-    linear-gradient(172deg, #2a0b91 0%, #4113c6 50%, #6020e4 100%);
-  --z-hero-top: #2a0b91;
+    radial-gradient(110% 80% at 88% 0%, rgb(190 110 255 / 0.24), transparent 62%),
+    linear-gradient(172deg, #28098c 0%, #3b11ba 50%, #521bcc 100%);
+  --z-hero-top: #28098c;
+  --z-gold-text: #8f4d00;
+  --z-gold-container: rgb(255 159 67 / 0.16);
 
   --z-ambient-1: rgb(90 34 214 / 0.07);
   --z-ambient-2: rgb(155 114 203 / 0.07);

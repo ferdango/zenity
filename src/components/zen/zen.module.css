@@ -360,8 +360,8 @@ a.row:hover {
   --z-divider: rgb(255 255 255 / 0.12);
   --z-outline: rgb(255 255 255 / 0.45);
   --z-on-surface: #ffffff;
-  --z-on-surface-variant: rgb(255 255 255 / 0.82);
-  --z-on-surface-low: rgb(255 255 255 / 0.64);
+  --z-on-surface-variant: rgb(255 255 255 / 0.92);
+  --z-on-surface-low: rgb(255 255 255 / 0.86);
   --z-surface-highest: #241066;
   --z-warning: #ffd77a;
   --z-negative: #ffb3c1;
@@ -494,7 +494,7 @@ button.stat:hover {
   height: 36px;
   padding: 0 10px;
   border-radius: var(--z-radius-sm);
-  border: 1px solid var(--z-outline-variant);
+  border: 1px solid var(--z-outline);
   background: var(--z-surface-high);
   color: var(--z-on-surface);
   font: inherit;
@@ -506,7 +506,7 @@ button.stat:hover {
   min-height: 44px;
   padding: 10px 12px;
   border-radius: var(--z-radius-md);
-  border: 1px solid var(--z-outline-variant);
+  border: 1px solid var(--z-outline);
   background: var(--z-surface-high);
   color: var(--z-on-surface);
   font: inherit;
@@ -985,8 +985,8 @@ textarea.input {
   height: 26px;
   padding: 0 10px;
   border-radius: var(--z-radius-full);
-  background: color-mix(in srgb, #ffb14a 18%, transparent);
-  color: color-mix(in srgb, #c46a00 80%, var(--z-on-surface));
+  background: var(--z-gold-container);
+  color: var(--z-gold-text);
   font-size: 0.75rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -1020,7 +1020,7 @@ textarea.input {
   padding: 6px 0 4px;
   border-radius: var(--z-radius-lg);
   background: var(--z-surface-high);
-  color: var(--z-outline);
+  color: var(--z-on-surface-low);
   line-height: 1;
 }
 
@@ -1056,7 +1056,7 @@ textarea.input {
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 700;
-  color: color-mix(in srgb, #c46a00 80%, var(--z-on-surface));
+  color: var(--z-gold-text);
   font-variant-numeric: tabular-nums;
 }
 

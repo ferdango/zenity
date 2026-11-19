@@ -6,6 +6,7 @@ import { estadoCierres, eventoEfectivo } from '../domain/cierres'
 import { porCobrar } from '../domain/collections'
 import type { Analysis } from '../domain/engine'
 import { evaluarLecciones } from '../domain/lessons'
+import { logros, puntosDisponibles, xpDeRecompensas } from '../domain/loyalty'
 import { camino, progreso, siguientePaso } from '../domain/progreso'
 import { avisoLimite, datosSimulador } from '../domain/taxSimulator'
 import { useApp } from './context'
@@ -70,9 +71,34 @@ export function useProgreso() {
       confirmados: demo.confirmados,
       regimenRevisado: demo.regimenRevisado,
       hitos: demo.hitos,
+      bonus: xpDeRecompensas(demo.recompensas),
     }
     const unidades = a ? camino(a, entrada, connections.length) : []
-    return { ...progreso(entrada), unidades, siguiente: siguientePaso(unidades) }
+    const p = progreso(entrada)
+    const leccionesAprobadas = new Set(demo.lessonEvents.filter((l) => l.tipo === 'LEIDA').map((l) => `${l.businessId}:${l.lessonId}`)).size
+    const listaLogros = logros(
+      {
+        xpHoy: p.xpHoy,
+        metaCumplida: p.metaCumplida,
+        racha: p.racha,
+        nivel: p.nivel.numero,
+        revisados: demo.corrections.filter((c) => c.origen !== 'CONTADOR').length,
+        recordatorios: Object.keys(demo.recordatorios).length,
+        lecciones: leccionesAprobadas,
+        unidadesCompletas: unidades.filter((u) => u.estado === 'completa').map((u) => u.id),
+      },
+      demo.recompensas,
+    )
+    return {
+      ...p,
+      unidades,
+      siguiente: siguientePaso(unidades),
+      /** Loyalty */
+      puntos: puntosDisponibles(p.xp, demo.canjes),
+      canjes: demo.canjes,
+      logros: listaLogros,
+      porReclamar: listaLogros.filter((l) => l.logrado && !l.reclamado).length,
+    }
   }, [a, demo, connections.length])
 }
 

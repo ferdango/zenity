@@ -1,0 +1,385 @@
+/* Loyalty: tienda de puntos y recompensas. */
+
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding: 4px var(--z-gutter) 40px;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+/* ── Saldo de puntos / logros (banda violeta) ─────────────────────── */
+.saldo {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 20px 22px;
+  border-radius: var(--z-radius-2xl);
+  background: var(--z-hero-bg);
+  color: var(--z-on-hero);
+  box-shadow: var(--z-float-shadow);
+}
+
+.saldoLabel {
+  font-size: 0.875rem;
+  color: var(--z-on-hero-muted);
+}
+
+.saldoValor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.saldoValor > :global(.z-icon) {
+  color: var(--z-gold);
+}
+
+.saldoMeta {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-hero-muted);
+}
+
+.saldoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 8px;
+  padding: 6px 10px 6px 14px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-hero-chip);
+  color: var(--z-on-hero);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filtros::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Productos ────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.grid > * {
+  display: grid;
+}
+
+/* Color por categoría (íconos sólidos con texto blanco) */
+[data-categoria='racha'] {
+  --cat: var(--z-chip-orange);
+}
+
+[data-categoria='aprende'] {
+  --cat: var(--z-chip-green);
+}
+
+[data-categoria='negocio'] {
+  --cat: var(--z-chip-violet);
+}
+
+.producto {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+}
+
+.productoIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
+  border-radius: var(--z-radius-full);
+  background: var(--cat);
+  color: #fff;
+  box-shadow: 0 10px 18px -10px color-mix(in srgb, var(--cat) 85%, transparent);
+}
+
+.tienes {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 2px 8px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-positive-container);
+  color: var(--z-on-positive-container);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.productoNombre {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+.productoDetalle {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.precio {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0 6px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--z-gold-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Mis canjes ───────────────────────────────────────────────────── */
+.canjes {
+  display: grid;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+}
+
+.canje {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.canje + .canje {
+  border-top: 1px solid var(--z-divider);
+}
+
+.canjeIcon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--z-radius-full);
+  background: var(--cat, var(--z-chip-violet));
+  color: #fff;
+}
+
+.canjeTexto {
+  display: grid;
+  min-width: 0;
+}
+
+.canjeTexto strong {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.canjeTexto span {
+  font-size: 0.75rem;
+  color: var(--z-on-surface-low);
+}
+
+.codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--z-radius-md);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.nota > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Hoja de canje ────────────────────────────────────────────────── */
+.hoja {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+  text-align: center;
+}
+
+.hojaIcon {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 4px;
+  border-radius: var(--z-radius-full);
+  background: var(--cat);
+  color: #fff;
+}
+
+.hojaNombre {
+  font-size: 1.25rem;
+  line-height: 1.625rem;
+  font-weight: 600;
+}
+
+.hojaResumen {
+  margin: 6px 0 4px;
+  font-size: 0.9375rem;
+  color: var(--z-on-surface-variant);
+}
+
+.hojaResumen strong {
+  color: var(--z-on-surface);
+}
+
+.hojaCodigo {
+  margin: 6px 0 2px;
+  padding: 10px 16px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-high);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* ── Recompensas ──────────────────────────────────────────────────── */
+.logros {
+  display: grid;
+  gap: 10px;
+}
+
+.logro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+}
+
+.logro[data-estado='logrado'] {
+  border-color: color-mix(in srgb, var(--z-gold) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--z-gold) 35%, transparent),
+    var(--z-card-shadow);
+}
+
+.logroIcon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  color: var(--z-on-surface-variant);
+}
+
+.logro[data-estado='logrado'] .logroIcon,
+.logro[data-estado='reclamado'] .logroIcon {
+  background: linear-gradient(160deg, #ffd66b, #ff9f43);
+  color: #4a2300;
+}
+
+.logroTexto {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.logroTexto strong {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+
+.logroTexto > span {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-variant);
+}
+
+.logroAvance {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--z-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.logroEnd {
+  display: grid;
+  justify-items: end;
+}
+
+.premio {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--z-gold-text);
+  white-space: nowrap;
+}
+
+.reclamado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--z-positive);
+  white-space: nowrap;
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
