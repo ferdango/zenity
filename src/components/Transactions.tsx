@@ -84,7 +84,7 @@ export function CategoryRow({
         <span className={styles.categoryIcon}>
           <Icon name={category.icon} size={22} />
         </span>
-        <span>
+        <span className={styles.categoryName}>
           <span className="t-title-m" style={{ display: 'block' }}>
             {category.label}
           </span>

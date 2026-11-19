@@ -27,7 +27,10 @@
 }
 
 .stretch .tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 clamp(8px, 3vw, 20px);
+  font-size: clamp(0.75rem, 3.6vw, 0.875rem);
 }
 
 .tab[aria-selected='true'] {

@@ -45,6 +45,7 @@
 
 /* ── Fila de categoría expandible ─────────────────────────── */
 .category {
+  container: categoria / inline-size;
   border-radius: var(--z-radius-xl);
   background: var(--z-surface);
   overflow: hidden;
@@ -58,7 +59,8 @@
 
 .categoryHead {
   display: grid;
-  grid-template-columns: 40px 1fr auto 24px;
+  grid-template-columns: 40px minmax(0, 1fr) auto 24px;
+  grid-template-areas: 'icon name amount chevron';
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -68,6 +70,7 @@
 }
 
 .categoryIcon {
+  grid-area: icon;
   display: grid;
   place-items: center;
   width: 40px;
@@ -86,9 +89,34 @@
   color: var(--z-negative);
 }
 
+.categoryName {
+  grid-area: name;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
 .categoryAmount {
+  grid-area: amount;
   display: grid;
   justify-items: end;
+}
+
+/* Tarjeta angosta: el monto pasa a una segunda fila, debajo del nombre, para no cortarse */
+@container categoria (max-width: 379.98px) {
+  .categoryHead {
+    grid-template-columns: 40px minmax(0, 1fr) 24px;
+    grid-template-areas:
+      'icon name chevron'
+      'icon amount chevron';
+    row-gap: 4px;
+  }
+
+  .categoryAmount {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    justify-content: flex-start;
+  }
 }
 
 .categoryValue {
@@ -98,6 +126,7 @@
 }
 
 .chevron {
+  grid-area: chevron;
   color: var(--z-on-surface-variant);
 }
 

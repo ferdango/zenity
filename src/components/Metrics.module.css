@@ -159,7 +159,7 @@
 .metric {
   display: grid;
   gap: 2px;
-  padding: 14px 16px;
+  padding: 14px clamp(12px, 4vw, 16px);
   border-radius: var(--z-radius-xl);
   background: var(--z-surface);
   min-width: 0;
@@ -182,14 +182,23 @@
   color: var(--z-on-surface-variant);
 }
 
+/* Contenedor del texto: su ancho decide el tamaño del monto (unidades cqi) */
+.metricBody {
+  display: grid;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+/* Cada carácter mide ~0.53 em en Google Sans Flex con cifras tabulares: se deja margen (0.57) */
 .metricValue {
-  font-size: 1.625rem;
+  max-width: 100%;
+  font-size: min(1.625rem, 100cqi / (var(--chars, 12) * 0.57));
   line-height: 2.125rem;
   font-weight: 420;
 }
 
 .metricLarge .metricValue {
-  font-size: 2rem;
+  font-size: min(2rem, 100cqi / (var(--chars, 12) * 0.57));
   line-height: 2.5rem;
 }
 
