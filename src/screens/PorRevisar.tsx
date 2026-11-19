@@ -14,6 +14,7 @@ import { businessName } from '../data/businesses'
 import { tituloMovimiento } from '../data/demoLedger'
 import { alternativas, partyKey } from '../domain/categorization'
 import { resumenMes } from '../domain/engine'
+import { XP } from '../domain/progreso'
 import type { BankMovement, CategoriaId } from '../domain/types'
 import { fmtFecha, monthOf } from '../domain/util'
 import { HOY } from '../config/demo'
@@ -260,7 +261,7 @@ function PorRevisarView({
                 · ~{minutos} minuto{minutos === 1 ? '' : 's'}
               </span>
               <span className={styles.sectionHint}>
-                {revisados} de {total} revisados
+                {revisados} de {total} · +{XP.revisar} XP c/u
               </span>
             </div>
             <ProgressBar value={total ? revisados / total : 0} label="Avance de la revisión" />
@@ -293,12 +294,20 @@ function PorRevisarView({
           <motion.div className={styles.empty} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ ease: ease.decelerate }}>
             <DoneCheck />
             <p className="t-headline-s">¡Todo al día!</p>
+            {revisados > 0 && (
+              <motion.span className={styles.xpChip} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ ...spring.bouncy, delay: 0.3 }}>
+                +{revisados * XP.revisar} XP ganados
+              </motion.span>
+            )}
             <p className={styles.muted}>
               {revisados > 0
                 ? `Revisaste ${revisados} movimiento${revisados === 1 ? '' : 's'}. ${businessName(business)} va ${Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100)}% conciliado este mes.`
                 : 'Zenity clasificó todo con confianza alta. No hay nada que revisar.'}
             </p>
             <div className={styles.actions} style={{ justifyContent: 'center' }}>
+              <Button icon="school" to="/progreso">
+                Sigue tu camino
+              </Button>
               <Button variant="tonal" icon="home" to="/inicio">
                 Volver al inicio
               </Button>

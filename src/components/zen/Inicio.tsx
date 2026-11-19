@@ -6,7 +6,9 @@ import { fadeUp } from '../../lib/motion'
 import { useApp } from '../../state/context'
 import { inicioCompleto } from '../../state/demoStore'
 import { useCaja, useCobranzas, useLecciones, useZen } from '../../state/useZen'
+import { XP } from '../../domain/progreso'
 import { Icon } from '../Icon'
+import { Avance } from './Avance'
 import { LessonCard, Money } from './index'
 import { SunatMes } from './SunatMes'
 import styles from './zen.module.css'
@@ -25,10 +27,16 @@ export function InicioOla1() {
   if (!a) return null
   const porRevisar = a.porRevisar.length
   const vencidas = cobranzas.filter((c) => c.diasVencidos > 0).length
+  // XP que se gana con las tareas de hoy: cada movimiento revisado y cada recordatorio de cobro
+  const xpRevisar = porRevisar * XP.revisar
+  const xpCobrar = vencidas * XP.recordatorio
+  const xpPendiente = xpRevisar + xpCobrar
   const leccion = lecciones?.activas.find((id) => !demo.leccionesCerradas.includes(`${business.id}:${id}`))
 
   return (
     <div className={styles.inicio}>
+      <Avance />
+
       {!inicioCompleto(demo, a.business.id) && (
         <motion.div variants={fadeUp} style={{ display: 'grid' }}>
           <Link to="/bienvenida" className={styles.banner} data-ripple="">
@@ -61,9 +69,10 @@ export function InicioOla1() {
 
       <motion.section className={styles.section} variants={fadeUp} data-tour="ola1">
         <div className={styles.sectionHead}>
-          <h2 className={styles.sectionTitle}>Para hoy</h2>
+          <h2 className={styles.sectionTitle}>Tareas de hoy</h2>
           <span className={styles.sectionHint}>
-            {[porRevisar === 0, vencidas === 0].filter(Boolean).length} de 2 listos
+            {[porRevisar === 0, vencidas === 0].filter(Boolean).length} de 2 listas
+            {xpPendiente > 0 && ` · +${xpPendiente} XP`}
           </span>
         </div>
         <div className={styles.flatList}>
@@ -75,7 +84,7 @@ export function InicioOla1() {
               <span className={styles.todoValue}>{porRevisar ? `Tienes ${porRevisar} por revisar` : '¡Todo revisado!'}</span>
               <span className={styles.rowSub}>{porRevisar ? `Te toma ~${Math.max(1, Math.ceil((porRevisar * 10) / 60))} minuto${porRevisar > 6 ? 's' : ''}` : 'Zenity clasificó todo'}</span>
             </span>
-            <Icon name="chevron_right" size={20} />
+            {xpRevisar > 0 ? <span className={styles.xpChip}>+{xpRevisar} XP</span> : <Icon name="chevron_right" size={20} />}
           </Link>
           <Link to="/cobrar" className={styles.todo} data-ripple="">
             <span className={`${styles.rowIcon} ${vencidas ? styles.toneWarning : styles.tonePositive}`}>
@@ -90,7 +99,7 @@ export function InicioOla1() {
                 {vencidas ? ` · ${vencidas} vencido${vencidas === 1 ? '' : 's'}` : ''}
               </span>
             </span>
-            <Icon name="chevron_right" size={20} />
+            {xpCobrar > 0 ? <span className={styles.xpChip}>+{xpCobrar} XP</span> : <Icon name="chevron_right" size={20} />}
           </Link>
         </div>
       </motion.section>

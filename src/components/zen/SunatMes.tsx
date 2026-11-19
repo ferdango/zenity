@@ -4,6 +4,7 @@ import { HOY } from '../../config/demo'
 import { resumenSunat } from '../../domain/sunat'
 import { fmtDiaMes } from '../../domain/util'
 import { ease, fadeUp } from '../../lib/motion'
+import { marcarHito } from '../../state/demoStore'
 import { useZen } from '../../state/useZen'
 import { Icon } from '../Icon'
 import { Money, Pill } from './index'
@@ -46,7 +47,11 @@ export function SunatMes() {
           data-ripple=""
           aria-expanded={abierto}
           aria-controls="sunat-detalle"
-          onClick={() => setAbierto(!abierto)}
+          onClick={() => {
+            // Camino de aprendizaje: «Revisa tu pago a SUNAT»
+            if (!abierto) marcarHito(a.business.id, 'sunat')
+            setAbierto(!abierto)
+          }}
         >
           <span className={`${styles.rowIcon} ${styles.toneWarning}`}>
             <Icon name="account_balance" size={20} />

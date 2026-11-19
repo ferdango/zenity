@@ -19,7 +19,7 @@ import { businessName } from '../data/businesses'
 import { MONTHS, MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
-import { guardarProyeccion, setOverride } from '../state/demoStore'
+import { guardarProyeccion, marcarHito, setOverride } from '../state/demoStore'
 import { useCaja, useZen } from '../state/useZen'
 
 type Dias = '30' | '60' | '90'
@@ -53,6 +53,11 @@ export function Caja() {
   const [verTodo, setVerTodo] = useState(false)
   const caja = useCaja(Number(dias))
   const businessId = a?.business.id
+
+  // Camino de aprendizaje: «Mira tu caja de los próximos meses»
+  useEffect(() => {
+    if (businessId) marcarHito(businessId, 'caja')
+  }, [businessId])
   const alerta = caja?.alerta
   // Métricas: la vista de caja (sin montos) y la proyección a 7 días para medir su error después
   useEffect(() => {

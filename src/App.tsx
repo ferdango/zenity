@@ -3,6 +3,7 @@ import { type ReactNode, useLayoutEffect, useRef } from 'react'
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router'
 import { Confetti } from './components/Confetti'
 import { Toaster } from './components/Toaster'
+import { XpBurst } from './components/XpBurst'
 import { AppShell } from './layouts/AppShell'
 import { RouteMotion } from './layouts/RouteMotion'
 import { saveScroll, useRouteTransition } from './layouts/transitions'
@@ -19,6 +20,7 @@ import { DatosEntrenamiento } from './screens/DatosEntrenamiento'
 import { Mas } from './screens/Mas'
 import { Metricas } from './screens/Metricas'
 import { Personal } from './screens/Personal'
+import { Progreso } from './screens/Progreso'
 import { PorRevisar } from './screens/PorRevisar'
 import { Regimen } from './screens/Regimen'
 import { Chat } from './screens/Chat'
@@ -38,7 +40,7 @@ import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Pantallas de la primera ola que viven dentro del layout del dueño. */
-const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
+const OLA1_PATHS = ['/progreso', '/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
@@ -98,6 +100,7 @@ function AnimatedRoutes() {
           <Route path="/revisado" element={<Review />} />
           <Route path="/conciliacion" element={<Conciliacion />} />
           <Route path="/personal" element={<Personal />} />
+          <Route path="/progreso" element={<Progreso />} />
           <Route path="/cobrar" element={<Cobrar />} />
           <Route path="/caja" element={<Caja />} />
           <Route path="/regimen" element={<Regimen />} />
@@ -128,6 +131,7 @@ export function App() {
           <AnimatedRoutes />
           <Toaster />
           <Confetti />
+          <XpBurst />
         </AppStateProvider>
       </MotionConfig>
     </HashRouter>
