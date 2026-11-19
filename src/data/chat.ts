@@ -1,4 +1,6 @@
+import { saldoEnCuentas, tipoConexion } from '../domain/conexiones'
 import { formatMoney } from '../lib/format'
+import { getSource } from './sources'
 import type { Ledger } from './ledger'
 import type { Connection, RichText } from './mock'
 import { accountTotals, categoryTotals, getPeriod, getTransactions, periodLabel, totals, variation } from './selectors'
@@ -173,16 +175,26 @@ export function answer(question: string, { connections, periodKey, ledger, busin
   }
 
   if (q.includes('consolidado') || q.includes('todas mis cuentas') || q.includes('general')) {
-    const total = connections.reduce((acc, c) => acc + c.balance, 0)
+    // Solo las cuentas guardan plata: los canales de venta ya se abonaron en ellas y las tarjetas son deuda
+    const tipo = (c: Connection) => tipoConexion(c, getSource(c.sourceId)?.kind)
+    const cuentas = connections.filter((c) => tipo(c) === 'cuenta')
+    const total = saldoEnCuentas(connections.map((c) => ({ balance: c.balance, tipo: tipo(c) })))
+    const otras = connections.length - cuentas.length
     return [
       {
         type: 'p',
-        text: ['Este es el consolidado de las ', { b: `${connections.length} cuentas conectadas` }, ' de ', { b: business }, ':'],
+        text: [
+          'Este es el saldo de las ',
+          { b: `${cuentas.length} cuenta${cuentas.length === 1 ? '' : 's'}` },
+          ' de ',
+          { b: business },
+          otras ? '. Tus canales de venta y tarjetas no se suman: lo que cobras por Yape o el POS ya está en tus cuentas.' : ':',
+        ],
       },
       {
         type: 'table',
         head: ['Cuenta', 'Saldo'],
-        rows: connections.map((c) => [c.name, m(c.balance)]),
+        rows: cuentas.map((c) => [c.name, m(c.balance)]),
         foot: ['Total', m(total)],
       },
       {

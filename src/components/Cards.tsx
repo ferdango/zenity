@@ -7,6 +7,7 @@ import { businessName } from '../data/businesses'
 import type { Connection } from '../data/mock'
 import { cn } from '../lib/cn'
 import { useApp } from '../state/context'
+import { tipoDe, useCobradoCanal } from '../state/useConexiones'
 import { Amount } from './Amount'
 import styles from './Cards.module.css'
 import { ApiGlyph, SheetGlyph } from './Glyphs'
@@ -73,6 +74,8 @@ export function AccountCard({ connection }: { connection: Connection }) {
   const holder = useHolder(connection)
   const isCard = Boolean(connection.last4 && connection.holder)
   const isNew = Boolean(connection.sourceId)
+  const canal = tipoDe(connection) === 'canal'
+  const cobrado = useCobradoCanal(connection)
   return (
     <Link
       to={`/conexion/${connection.id}`}
@@ -94,14 +97,24 @@ export function AccountCard({ connection }: { connection: Connection }) {
       </span>
       <div className={styles.cardBottom}>
         <div>
-          {isNew && connection.balance === 0 ? (
+          {canal ? (
+            // Un canal de venta no guarda saldo: muestra lo que cobró (ya se abonó en una cuenta)
+            cobrado !== null ? (
+              <>
+                <Amount value={cobrado} className={styles.cardAmount} />
+                <p className={styles.cardHolder}>Cobrado este mes</p>
+              </>
+            ) : (
+              <p className={styles.cardHolder}>Canal de venta</p>
+            )
+          ) : isNew && connection.balance === 0 ? (
             <span className={styles.status}>
               <Icon name="sync" size={14} /> Sincronizando
             </span>
           ) : (
             <Amount value={connection.balance} className={styles.cardAmount} />
           )}
-          {holder && <p className={styles.cardHolder}>{holder}</p>}
+          {holder && !canal && <p className={styles.cardHolder}>{holder}</p>}
         </div>
         <span className={styles.brand}>
           <BrandMark connection={connection} />
@@ -135,6 +148,8 @@ export function CreditCard({ connection }: { connection: Connection }) {
 
   const isCard = Boolean(connection.last4 && connection.holder)
   const holder = useHolder(connection)
+  const canal = tipoDe(connection) === 'canal'
+  const cobrado = useCobradoCanal(connection)
 
   return (
     <div className={styles.creditWrap}>
@@ -167,8 +182,17 @@ export function CreditCard({ connection }: { connection: Connection }) {
         )}
         <div className={styles.cardBottom}>
           <div>
-            <Amount value={connection.balance} className={styles.creditAmount} />
-            {holder && <p className={styles.cardHolder}>{holder}</p>}
+            {canal ? (
+              <>
+                {cobrado !== null && <Amount value={cobrado} className={styles.creditAmount} />}
+                <p className={styles.cardHolder}>{cobrado !== null ? 'Cobrado este mes · se abona en tu cuenta' : 'Canal de venta: se abona en tu cuenta'}</p>
+              </>
+            ) : (
+              <>
+                <Amount value={connection.balance} className={styles.creditAmount} />
+                {holder && <p className={styles.cardHolder}>{holder}</p>}
+              </>
+            )}
           </div>
           <span className={styles.brand} style={{ height: 32 }}>
             <BrandMark connection={connection} size={32} />

@@ -978,6 +978,24 @@ textarea.input {
   transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
+/* Nota explicativa con ícono (p. ej. por qué los canales no se suman al saldo) */
+.nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+.nota > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 /* XP que da una tarea (estilo Duolingo) */
 .xpChip {
   display: inline-flex;
