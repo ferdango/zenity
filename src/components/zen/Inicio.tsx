@@ -5,10 +5,11 @@ import { totalCobranzas } from '../../domain/collections'
 import { fadeUp } from '../../lib/motion'
 import { useApp } from '../../state/context'
 import { inicioCompleto } from '../../state/demoStore'
-import { useCaja, useCobranzas, useLecciones, useZen } from '../../state/useZen'
+import { useCaja, useCobranzas, useDecision, useLecciones, useZen } from '../../state/useZen'
 import { XP } from '../../domain/progreso'
 import { Icon } from '../Icon'
 import { Avance } from './Avance'
+import { DecisionSemana } from './DecisionSemana'
 import { LessonCard, Money } from './index'
 import { SunatMes } from './SunatMes'
 import styles from './zen.module.css'
@@ -24,6 +25,7 @@ export function InicioOla1() {
   const caja = useCaja(60)
   const cobranzas = useCobranzas()
   const lecciones = useLecciones()
+  const decision = useDecision()
   if (!a) return null
   const porRevisar = a.porRevisar.length
   const vencidas = cobranzas.filter((c) => c.diasVencidos > 0).length
@@ -52,7 +54,11 @@ export function InicioOla1() {
         </motion.div>
       )}
 
-      {caja?.alerta && (
+      {/* La decisión de la semana va antes que todo lo demás: es lo que el dueño hace hoy con sus números */}
+      <DecisionSemana />
+
+      {/* Si la decisión ya es sobre la caja, el aviso de caja estaría repetido */}
+      {caja?.alerta && decision?.decision.tipo !== 'caja' && (
         <motion.div variants={fadeUp} style={{ display: 'grid' }}>
           <Link to="/caja" className={caja.alerta.cruza === 'CERO' ? styles.bannerDanger : styles.bannerWarn} data-tour="alerta-caja">
             <span className={styles.bannerIcon}>

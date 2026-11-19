@@ -74,6 +74,7 @@ export type AnalyticsEvent =
   | 'datos_permiso_revocado'
   | 'datos_permiso_restaurado'
   | 'cobro_simulado_deshecho'
+  | 'decision_tomada'
   | 'planilla_confirmada'
   | 'configuracion_omitida'
 

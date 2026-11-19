@@ -1,7 +1,7 @@
 /** «Tu negocio en esta unidad»: el número real que mueve cada unidad del camino. */
 import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
-import { type EntradaIndicadores, indicadores } from './indicadores.ts'
+import { cambiosDelNegocio, type EntradaIndicadores, indicadores } from './indicadores.ts'
 
 const base: EntradaIndicadores = {
   conciliado: 0.62,
@@ -61,3 +61,26 @@ describe('indicadores del camino', () => {
     assert.equal(i.progreso, null)
   })
 })
+
+describe('tu semana: qué cambió en los números', () => {
+  test('solo lista lo que se movió, con su dirección', () => {
+    const ahora: EntradaIndicadores = { ...base, conciliado: 0.7, vencido: 1180, caja: { minimo: 7684, colchon: 7659 }, sueldoDueno: 2500 }
+    const c = cambiosDelNegocio(base, ahora)
+    assert.deepEqual(
+      c.map((x) => [x.etiqueta, x.antes, x.ahora, x.mejoro]),
+      [
+        ['Conciliado del mes', '62%', '70%', true],
+        ['Vencido por cobrar', 'S/ 4,130', 'S/ 1,180', true],
+        ['Punto más bajo de tu caja', 'S/ 4,734', 'S/ 7,684', true],
+        ['Sueldo de dueño', 'sin definir', 'S/ 2,500', true],
+      ],
+    )
+  })
+
+  test('sin cambios, la lista queda vacía; si algo empeora, se marca', () => {
+    assert.deepEqual(cambiosDelNegocio(base, base), [])
+    const peor = cambiosDelNegocio(base, { ...base, vencido: 5000 })
+    assert.equal(peor[0].mejoro, false)
+  })
+})
+

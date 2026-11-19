@@ -9,6 +9,7 @@ import { AHORA, HOY } from '../config/demo'
 import { CONSENTIMIENTO_DATOS, type FuenteDatos } from '../config/legal'
 import { track } from '../lib/analytics'
 import { loadBusinessData } from '../data/fuentes'
+import type { Decision, OpcionDecision } from '../domain/decision'
 import { analyze, type Analysis } from '../domain/engine'
 import { type Canje, codigoCanje, disponibilidad, PRODUCTOS } from '../domain/loyalty'
 import type {
@@ -100,6 +101,17 @@ export interface DemoState {
   recompensas: string[]
   /** Conciliaciones de confianza media que el dueño confirmó (o marcó para consultar) */
   confirmados: Record<string, 'OK' | 'CONSULTA'>
+  /** «Decisión de la semana» tomada, por negocio y decisión («negocio:caja@2026-11-16») */
+  decisiones: Record<string, DecisionTomada>
+}
+
+export interface DecisionTomada {
+  opcion: string
+  /** Eligió la opción con mejor resultado para el negocio */
+  mejor: boolean
+  ts: string
+  /** La decisión tal como se vio al elegir: queda fija toda la semana aunque cambien los números */
+  decision: Decision
 }
 
 const KEY = 'zenity.demo.v1'
@@ -127,8 +139,12 @@ function initial(): DemoState {
     canjes: [],
     recompensas: [],
     confirmados: {},
+    decisiones: {},
   }
 }
+
+/** El punto de partida de la demo (sin nada de lo que hizo el dueño): sirve para comparar «antes y ahora». */
+export const ESTADO_INICIAL: DemoState = initial()
 
 function load(): DemoState {
   const stored = readStorage<Partial<DemoState> | null>(KEY, null)
@@ -458,6 +474,25 @@ export function marcarHito(businessId: string, hito: 'caja' | 'sunat') {
   const clave = `${businessId}:${hito}`
   if (getDemoState().hitos[clave]) return
   setDemoState((s) => ({ ...s, hitos: { ...s.hitos, [clave]: AHORA } }))
+}
+
+/* ── Decisión de la semana ────────────────────────────────────── */
+
+/** Guarda la decisión de la semana (da XP una vez por semana y negocio). */
+export function tomarDecision(businessId: string, decision: Decision, opcion: OpcionDecision) {
+  const clave = `${businessId}:${decision.id}`
+  setDemoState((s) => ({ ...s, decisiones: { ...s.decisiones, [clave]: { opcion: opcion.id, mejor: opcion.mejor, ts: AHORA, decision } } }))
+  track('decision_tomada', { tipo: decision.tipo, mejor: opcion.mejor })
+}
+
+/** Vuelve a abrir la decisión para elegir otra opción. */
+export function cambiarDecision(businessId: string, decisionId: string) {
+  const clave = `${businessId}:${decisionId}`
+  setDemoState((s) => {
+    const decisiones = { ...s.decisiones }
+    delete decisiones[clave]
+    return { ...s, decisiones }
+  })
 }
 
 /* ── Loyalty: tienda de puntos y recompensas ──────────────────── */

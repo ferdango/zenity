@@ -319,15 +319,20 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
     acciones.push({ id: 'cobrar', texto: `Cobra ${vencidas.length === 1 ? 'tu factura vencida' : `tus ${vencidas.length} facturas vencidas`} (S/ ${total.toLocaleString('es-PE', { minimumFractionDigits: 2 })})`, to: '/cobrar' })
   }
   if (alerta) {
-    const mover = eventos
-      .filter((e) => (e.fuente === 'POR_PAGAR' || (e.fuente === 'RECURRENTE' && /S\.A\.C|S\.A\.|E\.I\.R\.L/.test(e.concepto))) && e.fecha <= alerta.fecha && diffDays(e.fecha, alerta.fecha) <= 15)
-      .sort((x, y) => x.monto - y.monto)[0]
+    const mover = pagoParaMover(eventos, alerta)
     if (mover) {
       acciones.push({ id: 'mover', texto: `Mueve el pago a ${mover.concepto.replace(/^Pago a /, '')} para después del ${fmtDiaMes(addDays(alerta.fecha, 1))}` })
     }
   }
 
   return { saldoInicial, colchon, eventos, serie, minimo, alerta, acciones }
+}
+
+/** El pago a un proveedor más grande en los 15 días antes del bache: el que conviene correr de fecha. */
+export function pagoParaMover(eventos: CashEvent[], alerta: CashAlert): CashEvent | undefined {
+  return eventos
+    .filter((e) => (e.fuente === 'POR_PAGAR' || (e.fuente === 'RECURRENTE' && /S\.A\.C|S\.A\.|E\.I\.R\.L/.test(e.concepto))) && e.fecha <= alerta.fecha && diffDays(e.fecha, alerta.fecha) <= 15)
+    .sort((x, y) => x.monto - y.monto)[0]
 }
 
 /** Primer y último día en que el saldo base queda bajo el colchón (null si nunca baja). */

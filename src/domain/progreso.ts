@@ -22,6 +22,8 @@ export interface EntradaProgreso {
   hitos: Record<string, string>
   /** XP extra de las recompensas reclamadas (logros) */
   bonus?: number
+  /** Decisiones de la semana tomadas («negocio:decisión» → detalle) */
+  decisiones?: Record<string, unknown>
 }
 
 /** XP por cada cosa que hace el dueño. */
@@ -37,6 +39,7 @@ export const XP = {
   confirmado: 5,
   regimen: 15,
   hito: 10,
+  decision: 15,
 } as const
 
 /**
@@ -99,6 +102,7 @@ export function xpDeHoy(e: EntradaProgreso): number {
     Object.keys(e.confirmados).length * XP.confirmado +
     Object.values(e.regimenRevisado).filter(Boolean).length * XP.regimen +
     Object.keys(e.hitos).length * XP.hito +
+    Object.keys(e.decisiones ?? {}).length * XP.decision +
     (e.bonus ?? 0)
   )
 }
