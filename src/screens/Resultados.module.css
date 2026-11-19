@@ -1,0 +1,409 @@
+/* «Estado de resultados»: la respuesta arriba, la cascada y el mes a mes. */
+
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 4px var(--z-gutter) 40px;
+}
+
+.meses {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px;
+  margin: -2px;
+  scrollbar-width: none;
+}
+
+.meses > * {
+  flex-shrink: 0;
+}
+
+.mes {
+  display: grid;
+  gap: 12px;
+}
+
+/* ── La respuesta en la banda violeta ───────────────────────────── */
+.hero {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 20px;
+  border-radius: var(--z-radius-2xl);
+  background: var(--z-hero-bg);
+  color: var(--z-on-hero);
+  box-shadow: var(--z-float-shadow);
+}
+
+.heroLabel {
+  font-size: 0.875rem;
+  color: var(--z-on-hero-muted);
+}
+
+.heroAmount {
+  font-size: clamp(2rem, 9vw, 2.625rem);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.heroFrase {
+  font-size: 1rem;
+  line-height: 1.4rem;
+}
+
+.heroPill {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 4px 10px;
+  border-radius: var(--z-radius-full);
+  background: rgb(255 179 193 / 0.2);
+  color: #ffd2db;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.heroPill[data-sube] {
+  background: rgb(159 240 192 / 0.18);
+  color: #b9f5d2;
+}
+
+/* ── La cascada ─────────────────────────────────────────────────── */
+.card {
+  display: grid;
+  padding: 6px 0;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+  overflow: hidden;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'signo texto monto'
+    '. barra barra';
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  color: var(--z-on-surface);
+}
+
+.signo {
+  grid-area: signo;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--z-on-surface-low);
+  text-align: center;
+}
+
+.filaTexto {
+  grid-area: texto;
+  display: grid;
+  min-width: 0;
+}
+
+.filaLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+}
+
+.filaNota {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.filaMonto {
+  grid-area: monto;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.barra {
+  grid-area: barra;
+  display: block;
+  height: 6px;
+  border-radius: var(--z-radius-full);
+  background: var(--z-surface-high);
+  overflow: hidden;
+}
+
+.barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--z-primary);
+  transition: width var(--z-dur-long) var(--z-ease-emphasized);
+}
+
+.fila[data-tipo='resta'] .barra > span {
+  background: var(--z-outline);
+}
+
+.fila[data-tipo='resta'] .filaMonto {
+  color: var(--z-on-surface-variant);
+}
+
+/* Subtotales y total: resaltados, verdes si ganan y coral si pierden */
+.fila[data-tipo='subtotal'],
+.fila[data-tipo='total'] {
+  background: var(--z-surface-low);
+  border-block: 1px solid var(--z-divider);
+}
+
+.fila[data-tipo='subtotal'] .filaLabel,
+.fila[data-tipo='total'] .filaLabel {
+  font-weight: 700;
+}
+
+.fila[data-tipo='subtotal'] .barra > span,
+.fila[data-tipo='total'] .barra > span {
+  background: var(--z-positive);
+}
+
+.fila[data-tipo='total'] .filaMonto {
+  font-size: 1.125rem;
+  color: var(--z-positive);
+}
+
+.fila[data-negativo] .barra > span {
+  background: var(--z-negative);
+}
+
+.fila[data-tipo='total'][data-negativo] .filaMonto,
+.fila[data-tipo='subtotal'][data-negativo] .filaMonto {
+  color: var(--z-negative);
+}
+
+.gastos {
+  display: grid;
+}
+
+.gastos > button:hover {
+  background: var(--z-surface-low);
+}
+
+.detalle {
+  display: grid;
+  overflow: hidden;
+  margin: 0 16px 6px 42px;
+  list-style: none;
+}
+
+.detalle li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--z-divider);
+  font-size: 0.8125rem;
+  color: var(--z-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── No son gastos ─────────────────────────────────────────────── */
+.fuera {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.fueraFila {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fueraFila > span:last-child {
+  font-weight: 700;
+}
+
+.fuera p {
+  font-size: 0.8125rem;
+  opacity: 0.9;
+}
+
+/* ── Cómo se calcula ───────────────────────────────────────────── */
+.como {
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+}
+
+.como summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.como summary::-webkit-details-marker {
+  display: none;
+}
+
+.como summary > :global(.z-icon):first-child {
+  color: var(--z-primary);
+}
+
+.como summary > :global(.z-icon):last-child {
+  margin-left: auto;
+  transition: transform var(--z-dur-short) var(--z-ease-standard);
+}
+
+.como[open] summary > :global(.z-icon):last-child {
+  transform: rotate(180deg);
+}
+
+.como ul {
+  display: grid;
+  gap: 8px;
+  padding: 0 16px 16px 40px;
+  font-size: 0.875rem;
+  line-height: 1.3rem;
+  color: var(--z-on-surface-variant);
+}
+
+/* ── Mes a mes ─────────────────────────────────────────────────── */
+.historico {
+  display: grid;
+  gap: 12px;
+}
+
+.historicoFrase {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  color: var(--z-on-surface-variant);
+}
+
+.barras {
+  display: grid;
+  gap: 6px;
+  padding: 12px 8px 10px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+}
+
+.barras svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.barrasEtiquetas {
+  display: grid;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.barrasEtiquetas > span {
+  display: grid;
+  min-width: 0;
+}
+
+.barrasEtiquetas strong {
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--z-positive);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.barrasEtiquetas strong[data-negativo] {
+  color: var(--z-negative);
+}
+
+.barrasEtiquetas > span[data-elegido] {
+  color: var(--z-on-surface);
+  font-weight: 700;
+}
+
+.barrasNota {
+  font-size: 0.75rem;
+  color: var(--z-on-surface-low);
+  text-align: center;
+}
+
+.tabla {
+  display: grid;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  overflow: hidden;
+}
+
+.tablaFila {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.7fr);
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  border-top: 1px solid var(--z-divider);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--z-on-surface);
+}
+
+.tablaFila > :first-child {
+  text-align: left;
+}
+
+.tablaFila small {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--z-on-surface-low);
+}
+
+.tablaFila[data-cabecera] {
+  border-top: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--z-on-surface-low);
+}
+
+.tablaFila[data-elegido] {
+  background: var(--z-primary-container);
+  color: var(--z-on-primary-container);
+}
+
+.tablaFila [data-negativo] {
+  color: var(--z-negative);
+}
+
+.tablaFila[data-elegido] [data-negativo] {
+  color: inherit;
+}

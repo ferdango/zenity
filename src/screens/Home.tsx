@@ -21,6 +21,7 @@ import { formatDue, sirePeriod, totalAPagar, vencimiento } from '../data/sire'
 import { getPeriod, getTransactions, periodLabel, variation } from '../data/selectors'
 import { TOUR_STEPS } from '../data/tour'
 import { FEATURES } from '../lib/features'
+import { MONTHS } from '../lib/format'
 import { GREETING, getDayPart } from '../lib/greeting'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useMediaQuery } from '../lib/useMediaQuery'
@@ -28,7 +29,7 @@ import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
 import { useAvisos } from '../state/useAvisos'
-import { useZen } from '../state/useZen'
+import { useResultados, useZen } from '../state/useZen'
 import { fmtFecha } from '../domain/util'
 import { ChatPanel } from './Chat'
 import styles from './Home.module.css'
@@ -160,6 +161,9 @@ export function Home() {
   // Saldo de la banda violeta: el de la cuenta BCP (demo) o, si no hay, el de las conexiones
   const { a } = useZen()
   const saldoInicio = a ? { saldo: a.saldoActual, fecha: fmtFecha(HOY) } : null
+  // Último mes cerrado del estado de resultados (el mes en curso aún no tiene todos sus pagos)
+  const resultados = useResultados()
+  const cerrado = [...resultados].reverse().find((e) => !e.enCurso) ?? null
   // En escritorio, el chat «Pregúntale a Zenity» vive a la derecha del Inicio
   const chatPanel = useMediaQuery(CHAT_PANEL_QUERY)
   const bandRef = useRef<HTMLElement>(null)
@@ -171,7 +175,6 @@ export function Home() {
   const month = periodLabel(period)
   const greeting = GREETING[getDayPart()]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
-  const margen = period.ingresos ? Math.round((neto / period.ingresos) * 100) : null
   const name = businessName(business)
   const saldoConexiones = connections.reduce((sum, c) => sum + c.balance, 0)
   // Insights del negocio: los del Figma para el negocio base; para el resto, generados de sus datos
@@ -233,14 +236,25 @@ export function Home() {
         />
       </motion.div>
       <motion.div variants={fadeUp} className={styles.tileWide}>
-        <SummaryTile
-          kind="total"
-          label="Utilidad"
-          value={neto}
-          caption={`Te queda en ${month.toLowerCase()}`}
-          to="/movimientos/todo"
-          status={margen === null ? undefined : { label: `Margen ${margen}%`, negative: neto < 0 }}
-        />
+        {/* La utilidad real sale del estado de resultados (sin IGV ni retiros); entró menos salió es solo el flujo */}
+        {cerrado ? (
+          <SummaryTile
+            kind="total"
+            label={`Utilidad de ${MONTHS[Number(cerrado.mes.slice(5, 7)) - 1].toLowerCase()}`}
+            value={cerrado.utilidadNeta}
+            caption="Lo que ganaste de verdad · estado de resultados"
+            to="/resultados"
+            status={cerrado.margenNeto === null ? undefined : { label: `Margen ${Math.round(cerrado.margenNeto * 100)}%`, negative: cerrado.utilidadNeta < 0 }}
+          />
+        ) : (
+          <SummaryTile
+            kind="total"
+            label="Flujo del mes"
+            value={neto}
+            caption={`Entró menos salió en ${month.toLowerCase()}`}
+            to="/movimientos/todo"
+          />
+        )}
       </motion.div>
       {FEATURES.sunatSire && (
         <motion.div variants={fadeUp}>

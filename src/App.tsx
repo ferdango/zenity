@@ -22,6 +22,7 @@ import { Metricas } from './screens/Metricas'
 import { Personal } from './screens/Personal'
 import { Progreso } from './screens/Progreso'
 import { Recompensas } from './screens/Recompensas'
+import { Resultados } from './screens/Resultados'
 import { Tienda } from './screens/Tienda'
 import { PorRevisar } from './screens/PorRevisar'
 import { Regimen } from './screens/Regimen'
@@ -42,7 +43,7 @@ import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Pantallas de la primera ola que viven dentro del layout del dueño. */
-const OLA1_PATHS = ['/progreso', '/tienda', '/recompensas', '/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
+const OLA1_PATHS = ['/resultados', '/progreso', '/tienda', '/recompensas', '/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
@@ -105,6 +106,7 @@ function AnimatedRoutes() {
           <Route path="/progreso" element={<Progreso />} />
           <Route path="/tienda" element={<Tienda />} />
           <Route path="/recompensas" element={<Recompensas />} />
+          <Route path="/resultados" element={<Resultados />} />
           <Route path="/cobrar" element={<Cobrar />} />
           <Route path="/caja" element={<Caja />} />
           <Route path="/regimen" element={<Regimen />} />

@@ -470,7 +470,7 @@ export function inicioCompleto(s: DemoState, businessId: string): boolean {
 }
 
 /** Marca un hito del camino de aprendizaje (una sola vez por negocio). */
-export function marcarHito(businessId: string, hito: 'caja' | 'sunat') {
+export function marcarHito(businessId: string, hito: 'caja' | 'sunat' | 'resultados') {
   const clave = `${businessId}:${hito}`
   if (getDemoState().hitos[clave]) return
   setDemoState((s) => ({ ...s, hitos: { ...s.hitos, [clave]: AHORA } }))

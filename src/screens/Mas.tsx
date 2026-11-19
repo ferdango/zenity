@@ -32,6 +32,7 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Tu negocio" />
           <div className={styles.list}>
+            <LinkRow tone="positive" to="/resultados" icon="receipt_long" title="Estado de resultados" sub="Cuánto ganas de verdad, mes a mes" />
             <LinkRow
               tone="warning"
               to="/progreso"
