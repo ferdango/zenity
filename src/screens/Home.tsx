@@ -32,6 +32,7 @@ import { useSire } from '../lib/useSire'
 import { track } from '../lib/analytics'
 import { useApp } from '../state/context'
 import { useAvisos } from '../state/useAvisos'
+import { saldoReal } from '../state/useConexiones'
 import { useResultados, useZen } from '../state/useZen'
 import { fmtFecha } from '../domain/util'
 import { ChatPanel } from './Chat'
@@ -179,7 +180,8 @@ export function Home() {
   const greeting = GREETING[getDayPart()]
   const neto = Math.round((period.ingresos - period.egresos) * 100) / 100
   const name = businessName(business)
-  const saldoConexiones = connections.reduce((sum, c) => sum + c.balance, 0)
+  // Saldo real: solo las cuentas (los canales de venta ya se abonaron en ellas)
+  const saldoConexiones = saldoReal(connections)
   // Insights del negocio: los del Figma para el negocio base; para el resto, generados de sus datos
   const insights =
     ledger.insights ??
@@ -301,7 +303,7 @@ export function Home() {
               <h1 className={styles.bandHello} data-tour="greeting">
                 {greeting.text}, {profile.firstName}
               </h1>
-              <span className={styles.bandLabel}>{saldoInicio ? 'Saldo actual · BCP cuenta corriente' : 'Saldo en tus conexiones'}</span>
+              <span className={styles.bandLabel}>{saldoInicio ? 'Saldo actual · BCP cuenta corriente' : 'Saldo en tus cuentas'}</span>
               <Money animated value={saldoInicio?.saldo ?? saldoConexiones} className={styles.bandAmount} />
               <div className={styles.bandPills}>
                 {saldoInicio && <OrigenSaldo className={styles.bandPill} fuente="BCP cuenta corriente" />}
@@ -383,7 +385,7 @@ export function Home() {
             {!ledger.empty && (
               <>
                 <motion.h2 className={styles.monthTitle} variants={fadeUp}>
-                  Tus cuentas
+                  Tus cuentas y canales de venta
                 </motion.h2>
                 <motion.div variants={fadeUp} data-tour="accounts">
                   <Carousel />

@@ -12,6 +12,8 @@ import {
   type Transaction,
 } from './mock'
 import { seeded } from './registry'
+import { getSource } from './sources'
+import { saldoEnCuentas, tipoConexion } from '../domain/conexiones'
 
 /**
  * Datos financieros de un negocio: la serie mensual, los movimientos del último mes
@@ -107,7 +109,8 @@ function baseLedger(business: Business): Ledger {
   const ingresos = round2(base.reduce((acc, t) => (t.amount > 0 ? acc + t.amount : acc), 0))
   const egresos = round2(base.reduce((acc, t) => (t.amount < 0 ? acc - t.amount : acc), 0))
   const last = PERIODS[PERIODS.length - 1]
-  const synced = round2(connections.reduce((acc, c) => acc + c.balance, 0))
+  // Solo cuentas: lo cobrado por canales de venta ya está en ellas y las tarjetas son deuda
+  const synced = saldoEnCuentas(connections.map((c) => ({ balance: c.balance, tipo: tipoConexion(c, getSource(c.sourceId)?.kind) })))
   const balance = synced > 0 ? synced : round2(last.balance * k)
   const wobble = () => 0.82 + rand() * 0.36
 

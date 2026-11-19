@@ -7,6 +7,7 @@ import styles from './AccountSelector.module.css'
 import { Amount } from './Amount'
 import { BrandAvatar } from './Avatars'
 import { Icon } from './Icon'
+import { saldoReal } from '../state/useConexiones'
 
 interface AccountSelectorProps {
   connections: Connection[]
@@ -44,7 +45,8 @@ export function AccountSelector({ connections, value, onChange }: AccountSelecto
   const [open, setOpen] = useState(false)
   const listId = useId()
   const current = connections.find((c) => c.id === value) ?? null
-  const total = connections.reduce((acc, c) => acc + c.balance, 0)
+  // Total sin duplicar: solo cuentas (los canales de venta ya se abonaron en ellas)
+  const total = saldoReal(connections)
 
   return (
     <div className={cn(styles.selector, open && styles.open)}>
