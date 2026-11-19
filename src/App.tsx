@@ -10,19 +10,14 @@ import { AddBusiness } from './screens/AddBusiness'
 import { AddConnection } from './screens/AddConnection'
 import { Analyzing } from './screens/Analyzing'
 import { Aprende } from './screens/Aprende'
-import { Bcp, BcpExpediente } from './screens/Bcp'
 import { Bienvenida, PermisosDatos } from './screens/Bienvenida'
 import { Caja } from './screens/Caja'
 import { CierreCaja } from './screens/CierreCaja'
 import { Cobrar } from './screens/Cobrar'
 import { Conciliacion } from './screens/Conciliacion'
-import { Contador } from './screens/Contador'
-import { Credito } from './screens/Credito'
-import { ContadorCliente } from './screens/ContadorCliente'
 import { DatosEntrenamiento } from './screens/DatosEntrenamiento'
 import { Mas } from './screens/Mas'
 import { Metricas } from './screens/Metricas'
-import { MiContador } from './screens/MiContador'
 import { Personal } from './screens/Personal'
 import { PorRevisar } from './screens/PorRevisar'
 import { Regimen } from './screens/Regimen'
@@ -43,7 +38,7 @@ import { VerifyOtp } from './screens/VerifyOtp'
 import { AppStateProvider } from './state/AppState'
 
 /** Pantallas de la primera ola que viven dentro del layout del dueño. */
-const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
+const OLA1_PATHS = ['/revisar', '/revisado', '/caja', '/cobrar', '/mas', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
 /** Rutas que viven dentro del layout con navegación (barra lateral / inferior). */
 function isShellPath(path: string) {
@@ -108,9 +103,7 @@ function AnimatedRoutes() {
           <Route path="/regimen" element={<Regimen />} />
           <Route path="/aprende" element={<Aprende />} />
           <Route path="/datos" element={<DatosEntrenamiento />} />
-          <Route path="/mi-contador" element={<MiContador />} />
           <Route path="/mas" element={<Mas />} />
-          <Route path="/credito" element={<Credito />} />
           <Route path="/cierre-caja" element={<CierreCaja />} />
           <Route path="/permisos" element={<PermisosDatos />} />
           <Route path="/metricas" element={<Metricas />} />
@@ -119,10 +112,6 @@ function AnimatedRoutes() {
           <Route path="/negocios/nuevo" element={<AddBusiness />} />
           <Route path="/conexion/:id" element={<ConnectionDetail />} />
         </Route>
-        <Route path="/contador" element={screen(<Contador />)} />
-        <Route path="/contador/:id" element={screen(<ContadorCliente />)} />
-        <Route path="/bcp" element={screen(<Bcp />)} />
-        <Route path="/bcp/:id" element={screen(<BcpExpediente />)} />
         <Route path="/movimientos" element={<Navigate to="/movimientos/todo" replace />} />
         <Route path="/sunat" element={<Navigate to="/sunat/balance" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

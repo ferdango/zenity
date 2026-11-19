@@ -34,7 +34,6 @@ const FUENTE_LABEL: Record<FuenteCaja, string> = {
   IMPUESTOS: 'Impuestos',
   GRATIFICACION: 'Gratificación',
   CTS: 'CTS',
-  CREDITO: 'Crédito BCP',
   EFECTIVO: 'Efectivo en caja',
 }
 
@@ -143,7 +142,7 @@ export function Caja() {
                 ac.to ? (
                   <Link key={ac.id} to={ac.to} className={`${styles.row} ${styles.rowWrap}`} data-ripple="">
                     <span className={styles.rowIcon}>
-                      <Icon name={ac.id === 'capital' ? 'credit_score' : 'payments'} size={20} />
+                      <Icon name="payments" size={20} />
                     </span>
                     <span className={styles.rowText}>
                       <span className={styles.rowTitle}>{ac.texto}</span>

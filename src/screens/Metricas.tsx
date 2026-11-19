@@ -5,12 +5,11 @@ import { TopBar } from '../components/TopBar'
 import { NoDemoData, Pill, SectionHead } from '../components/zen'
 import { TONE_CLASS, type Tone } from '../components/zen/tone'
 import styles from '../components/zen/zen.module.css'
-import { CONTADOR_DEMO, HOY } from '../config/demo'
+import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
-import { CARTERA_RESUMIDA, SEED_IDS } from '../data/seed'
 import { diasPromedioCobro } from '../domain/collections'
 import { resumenMes } from '../domain/engine'
-import { cobrosTrasRecordatorio, diasDeCierre, errorProyecciones, sinIntervencion } from '../domain/metricas'
+import { cobrosTrasRecordatorio, errorProyecciones, sinIntervencion } from '../domain/metricas'
 import { fmtFecha, fmtPct } from '../domain/util'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
@@ -58,15 +57,10 @@ export function Metricas() {
   const auto = sinIntervencion(a, demo.corrections, mes)
   const correcciones = demo.corrections.filter((c) => c.businessId === businessId)
   const rubros = new Set(demo.corrections.map((c) => c.rubro)).size
-  const actividadContador = demo.comments.some((c) => c.autor === 'CONTADOR') || Object.keys(demo.pcge).length > 0 || Object.keys(demo.mesesCerrados).length > 0
-  const clientes = SEED_IDS.length + CARTERA_RESUMIDA.length
-  const sol = demo.credito[businessId]?.solicitud
-  const creditos = Object.values(demo.credito).filter((c) => c.solicitud?.estado === 'ACEPTADA').length
   const cobros = cobrosTrasRecordatorio(a, demo.recordatorios)
   const promedio = diasPromedioCobro(a, mes)
   const errores = errorProyecciones(a, demo.proyecciones, HOY)
   const guardadas = demo.proyecciones.filter((p) => p.businessId === businessId).length
-  const cierresMes = diasDeCierre(businessId, demo.mesesCerrados)
   const lecciones = demo.lessonEvents.filter((e) => e.businessId === businessId)
   const mostradas = new Set(lecciones.filter((e) => e.tipo === 'MOSTRADA').map((e) => e.lessonId)).size
   const leidas = new Set(lecciones.filter((e) => e.tipo === 'LEIDA').map((e) => e.lessonId)).size
@@ -103,22 +97,6 @@ export function Metricas() {
               valor={correcciones.length}
               nota={`${demo.corrections.length} en total, de ${rubros} rubro${rubros === 1 ? '' : 's'}. Se guardan en este navegador; en el piloto, en el servidor`}
               evento="correccion_registrada · regla_creada"
-            />
-            <Fila
-              icon="support_agent"
-              tone="info"
-              titulo="Contadores activos y clientes por contador"
-              valor={actividadContador ? `1 · ${clientes}` : `0 · ${clientes}`}
-              nota={actividadContador ? `${CONTADOR_DEMO.nombre} trabajó en el portal; tiene ${clientes} clientes` : `${CONTADOR_DEMO.nombre} todavía no trabaja en el portal en esta demo`}
-              evento="contador_portal_visto · contador_cuenta_asignada"
-            />
-            <Fila
-              icon="credit_score"
-              tone="positive"
-              titulo="Créditos originados vía Zenity y su mora"
-              valor={`${creditos} · 0%`}
-              nota={sol?.estado === 'ACEPTADA' && sol.desembolso ? `Desembolsado el ${fmtFecha(sol.desembolso)}; ninguna cuota vencida todavía` : 'La mora se mide con las cuotas vencidas sin pagar'}
-              evento="credito_aceptado"
             />
             <Fila
               icon="event_repeat"
@@ -167,19 +145,11 @@ export function Metricas() {
               evento="caja_vista"
             />
             <Fila
-              icon="lock"
-              tone="info"
-              titulo="Días de cierre del contador"
-              valor={cierresMes.length ? `${cierresMes.at(-1)!.dias} días` : '—'}
-              nota={cierresMes.length ? `Último mes cerrado: ${cierresMes.at(-1)!.mes}` : 'Se mide cuando el contador cierra el mes en su portal'}
-              evento="cierre_mes_completado"
-            />
-            <Fila
               icon="balance"
               tone="violet"
               titulo="Simulaciones de régimen revisadas"
               valor={Object.keys(demo.regimenRevisado).length}
-              nota={demo.comments.some((c) => c.movementId === 'simulador') ? 'Al menos una se envió al contador' : 'Negocios que abrieron el simulador'}
+              nota="Negocios que abrieron el simulador"
               evento="regimen_simulado · regimen_revisado"
             />
             <Fila

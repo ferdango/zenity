@@ -20,7 +20,6 @@ const BUSINESS: DemoBusiness = {
   regimenLaboral: 'PEQUENA_REMYPE',
   trabajadores: 4,
   sueldoPromedio: 1400,
-  contadorId: 'contador-luis',
   telefonoWhatsApp: '987123456',
   dueno: { nombres: 'Rosa', apellidos: 'Huamán Quispe' },
   cuentaBcp: '191-2345678-0-12',

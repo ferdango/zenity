@@ -25,7 +25,6 @@ import { FEATURES } from '../lib/features'
 import { MONTHS_SHORT } from '../lib/format'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
-import { CONTADOR, useDemoState } from '../state/demoStore'
 import { useZen } from '../state/useZen'
 
 const ESTADO_ICON: Record<Estado, string> = {
@@ -252,8 +251,6 @@ function Detalle({ a, item }: { a: Analysis; item: EstadoItem }) {
   const yape = m ? a.data.yapePayments.find((y) => y.numeroOperacion === m.numeroOperacion) : undefined
   const lote = match?.posSaleIds?.length ? a.data.posBatches.find((b) => a.data.posSales.some((s) => s.loteId === b.loteId && match.posSaleIds!.includes(s.id))) : undefined
   const estado: Estado = item.kind === 'comprobante' ? a.comprobanteEstado.get(item.id)! : cl!.estado
-  const demo = useDemoState()
-  const notas = demo.comments.filter((c) => c.businessId === a.business.id && c.autor === 'CONTADOR' && movs.some((x) => x.id === c.movementId))
 
   return (
     <div style={{ display: 'grid', gap: 14, padding: '0 0 20px' }}>
@@ -423,19 +420,6 @@ function Detalle({ a, item }: { a: Analysis; item: EstadoItem }) {
       )}
 
       <Why motivo={match?.motivo ?? cl?.motivo ?? (estado === 'COMPROBANTE_SIN_COBRO' ? 'Emitiste este comprobante y todavía no llega su pago al banco.' : 'Recibiste esta factura y todavía no sale su pago del banco.')} defaultOpen />
-
-      {notas.length > 0 && (
-        <div className={styles.card}>
-          <span className={styles.statLabel}>
-            <Icon name="support_agent" size={16} /> Nota de tu contador
-          </span>
-          {notas.map((n) => (
-            <p key={n.id} className={styles.small}>
-              «{n.texto}» <span className={styles.muted}>· {CONTADOR.nombre}</span>
-            </p>
-          ))}
-        </div>
-      )}
 
       {cl && !match && (
         <p className={styles.small}>

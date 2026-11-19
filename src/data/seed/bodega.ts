@@ -19,7 +19,6 @@ const BUSINESS: DemoBusiness = {
   regimenLaboral: 'MICRO_REMYPE',
   trabajadores: 0,
   sueldoPromedio: 0,
-  contadorId: 'contador-luis',
   telefonoWhatsApp: '987123457',
   dueno: { nombres: 'Rosa', apellidos: 'Huamán Quispe' },
   dosVias: true,

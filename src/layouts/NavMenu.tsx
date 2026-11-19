@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { InitialsAvatar } from '../components/Avatars'
 import { BusinessAvatar } from '../components/Business'
 import { Button } from '../components/Button'
@@ -12,7 +12,6 @@ import { FEATURES } from '../lib/features'
 import { fadeUp, spring, staggerContainer } from '../lib/motion'
 import { useSwitchBusiness } from '../lib/useSwitchBusiness'
 import { useApp } from '../state/context'
-import { setPersona } from '../state/demoStore'
 import { useZen } from '../state/useZen'
 import styles from './NavMenu.module.css'
 import { PRIMARY_NAV, REPORTS_NAV, TOOLS_NAV } from './nav'
@@ -33,10 +32,9 @@ function ItemIcon({ icon }: { icon: string }) {
 /** Contenido del menú lateral (Figma: Menu). Se usa en el drawer móvil y en la barra lateral de escritorio. */
 export function NavMenu({ variant, onNavigate }: NavMenuProps) {
   const { pathname } = useLocation()
-  const navigate = useNavigate()
   const { openSheet, profile, business, businesses } = useApp()
-  const { a, demo } = useZen()
-  const porRevisar = (a?.porRevisar.length ?? 0) + demo.comments.filter((c) => c.businessId === business.id && c.pregunta && !c.respondida).length
+  const { a } = useZen()
+  const porRevisar = a?.porRevisar.length ?? 0
   const switchTo = useSwitchBusiness()
   const others = businesses.filter((b) => b.id !== business.id)
   const layoutId = `nav-active-${variant}`
@@ -230,36 +228,6 @@ export function NavMenu({ variant, onNavigate }: NavMenuProps) {
         </motion.ul>
         <p className={styles.sectionLabel}>Demo</p>
         <motion.ul className={styles.group} variants={staggerContainer(0.03, 0.2)} initial="hidden" animate="show">
-          {row(
-            'contador',
-            <>
-              <span className={styles.itemIcon}>
-                <Icon name="switch_account" size={20} />
-              </span>
-              <span>Ver como contador</span>
-            </>,
-            {
-              onClick: action(() => {
-                setPersona('CONTADOR')
-                navigate('/contador')
-              }),
-            },
-          )}
-          {row(
-            'bcp',
-            <>
-              <span className={styles.itemIcon}>
-                <Icon name="account_balance" size={20} />
-              </span>
-              <span>Ver como BCP</span>
-            </>,
-            {
-              onClick: action(() => {
-                setPersona('BCP')
-                navigate('/bcp')
-              }),
-            },
-          )}
           {row(
             'reset',
             <>

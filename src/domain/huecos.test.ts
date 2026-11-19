@@ -8,7 +8,7 @@ import { porCobrar, totalCobranzas } from './collections.ts'
 import { analyze, saldoPendiente, type UserInputs } from './engine.ts'
 import { canalDe, contraparteDe, leerExtracto, parseCsv, parseFecha, parseMonto, toCsv } from './extracto.ts'
 import { extractoEjemplo } from './extractoEjemplo.ts'
-import { cobrosTrasRecordatorio, diasDeCierre, errorProyecciones, saldoAl, sinIntervencion } from './metricas.ts'
+import { cobrosTrasRecordatorio, errorProyecciones, saldoAl, sinIntervencion } from './metricas.ts'
 import { reconcile } from './reconciliation.ts'
 import type { BankMovement, CierreCaja, Comprobante } from './types.ts'
 
@@ -249,8 +249,7 @@ describe('métricas de la primera ola', () => {
     assert.deepEqual(r, { recordados: 2, cobrados: 1, pct: 0.5, dias: 3 })
   })
 
-  test('días de cierre y error de la proyección', () => {
-    assert.deepEqual(diasDeCierre(BIZ, { [`${BIZ}:2026-10`]: '2026-11-18T10:30', 'otro:2026-10': '2026-11-02T10:00' }), [{ mes: '2026-10', dias: 18 }])
+  test('error de la proyección', () => {
     const errores = errorProyecciones(sinCambios, [{ businessId: BIZ, fecha: '2026-11-10', saldo7: 10000 }, { businessId: BIZ, fecha: '2026-11-15', saldo7: 1 }], HOY)
     assert.equal(errores.length, 1)
     assert.equal(errores[0].real, saldoAl(sinCambios, '2026-11-17'))

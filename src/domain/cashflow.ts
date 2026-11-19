@@ -26,7 +26,7 @@ export interface CashAlert {
 }
 
 export interface CashAction {
-  id: 'cobrar' | 'mover' | 'capital'
+  id: 'cobrar' | 'mover'
   texto: string
   to?: string
   disabled?: boolean
@@ -307,7 +307,7 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
       .sort((x, y) => pico(x) - pico(y) || x.monto - y.monto)
       .slice(0, 2)
     const nombre = (e: CashEvent) =>
-      e.fuente === 'CREDITO' ? 'la cuota del crédito' : e.fuente === 'GRATIFICACION' ? 'la gratificación' : e.fuente === 'IMPUESTOS' ? (e.concepto.includes('IGV') ? 'el IGV' : 'los impuestos') : e.fuente === 'PLANILLA' ? 'la planilla' : e.fuente === 'CTS' ? 'la CTS' : `el pago a ${e.concepto.replace(/^Pago a /, '')}`
+      e.fuente === 'GRATIFICACION' ? 'la gratificación' : e.fuente === 'IMPUESTOS' ? (e.concepto.includes('IGV') ? 'el IGV' : 'los impuestos') : e.fuente === 'PLANILLA' ? 'la planilla' : e.fuente === 'CTS' ? 'la CTS' : `el pago a ${e.concepto.replace(/^Pago a /, '')}`
     alerta = { fecha: bajo.fecha, saldo: bajo.base, cruza: bajo.base < 0 ? 'CERO' : 'COLCHON', motivos: cercanos.map(nombre) }
   }
 
@@ -326,7 +326,6 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
       acciones.push({ id: 'mover', texto: `Mueve el pago a ${mover.concepto.replace(/^Pago a /, '')} para después del ${fmtDiaMes(addDays(alerta.fecha, 1))}` })
     }
   }
-  acciones.push({ id: 'capital', texto: 'Ver cuánto crédito BCP puede pagar tu negocio', to: '/credito' })
 
   return { saldoInicial, colchon, eventos, serie, minimo, alerta, acciones }
 }

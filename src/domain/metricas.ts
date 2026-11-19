@@ -4,7 +4,7 @@
  */
 import type { Analysis } from './engine.ts'
 import type { BankMovement, Correction } from './types.ts'
-import { addDays, dayOf, diffDays, lastDayOfMonth, monthOf, round2 } from './util.ts'
+import { addDays, dayOf, diffDays, monthOf, round2 } from './util.ts'
 
 export interface SinIntervencion {
   total: number
@@ -45,17 +45,6 @@ export function cobrosTrasRecordatorio(a: Analysis, recordatorios: Record<string
     pct: propios.length ? dias.length / propios.length : null,
     dias: dias.length ? Math.round(dias.reduce((s, d) => s + d, 0) / dias.length) : null,
   }
-}
-
-/** Días entre el fin de cada mes y el día en que el contador lo cerró. */
-export function diasDeCierre(businessId: string, mesesCerrados: Record<string, string>): { mes: string; dias: number }[] {
-  return Object.entries(mesesCerrados)
-    .filter(([k]) => k.startsWith(`${businessId}:`))
-    .map(([k, cuando]) => {
-      const mes = k.slice(businessId.length + 1)
-      return { mes, dias: diffDays(lastDayOfMonth(mes), dayOf(cuando)) }
-    })
-    .sort((x, y) => x.mes.localeCompare(y.mes))
 }
 
 /** Saldo del banco al final de un día (el del último movimiento hasta ese día). */
