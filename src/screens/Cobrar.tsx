@@ -15,7 +15,7 @@ import { docLabel, tipoLabel } from '../domain/reconciliation'
 import { addDays, addMonths, fmtFecha, fmtSolesCorto } from '../domain/util'
 import { ease, fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
-import { registrarPromesa, registrarRecordatorio, simularPago } from '../state/demoStore'
+import { quitarPagoSimulado, registrarPromesa, registrarRecordatorio, simularPago } from '../state/demoStore'
 import { useCobranzas, useZen } from '../state/useZen'
 
 /** Atajos para fechar la promesa sin abrir el calendario. */
@@ -56,8 +56,8 @@ export function Cobrar() {
   const recordar1 = (c: Cobranza, canal: 'whatsapp' | 'copiado') => registrarRecordatorio(c.comprobante.id, { tono: tonoDe(c.diasVencidos), tramo: c.tramo, canal })
 
   const pagar = (c: Cobranza) => {
-    simularPago(a.business.id, c.comprobante, c.monto)
-    toast(`¡${c.comprobante.nombreContraparte} te pagó ${fmtSolesCorto(c.monto)}!`, 'celebration')
+    const id = simularPago(a.business.id, c.comprobante, c.monto)
+    toast(`¡${c.comprobante.nombreContraparte} te pagó ${fmtSolesCorto(c.monto)}!`, 'celebration', { label: 'Deshacer', onClick: () => quitarPagoSimulado(id) })
   }
 
   const guardarPromesa = () => {
@@ -176,6 +176,10 @@ export function Cobrar() {
               Mensaje (puedes editarlo)
               <textarea className={styles.input} value={recordar.texto} onChange={(e) => setRecordar({ ...recordar, texto: e.target.value })} />
             </label>
+            <p className={styles.trustNote}>
+              <Icon name="verified_user" size={18} />
+              <span>Zenity no envía nada por ti: se abre tu WhatsApp con el mensaje y tú decides si lo mandas.</span>
+            </p>
             <Button
               size="lg"
               icon="open_in_new"

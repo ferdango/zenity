@@ -1326,3 +1326,52 @@ textarea.input {
     transform: translateX(3px);
   }
 }
+
+/* Lista de garantías («Solo lectura», «Tus datos son tuyos»…) en las hojas de confianza */
+.garantias {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface-high);
+  list-style: none;
+}
+
+.garantias li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.garantias li > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--z-primary);
+}
+
+.garantias strong {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--z-on-surface);
+}
+
+/* Nota de confianza bajo una acción («Zenity no envía nada por ti») */
+.trustNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+.trustNote > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--z-positive);
+}

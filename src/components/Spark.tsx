@@ -1,18 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { useId } from 'react'
-
-/** Estrella de 4 puntas con lados cóncavos centrada en (cx, cy) con radio r. */
-function starPath(cx: number, cy: number, r: number): string {
-  const a = 0.0857 * r
-  const b = 0.457 * r
-  return [
-    `M${cx} ${cy - r}`,
-    `C${cx + a} ${cy - b} ${cx + b} ${cy - a} ${cx + r} ${cy}`,
-    `C${cx + b} ${cy + a} ${cx + a} ${cy + b} ${cx} ${cy + r}`,
-    `C${cx - a} ${cy + b} ${cx - b} ${cy + a} ${cx - r} ${cy}`,
-    `C${cx - b} ${cy - a} ${cx - a} ${cy - b} ${cx} ${cy - r}Z`,
-  ].join('')
-}
+import { starPath } from '../lib/sparkPath'
 
 const SINGLE = starPath(12, 12, 10.5)
 const CLUSTER = [starPath(9.5, 13.5, 8), starPath(18.6, 4.6, 3.6), starPath(19.2, 19.4, 2.8)].join('')

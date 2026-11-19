@@ -89,6 +89,13 @@
   --z-ambient-2: rgb(155 114 203 / 0.13);
   --z-ambient-3: rgb(20 184 166 / 0.07);
 
+  /* Patrón de marca (destellos de Zenity) y luces de color de los fondos ilustrados */
+  --z-pattern-ink: #a98bff;
+  --z-pattern-opacity: 0.11;
+  --z-glow-violet: rgb(124 77 255 / 0.24);
+  --z-glow-pink: rgb(207 107 255 / 0.14);
+  --z-glow-gold: rgb(255 177 74 / 0.12);
+
   /* Vista previa de WhatsApp (modo oscuro de WhatsApp) */
   --z-wa-bg: #0b141a;
   --z-wa-in: #202c33;
@@ -259,6 +266,12 @@
   --z-ambient-1: rgb(90 34 214 / 0.07);
   --z-ambient-2: rgb(155 114 203 / 0.07);
   --z-ambient-3: rgb(20 184 166 / 0.05);
+
+  --z-pattern-ink: #6b3df0;
+  --z-pattern-opacity: 0.085;
+  --z-glow-violet: rgb(109 53 240 / 0.13);
+  --z-glow-pink: rgb(207 107 255 / 0.11);
+  --z-glow-gold: rgb(255 159 67 / 0.15);
 
   --z-wa-bg: #efeae2;
   --z-wa-in: #ffffff;

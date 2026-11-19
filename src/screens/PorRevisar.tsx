@@ -325,7 +325,7 @@ function PorRevisarView({
               Atajos: <kbd className={styles.kbd}>Enter</kbd> correcto · <kbd className={styles.kbd}>1</kbd>–<kbd className={styles.kbd}>3</kbd> otra opción ·{' '}
               <kbd className={styles.kbd}>O</kbd> buscar.{' '}
             </span>
-            Cada respuesta enseña a Zenity.
+            Cada respuesta enseña a Zenity y puedes deshacerla.
           </p>
         )}
       </div>
@@ -512,8 +512,9 @@ function SwipeCard({
         </span>
       </div>
       <Why motivo={motivo} />
+      {/* Con confianza baja el botón dice qué confirmas, para no aceptar a ciegas */}
       <Button size="lg" icon="check" onClick={() => onElegir(sugerida)}>
-        Correcto
+        {confianza < 0.6 ? `Sí, es ${CATEGORIAS[sugerida].label}` : 'Correcto'}
       </Button>
       <div className={styles.chipsWrap} role="group" aria-label="Otras categorías">
         {alts.map((c, i) => (

@@ -1,0 +1,93 @@
+/*
+ * Fondo con figuras de la marca: luces radiales (violeta, rosa, dorado), el patrón de destellos
+ * de Zenity como máscara repetida (el color sale de los tokens) y destellos que titilan.
+ */
+.fondo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── Luces de color ─────────────────────────────────────────────── */
+.luz {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--luz), transparent);
+}
+
+.luz[data-luz='violeta'] {
+  --luz: var(--z-glow-violet);
+  top: -140px;
+  right: -240px;
+}
+
+.luz[data-luz='rosa'] {
+  --luz: var(--z-glow-pink);
+  top: 30%;
+  left: -300px;
+}
+
+.luz[data-luz='oro'] {
+  --luz: var(--z-glow-gold);
+  top: 55%;
+  right: -280px;
+}
+
+.luz[data-luz='violeta-bajo'] {
+  --luz: var(--z-glow-violet);
+  bottom: -220px;
+  left: -200px;
+}
+
+/* ── Patrón de destellos ───────────────────────────────────────── */
+.patron {
+  position: absolute;
+  inset: 0;
+  background: var(--z-pattern-ink);
+  opacity: var(--z-pattern-opacity);
+  -webkit-mask: var(--patron) 0 0 / 260px 300px repeat;
+  mask: var(--patron) 0 0 / 260px 300px repeat;
+}
+
+/* ── Destellos que titilan ─────────────────────────────────────── */
+.acento {
+  position: absolute;
+  -webkit-mask: var(--destello) center / contain no-repeat;
+  mask: var(--destello) center / contain no-repeat;
+  animation: titila 5.2s ease-in-out infinite both;
+}
+
+.acento[data-tono='ia'] {
+  background: var(--z-gradient-spark);
+}
+
+.acento[data-tono='oro'] {
+  background: linear-gradient(160deg, #ffd66b, #ff9f43);
+}
+
+.acento[data-tono='violeta'] {
+  background: var(--z-chip-violet);
+}
+
+@keyframes titila {
+  0%,
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.12) rotate(18deg);
+    opacity: 0.95;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acento {
+    animation: none;
+    opacity: 0.7;
+  }
+}

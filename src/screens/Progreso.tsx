@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { useState } from 'react'
+import { type CSSProperties, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
+import { BrandPattern } from '../components/BrandPattern'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
@@ -13,6 +14,7 @@ import type { Paso, Unidad } from '../domain/progreso'
 import { celebrateFrom } from '../lib/celebrate'
 import { haptic } from '../lib/haptics'
 import { ease, fadeUp, spring, staggerContainer } from '../lib/motion'
+import { SPARK_MASK } from '../lib/sparkPath'
 import { useApp } from '../state/context'
 import { registrarLeccion } from '../state/demoStore'
 import { useLecciones, useProgreso } from '../state/useZen'
@@ -20,6 +22,9 @@ import styles from './Progreso.module.css'
 
 /** Posición en zigzag de cada paso (como el camino de Duolingo). */
 const ZIGZAG = [0, 1, 2, 1, 0, -1, -2, -1]
+/** Desplazamiento horizontal de cada posición del zigzag y alto del nodo (iguales que en el CSS). */
+const PASO_X = 38
+const NODO_ALTO = 66
 
 const ICONO_TAREA: Record<string, string> = {
   conectar: 'link',
@@ -33,6 +38,16 @@ const ICONO_TAREA: Record<string, string> = {
   sunat: 'account_balance',
 }
 
+/** Abre un paso del camino: la microlección en una hoja o la pantalla donde se hace la tarea. */
+function useAbrirPaso(onLeccion: (p: Paso) => void) {
+  const navigate = useNavigate()
+  return (paso: Paso) => {
+    haptic('tap')
+    if (paso.tipo === 'leccion') onLeccion(paso)
+    else if (paso.to) navigate(paso.to)
+  }
+}
+
 /**
  * «Tu camino financiero»: el avance del dueño como un curso. Cada unidad junta tareas reales de la
  * app con una microlección y su pregunta de práctica. Las unidades se desbloquean en orden.
@@ -41,9 +56,12 @@ export function Progreso() {
   const { business } = useApp()
   const p = useProgreso()
   const [leccion, setLeccion] = useState<Paso | null>(null)
+  const abrirPaso = useAbrirPaso(setLeccion)
+  const siguiente = p.siguiente?.paso
 
   return (
-    <div className="z-page">
+    <div className="z-page" style={{ '--destello': SPARK_MASK } as CSSProperties}>
+      <BrandPattern />
       <TopBar title="Tu camino" subtitle={businessName(business)} />
       <motion.div className={`z-container ${styles.page}`} variants={staggerContainer(0.06)} initial="hidden" animate="show">
         <motion.section className={styles.resumen} variants={fadeUp}>
@@ -95,9 +113,34 @@ export function Progreso() {
         {!p.unidades.length ? (
           <NoDemoData feature="El camino de aprendizaje" />
         ) : (
-          p.unidades.map((u, i) => <UnidadCamino key={u.id} unidad={u} numero={i + 1} anterior={p.unidades[i - 1]} siguienteId={p.siguiente?.paso.id} onLeccion={setLeccion} />)
+          p.unidades.map((u, i) => <UnidadCamino key={u.id} unidad={u} numero={i + 1} anterior={p.unidades[i - 1]} siguienteId={siguiente?.id} onAbrir={abrirPaso} />)
+        )}
+
+        {p.unidades.length > 0 && !siguiente && (
+          <motion.p className={styles.meta} variants={fadeUp}>
+            <Icon name="emoji_events" size={22} fill />
+            Completaste todo tu camino. Sigue sumando XP con tus tareas de cada día.
+          </motion.p>
         )}
       </motion.div>
+
+      {/* El siguiente paso siempre a un toque, aunque esté más abajo en el camino */}
+      {siguiente && (
+        <div className={`z-action-bar ${styles.seguir}`}>
+          <Button
+            size="lg"
+            fullWidth
+            icon={siguiente.tipo === 'leccion' ? 'school' : (ICONO_TAREA[siguiente.id] ?? 'task_alt')}
+            trailingIcon="arrow_forward"
+            onClick={() => abrirPaso(siguiente)}
+          >
+            {siguiente.tipo === 'leccion' ? `Lección: ${siguiente.titulo}` : siguiente.titulo}
+          </Button>
+          <span className={styles.seguirXp}>
+            Tu siguiente paso · <Icon name="bolt" size={16} fill />+{siguiente.xp} XP{siguiente.avance ? ' por cada uno' : ''}
+          </span>
+        </div>
+      )}
 
       <HojaLeccion paso={leccion} onClose={() => setLeccion(null)} />
     </div>
@@ -109,17 +152,17 @@ function UnidadCamino({
   numero,
   anterior,
   siguienteId,
-  onLeccion,
+  onAbrir,
 }: {
   unidad: Unidad
   numero: number
   anterior?: Unidad
   siguienteId?: string
-  onLeccion: (p: Paso) => void
+  onAbrir: (p: Paso) => void
 }) {
-  const navigate = useNavigate()
   const { toast } = useApp()
   const bloqueada = u.estado === 'bloqueada'
+  const [senderoRef, sendero] = useSendero(u.pasos.length)
 
   const abrir = (paso: Paso) => {
     if (bloqueada && !paso.hecho) {
@@ -127,9 +170,7 @@ function UnidadCamino({
       toast(`Termina «${anterior?.titulo}» para desbloquear esta unidad`, 'lock')
       return
     }
-    haptic('tap')
-    if (paso.tipo === 'leccion') onLeccion(paso)
-    else if (paso.to) navigate(paso.to)
+    onAbrir(paso)
   }
 
   return (
@@ -140,18 +181,39 @@ function UnidadCamino({
         </span>
         <span className={styles.unidadTexto}>
           <span className={styles.unidadKicker}>
-            Unidad {numero} · {u.hechos} de {u.pasos.length}
+            Unidad {numero} · {u.estado === 'completa' ? 'Completa' : `${u.hechos} de ${u.pasos.length}`}
           </span>
           <strong>{u.titulo}</strong>
           <span>{u.meta}</span>
+          {bloqueada && anterior && (
+            <span className={styles.unidadCandado}>
+              <Icon name="lock" size={14} />
+              Termina la unidad {numero - 1} para abrirla
+            </span>
+          )}
         </span>
       </header>
 
-      <ol className={styles.pasos}>
+      <ol className={styles.pasos} ref={senderoRef}>
+        {sendero.puntos.length === u.pasos.length && (
+          <svg className={styles.sendero} width={sendero.ancho} height={sendero.alto} aria-hidden>
+            {sendero.puntos.slice(1).map((b, i) => {
+              const a = sendero.puntos[i]
+              const medio = (a.y + b.y) / 2
+              return (
+                <path
+                  key={u.pasos[i].id}
+                  d={`M${a.x} ${a.y} C${a.x} ${medio} ${b.x} ${medio} ${b.x} ${b.y}`}
+                  data-hecho={u.pasos[i].hecho || undefined}
+                />
+              )
+            })}
+          </svg>
+        )}
         {u.pasos.map((paso, i) => {
           const actual = paso.id === siguienteId
           return (
-            <li key={paso.id} className={styles.paso} style={{ '--x': ZIGZAG[i % ZIGZAG.length] } as React.CSSProperties}>
+            <li key={paso.id} className={styles.paso} data-actual={actual || undefined} style={{ '--x': ZIGZAG[i % ZIGZAG.length] } as CSSProperties}>
               <button
                 type="button"
                 className={styles.nodo}
@@ -160,7 +222,8 @@ function UnidadCamino({
                 data-bloqueado={(bloqueada && !paso.hecho) || undefined}
                 data-leccion={paso.tipo === 'leccion' || undefined}
                 onClick={() => abrir(paso)}
-                aria-label={`${paso.titulo}${paso.hecho ? ' (hecho)' : ''}`}
+                aria-label={`${paso.titulo}${paso.hecho ? ' (hecho)' : bloqueada ? ' (bloqueado)' : actual ? ' (siguiente paso)' : ''}`}
+                aria-current={actual ? 'step' : undefined}
               >
                 {actual && (
                   <motion.span className={styles.empieza} initial={{ y: 6, opacity: 0 }} animate={{ y: [0, -4, 0], opacity: 1 }} transition={{ y: { repeat: Infinity, duration: 1.6, ease: 'easeInOut' }, opacity: { duration: 0.3 } }}>
@@ -176,7 +239,7 @@ function UnidadCamino({
               <span className={styles.pasoTexto}>
                 <strong>{paso.titulo}</strong>
                 <span>
-                  {paso.avance && !paso.hecho ? `${paso.avance.hechos} de ${paso.avance.total} · ` : ''}+{paso.xp} XP{paso.avance && !paso.hecho ? ' c/u' : ''}
+                  {paso.hecho ? 'Hecho · ' : paso.avance ? `${paso.avance.hechos} de ${paso.avance.total} · ` : ''}+{paso.xp} XP{paso.avance && !paso.hecho ? ' c/u' : ''}
                 </span>
               </span>
             </li>
@@ -185,6 +248,35 @@ function UnidadCamino({
       </ol>
     </motion.section>
   )
+}
+
+/**
+ * Centro de cada nodo dentro de la lista, para dibujar el sendero punteado entre pasos. Se mide con
+ * offsetTop (no le afectan las transformaciones de las transiciones) y se recalcula al cambiar el tamaño.
+ */
+function useSendero(pasos: number) {
+  const ref = useRef<HTMLOListElement>(null)
+  const [medida, setMedida] = useState<{ ancho: number; alto: number; puntos: { x: number; y: number }[] }>({ ancho: 0, alto: 0, puntos: [] })
+
+  useLayoutEffect(() => {
+    const ol = ref.current
+    if (!ol) return
+    const medir = () => {
+      const items = Array.from(ol.children).filter((el): el is HTMLLIElement => el instanceof HTMLLIElement)
+      const centro = ol.clientWidth / 2
+      setMedida({
+        ancho: ol.clientWidth,
+        alto: ol.clientHeight,
+        puntos: items.map((li, i) => ({ x: centro + ZIGZAG[i % ZIGZAG.length] * PASO_X, y: li.offsetTop + NODO_ALTO / 2 })),
+      })
+    }
+    medir()
+    const ro = new ResizeObserver(medir)
+    ro.observe(ol)
+    return () => ro.disconnect()
+  }, [pasos])
+
+  return [ref, medida] as const
 }
 
 /** Microlección + pregunta de práctica: acertar registra la lección como leída y da su XP. */

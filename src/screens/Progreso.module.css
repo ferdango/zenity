@@ -9,6 +9,9 @@
 
 /* ── Resumen: nivel, XP, racha y meta de hoy (sobre la banda violeta) ── */
 .resumen {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   gap: 10px;
   padding: 20px;
@@ -19,6 +22,21 @@
   /* La barra de avance va en blanco sobre el violeta */
   --z-surface-highest: rgb(255 255 255 / 0.18);
   --z-gradient-spark: linear-gradient(90deg, #ffd66b, #ffb14a);
+}
+
+/* Destello de la marca como marca de agua de la banda violeta */
+.resumen::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: rgb(255 255 255 / 0.09);
+  -webkit-mask: var(--destello) center / contain no-repeat;
+  mask: var(--destello) center / contain no-repeat;
+  pointer-events: none;
+  top: -46px;
+  right: -40px;
+  width: 170px;
+  height: 170px;
 }
 
 .nivelFila {
@@ -108,12 +126,10 @@
 }
 
 .stat small {
-  overflow: hidden;
   font-size: 0.75rem;
   line-height: 1rem;
   color: rgb(255 255 255 / 0.92);
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  text-wrap: balance;
 }
 
 /* Accesos a la tienda de puntos y a las recompensas */
@@ -169,6 +185,9 @@
 }
 
 .unidadHead {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -183,6 +202,36 @@
   background: var(--z-surface-high);
   color: var(--z-on-surface-variant);
   box-shadow: 0 6px 0 var(--z-surface-highest);
+}
+
+/* Destello grande de la marca en la esquina del encabezado */
+.unidadHead::after {
+  content: '';
+  position: absolute;
+  top: -22px;
+  right: -18px;
+  z-index: -1;
+  width: 104px;
+  height: 104px;
+  background: rgb(255 255 255 / 0.13);
+  -webkit-mask: var(--destello) center / contain no-repeat;
+  mask: var(--destello) center / contain no-repeat;
+  pointer-events: none;
+}
+
+.unidad[data-estado='bloqueada'] .unidadHead::after {
+  background: var(--z-on-surface);
+  opacity: 0.05;
+}
+
+.unidadCandado {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
 }
 
 .unidadIcon {
@@ -222,14 +271,42 @@
 
 /* ── Pasos en zigzag ──────────────────────────────────────────────── */
 .pasos {
+  position: relative;
   display: grid;
   gap: 36px;
   justify-items: center;
   padding-top: 8px;
 }
 
+/* Sendero punteado que une los pasos (verde hasta donde llegaste) */
+.sendero {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sendero path {
+  fill: none;
+  stroke: var(--z-outline-variant);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 0 15;
+}
+
+.sendero path[data-hecho] {
+  stroke: var(--z-chip-green);
+}
+
+.unidad[data-estado='bloqueada'] .sendero {
+  opacity: 0.6;
+}
+
 .paso {
   --x: 0;
+  position: relative;
+  z-index: 1;
   display: grid;
   justify-items: center;
   gap: 6px;
@@ -237,6 +314,11 @@
   max-width: 320px;
   transform: translateX(calc(var(--x) * 38px));
   text-align: center;
+}
+
+/* Espacio para la burbuja «Empieza aquí» sin tapar el paso anterior */
+.paso[data-actual] {
+  margin-top: 24px;
 }
 
 .nodo {
@@ -331,6 +413,14 @@
 .pasoTexto {
   display: grid;
   max-width: 220px;
+  padding: 6px 12px 7px;
+  border-radius: var(--z-radius-lg);
+  background: color-mix(in srgb, var(--z-surface) 90%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 0 0 1px var(--z-divider),
+    var(--z-card-shadow);
 }
 
 .pasoTexto strong {
@@ -349,6 +439,48 @@
 
 .unidad[data-estado='bloqueada'] .pasoTexto strong {
   color: var(--z-on-surface-low);
+}
+
+/* Camino completo */
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--z-radius-xl);
+  background: var(--z-gold-container);
+  color: var(--z-gold-text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ── Botón fijo con el siguiente paso ─────────────────────────────── */
+.seguir {
+  justify-items: center;
+}
+
+.seguir > :first-child {
+  width: 100%;
+  max-width: calc(var(--z-content) - 2 * var(--z-gutter));
+}
+
+.seguirXp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--z-on-surface-low);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.seguirXp > :global(.z-icon) {
+  color: var(--z-gold-text);
 }
 
 /* ── Hoja de la lección y su pregunta ────────────────────────────── */
