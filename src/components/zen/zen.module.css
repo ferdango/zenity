@@ -1386,3 +1386,39 @@ textarea.input {
     display: none;
   }
 }
+
+/* Gráfico de caja: la respuesta en una frase, antes de la línea */
+.chartVeredicto {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.chartVeredicto > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #9ff0c0;
+}
+
+.chartVeredicto[data-riesgo] > :global(.z-icon) {
+  color: var(--z-negative);
+}
+
+.chartVeredicto strong {
+  font-weight: 700;
+}
+
+/* Pie del gráfico de barras y el escenario pesimista, en una línea cada uno */
+.chartPie,
+.chartNota {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--z-on-surface-low);
+}
+
+.chartNota strong {
+  color: var(--z-on-surface);
+}
