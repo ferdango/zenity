@@ -23,6 +23,11 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Cuánto entró, cuánto salió y cuánto te queda en el mes.',
   },
   {
+    target: 'avance',
+    title: 'Tu avance',
+    body: 'Cada tarea que haces te enseña algo y suma XP: cumple tu meta del día, cuida tu racha y sube de nivel. Toca aquí para ver tu camino.',
+  },
+  {
     target: 'accounts',
     title: 'Tus conexiones',
     body: 'Desliza para ver cada banco, billetera, API o Excel. Toca una para ver su detalle y movimientos.',
@@ -31,11 +36,6 @@ export const TOUR_STEPS: TourStep[] = [
     target: 'add-account',
     title: 'Ver y agregar conexiones',
     body: 'Todas tus conexiones en una lista, con su estado. Desde aquí conectas bancos, Yape, Plin, APIs o archivos.',
-  },
-  {
-    target: 'avance',
-    title: 'Tu avance',
-    body: 'Cada tarea que haces te enseña algo y suma XP: cumple tu meta del día, cuida tu racha y sube de nivel. Toca aquí para ver tu camino.',
   },
   {
     target: 'notifications',

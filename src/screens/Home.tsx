@@ -375,8 +375,9 @@ export function Home() {
             )}
             {tiles}
 
-            {/* 4 · Qué hacer con esos números y 5 · lo que hay que pagar a SUNAT */}
+            {/* 4 · Tu avance, qué hacer con esos números y 5 · lo que hay que pagar a SUNAT */}
             <div className={styles.bloque}>
+              <Avance />
               <DecisionSemana />
               <SunatMes />
             </div>
@@ -398,10 +399,9 @@ export function Home() {
               </>
             )}
 
-            {/* 7 · Configuración, tu avance de aprendizaje y la lección del día */}
+            {/* 7 · Configuración y la lección del día */}
             <div className={styles.bloque}>
               <ConfigurarZenity />
-              <Avance />
               <LeccionInicio />
             </div>
           </motion.div>
