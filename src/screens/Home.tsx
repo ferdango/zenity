@@ -312,6 +312,30 @@ export function Home() {
               </div>
             </motion.section>
 
+            {/* Acciones rápidas: tarjeta que flota sobre la banda */}
+            <motion.nav className={styles.quick} variants={fadeUp} aria-label="Acciones rápidas">
+              {ACCIONES.map((accion) => (
+                <Link
+                  key={accion.to}
+                  to={accion.to}
+                  className={styles.quickItem}
+                  data-ripple=""
+                  onClick={(event) => {
+                    // En escritorio, «Pregúntale» lleva al chat de la derecha sin salir del Inicio
+                    if (accion.to === '/chat' && chatPanel) {
+                      event.preventDefault()
+                      document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Mensaje para Zenity"]')?.focus()
+                    }
+                  }}
+                >
+                  <span className={`${styles.quickIcon} ${styles[accion.tone]}`}>
+                    {accion.icon === 'spark' ? <Spark size={24} /> : <Icon name={accion.icon} size={24} />}
+                  </span>
+                  {accion.label}
+                </Link>
+              ))}
+            </motion.nav>
+
             {/* 2 · El riesgo que viene: la alerta de caja */}
             <div className={styles.bloque}>
               <AlertaCaja />
@@ -372,31 +396,7 @@ export function Home() {
               </>
             )}
 
-            {/* 7 · Atajos */}
-            <motion.nav className={styles.quick} variants={fadeUp} aria-label="Acciones rápidas">
-              {ACCIONES.map((accion) => (
-                <Link
-                  key={accion.to}
-                  to={accion.to}
-                  className={styles.quickItem}
-                  data-ripple=""
-                  onClick={(event) => {
-                    // En escritorio, «Pregúntale» lleva al chat de la derecha sin salir del Inicio
-                    if (accion.to === '/chat' && chatPanel) {
-                      event.preventDefault()
-                      document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Mensaje para Zenity"]')?.focus()
-                    }
-                  }}
-                >
-                  <span className={`${styles.quickIcon} ${styles[accion.tone]}`}>
-                    {accion.icon === 'spark' ? <Spark size={24} /> : <Icon name={accion.icon} size={24} />}
-                  </span>
-                  {accion.label}
-                </Link>
-              ))}
-            </motion.nav>
-
-            {/* 8 · Configuración, tu avance de aprendizaje y la lección del día */}
+            {/* 7 · Configuración, tu avance de aprendizaje y la lección del día */}
             <div className={styles.bloque}>
               <ConfigurarZenity />
               <Avance />
