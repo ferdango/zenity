@@ -53,9 +53,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Tu saldo, la alerta de caja y lo que tienes pendiente, en un vistazo.',
   },
   {
-    target: 'nav-revisar',
-    title: 'Por revisar',
-    body: 'Lo que Zenity no pudo clasificar con seguridad. Confirma o corrige en un toque y Zenity aprende.',
+    target: 'nav-tareas',
+    title: 'Tareas',
+    body: 'Lo que tienes por hacer hoy: revisar movimientos, cobrar y el siguiente paso de tu camino. Cada tarea suma XP.',
   },
   {
     target: 'nav-caja',
@@ -63,9 +63,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: 'Tu saldo proyectado a 30, 60 y 90 días, con la gratificación, la CTS y los impuestos.',
   },
   {
-    target: 'nav-cobrar',
-    title: 'Cobrar',
-    body: 'Quién te debe, desde cuándo, y un recordatorio por WhatsApp listo para enviar.',
+    target: 'nav-chat',
+    title: 'Zenity',
+    body: 'Pregúntale lo que quieras sobre tu negocio: responde con tus propios números.',
   },
   {
     target: 'nav-mas',

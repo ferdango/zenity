@@ -4,9 +4,9 @@ import { Link, useLocation } from 'react-router'
 import { Icon } from '../components/Icon'
 import { Spark } from '../components/Spark'
 import { ease, spring } from '../lib/motion'
-import { useZen } from '../state/useZen'
+import { useCobranzas, useZen } from '../state/useZen'
 import styles from './BottomNav.module.css'
-import { PRIMARY_NAV, showsBottomNav } from './nav'
+import { BOTTOM_NAV, showsBottomNav } from './nav'
 
 /**
  * Barra inferior plana (estilo «Digital Wallet»): la pestaña activa va en violeta con el
@@ -16,7 +16,9 @@ export function BottomNav() {
   const { pathname } = useLocation()
   const visible = showsBottomNav(pathname)
   const { a } = useZen()
-  const porRevisar = a?.porRevisar.length ?? 0
+  const cobranzas = useCobranzas()
+  // Tareas pendientes: movimientos por revisar y cobros vencidos
+  const pendientes = (a?.porRevisar.length ?? 0) + cobranzas.filter((c) => c.diasVencidos > 0).length
 
   return createPortal(
     <AnimatePresence>
@@ -28,9 +30,9 @@ export function BottomNav() {
           exit={{ y: '110%', transition: { duration: 0.2, ease: ease.accelerate } }}
         >
           <nav className={styles.nav} aria-label="Navegación principal">
-            {PRIMARY_NAV.map((item) => {
+            {BOTTOM_NAV.map((item) => {
               const active = item.match(pathname)
-              const count = item.id === 'revisar' ? porRevisar : 0
+              const count = item.id === 'tareas' ? pendientes : 0
               return (
                 <Link
                   key={item.id}

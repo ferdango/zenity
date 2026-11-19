@@ -216,6 +216,14 @@
   background: linear-gradient(to top, var(--z-bg) 75%, transparent);
 }
 
+/* En el celular el chat es una pestaña: la caja de texto queda sobre la barra inferior */
+@media (max-width: 1023.98px) {
+  :global(main[data-bottom-nav='true']) .composerWrap {
+    bottom: var(--z-bottom-bar);
+    padding-bottom: 8px;
+  }
+}
+
 .composer {
   display: flex;
   align-items: flex-end;

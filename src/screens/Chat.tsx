@@ -519,6 +519,7 @@ function ChatView({ variant }: { variant: 'page' | 'panel' }) {
       <TopBar
         title="Zenity"
         subtitle={name}
+        hideBack
         end={
           <>
             {messages.length > 0 && <IconButton icon="edit_square" label="Nuevo chat" onClick={reset} />}
