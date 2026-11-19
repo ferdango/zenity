@@ -10,7 +10,7 @@ import { CashChart } from '../components/zen/CashChart'
 import { LessonCard, Money, NoDemoData, Pill, SectionHead } from '../components/zen'
 import styles from '../components/zen/zen.module.css'
 import { REGIMEN_LABORAL_LABEL } from '../domain/calendar'
-import { textoAlerta } from '../domain/cashflow'
+import { textoAlerta, tramoBajoColchon } from '../domain/cashflow'
 import type { CashEvent, Certeza, FuenteCaja, RegimenLaboral } from '../domain/types'
 import { addDays, diffDays, fmtDiaMes, fmtSolesCorto } from '../domain/util'
 import { HOY } from '../config/demo'
@@ -183,18 +183,32 @@ export function Caja() {
           </motion.section>
         )}
 
+        {/* El gráfico se lee en 5 segundos: primero la respuesta en una frase, luego la línea */}
         <motion.div className={`${styles.card} ${styles.chartHero}`} variants={fadeUp}>
-          <div className={styles.grid2}>
-            <div style={{ display: 'grid', gap: 2 }}>
-              <span className={styles.muted}>Saldo de hoy</span>
-              <Money value={caja.saldoInicial} className="t-title-l" />
-            </div>
-            <div style={{ display: 'grid', gap: 2 }}>
-              <span className={styles.muted}>Punto más bajo ({fmtDiaMes(caja.minimo.fecha)})</span>
-              <Money value={caja.minimo.base} className="t-title-l" />
-            </div>
-          </div>
-          <CashChart serie={caja.serie} colchon={caja.colchon} alerta={caja.alerta?.fecha} />
+          {(() => {
+            const tramo = tramoBajoColchon(caja.serie, caja.colchon)
+            const pesimista = Math.min(...caja.serie.map((p) => p.pesimista))
+            return (
+              <>
+                <p className={styles.chartVeredicto} data-riesgo={tramo ? '' : undefined}>
+                  <Icon name={tramo ? 'warning' : 'check_circle'} size={22} fill />
+                  <span>
+                    {tramo ? (
+                      <>
+                        Del <strong>{fmtDiaMes(tramo.desde)}</strong> al <strong>{fmtDiaMes(tramo.hasta)}</strong> tu caja queda por debajo de tu colchón.
+                      </>
+                    ) : (
+                      <>Tu caja se mantiene sobre tu colchón los próximos {dias} días.</>
+                    )}
+                  </span>
+                </p>
+                <CashChart serie={caja.serie} colchon={caja.colchon} />
+                <p className={styles.chartNota}>
+                  Si vendes menos de lo normal, podría bajar hasta <strong>{fmtSolesCorto(Math.round(pesimista))}</strong>.
+                </p>
+              </>
+            )
+          })()}
         </motion.div>
 
         <LessonCard id="L08" />

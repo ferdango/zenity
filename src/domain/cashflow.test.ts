@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'node:test'
 import { seedFerreteria } from '../data/seed/ferreteria.ts'
 import { ctsSemestral, gratificacion, proximoVencimiento, vencimientoSunat } from './calendar.ts'
-import { proyectarCaja } from './cashflow.ts'
+import { proyectarCaja, tramoBajoColchon } from './cashflow.ts'
 import { analyze } from './engine.ts'
 import type { RegimenLaboral } from './types.ts'
 
@@ -75,3 +75,17 @@ describe('proyección de caja', () => {
     }
   })
 })
+
+describe('gráfico de caja en una frase', () => {
+  const p = (fecha: string, base: number) => ({ fecha, base, pesimista: base })
+
+  test('el tramo bajo el colchón va del primer al último día debajo', () => {
+    const serie = [p('2026-11-18', 9000), p('2026-11-19', 7000), p('2026-11-20', 8500), p('2026-11-21', 6000), p('2026-11-22', 9000)]
+    assert.deepEqual(tramoBajoColchon(serie, 7659), { desde: '2026-11-19', hasta: '2026-11-21' })
+  })
+
+  test('si nunca baja del colchón, no hay tramo', () => {
+    assert.equal(tramoBajoColchon([p('2026-11-18', 9000), p('2026-11-19', 8000)], 7659), null)
+  })
+})
+

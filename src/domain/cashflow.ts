@@ -330,6 +330,15 @@ export function proyectarCaja(a: Analysis, promesas: PromesaPago[], hoy: string,
   return { saldoInicial, colchon, eventos, serie, minimo, alerta, acciones }
 }
 
+/** Primer y último día en que el saldo base queda bajo el colchón (null si nunca baja). */
+export function tramoBajoColchon(serie: CashPoint[], colchon: number): { desde: string; hasta: string } | null {
+  const i = serie.findIndex((p) => p.base < colchon)
+  if (i < 0) return null
+  let j = serie.length - 1
+  while (j > i && serie[j].base >= colchon) j--
+  return { desde: serie[i].fecha, hasta: serie[j].fecha }
+}
+
 /** «El 20/12 tu caja baja a S/ 6,437 por la gratificación y el IGV.» */
 export function textoAlerta(a: CashAlert): string {
   const motivos = a.motivos.length === 2 ? `${a.motivos[0]} y ${a.motivos[1]}` : (a.motivos[0] ?? 'tus pagos')
