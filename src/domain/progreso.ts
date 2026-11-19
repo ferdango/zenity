@@ -205,6 +205,7 @@ export function camino(a: Analysis, e: EntradaProgreso, conexiones: number): Uni
       icon: 'person',
       pasos: [
         leccion('L05', 'Tu bolsillo y el del negocio', 'Por qué no mezclarlos'),
+        { id: 'resultados', tipo: 'tarea', titulo: 'Mira tu estado de resultados', detalle: 'Cuánto ganas de verdad, sin IGV ni retiros', hecho: `${id}:resultados` in e.hitos, xp: XP.hito, to: '/resultados' },
         { id: 'sueldo', tipo: 'tarea', titulo: 'Define tu sueldo de dueño', detalle: 'Un monto fijo que el negocio pueda pagarte', hecho: !!a.business.sueldoDueno, xp: XP.sueldo, to: '/personal' },
         leccion('L06', 'Págate un sueldo fijo', 'Lo que sobra se queda para crecer'),
       ],

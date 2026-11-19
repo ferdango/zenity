@@ -36,6 +36,7 @@ const ICONO_TAREA: Record<string, string> = {
   planilla: 'groups',
   caja: 'monitoring',
   sunat: 'account_balance',
+  resultados: 'receipt_long',
 }
 
 /** Abre un paso del camino: la microlección en una hoja o la pantalla donde se hace la tarea. */

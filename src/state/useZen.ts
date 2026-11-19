@@ -11,6 +11,7 @@ import { evaluarLecciones } from '../domain/lessons'
 import { logros, puntosDisponibles, xpDeRecompensas } from '../domain/loyalty'
 import { personalesDelMes } from '../domain/personal'
 import { camino, progreso, siguientePaso } from '../domain/progreso'
+import { historicoResultados } from '../domain/resultados'
 import { resumenSunat } from '../domain/sunat'
 import { avisoLimite, datosSimulador } from '../domain/taxSimulator'
 import type { CashEvent, PromesaPago } from '../domain/types'
@@ -219,5 +220,11 @@ export function useDecision() {
     if (!actual) return null
     return { decision: actual, tomada: null, resuelta: false }
   }, [a, demo.promesas, demo.decisiones, businessId, cobranzas, cierres, caja])
+}
+
+/** Estado de resultados del negocio activo, un mes por elemento (del más antiguo al actual). */
+export function useResultados() {
+  const { a } = useZen()
+  return useMemo(() => (a ? historicoResultados(a, HOY) : []), [a])
 }
 

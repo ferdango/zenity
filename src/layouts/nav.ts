@@ -12,7 +12,7 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/progreso', '/tienda', '/recompensas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
+const MAS_PATHS = ['/mas', '/resultados', '/progreso', '/tienda', '/recompensas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
 /** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
 export const PRIMARY_NAV: NavItem[] = [
@@ -25,6 +25,7 @@ export const PRIMARY_NAV: NavItem[] = [
 
 /** Herramientas del dueño (menú lateral): solo lo que usa en el día a día. */
 export const TOOLS_NAV: NavItem[] = [
+  { id: 'resultados', label: 'Estado de resultados', short: 'Resultados', icon: 'receipt_long', to: '/resultados', match: (p) => p === '/resultados' },
   { id: 'progreso', label: 'Tu camino', short: 'Camino', icon: 'school', to: '/progreso', match: (p) => p === '/progreso' },
   { id: 'tienda', label: 'Tienda de puntos', short: 'Tienda', icon: 'storefront', to: '/tienda', match: (p) => p === '/tienda' },
   { id: 'recompensas', label: 'Recompensas', short: 'Recompensas', icon: 'redeem', to: '/recompensas', match: (p) => p === '/recompensas' },
