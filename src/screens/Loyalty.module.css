@@ -383,3 +383,11 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Explicación de cada grupo de recompensas */
+.grupoPista {
+  margin-top: -4px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-low);
+}
