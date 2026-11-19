@@ -1375,3 +1375,14 @@ textarea.input {
   margin-top: 1px;
   color: var(--z-positive);
 }
+
+/* Acción con texto en la barra superior: en celulares angostos queda solo el ícono para no cortarse */
+@media (max-width: 374.98px) {
+  .topAction {
+    padding-inline: 10px;
+  }
+
+  .topAction > :not(:global(.z-icon)) {
+    display: none;
+  }
+}

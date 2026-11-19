@@ -22,8 +22,7 @@ import styles from './Progreso.module.css'
 
 /** Posición en zigzag de cada paso (como el camino de Duolingo). */
 const ZIGZAG = [0, 1, 2, 1, 0, -1, -2, -1]
-/** Desplazamiento horizontal de cada posición del zigzag y alto del nodo (iguales que en el CSS). */
-const PASO_X = 38
+/** Alto del nodo (igual que en el CSS): el sendero pasa por su centro. */
 const NODO_ALTO = 66
 
 const ICONO_TAREA: Record<string, string> = {
@@ -98,14 +97,18 @@ export function Progreso() {
             </span>
           </div>
           <div className={styles.accesos}>
-            <Link to="/tienda" className={styles.acceso} data-ripple="">
+            <Link to="/tienda" className={styles.acceso} data-ripple="" aria-label={`Tienda de puntos: tienes ${p.puntos} XP para canjear`}>
               <Icon name="storefront" size={20} />
-              Tienda · {p.puntos} XP
+              <span className={styles.accesoTexto}>Tienda · {p.puntos} XP</span>
             </Link>
-            <Link to="/recompensas" className={styles.acceso} data-ripple="">
+            <Link to="/recompensas" className={styles.acceso} data-ripple="" aria-label={`Recompensas${p.porReclamar ? `: ${p.porReclamar} por reclamar` : ''}`}>
               <Icon name="redeem" size={20} />
-              Recompensas
-              {p.porReclamar > 0 && <span className={styles.accesoBadge}>{p.porReclamar}</span>}
+              <span className={styles.accesoTexto}>Recompensas</span>
+              {p.porReclamar > 0 && (
+                <span className={styles.accesoBadge} aria-hidden>
+                  {p.porReclamar}
+                </span>
+              )}
             </Link>
           </div>
         </motion.section>
@@ -132,6 +135,7 @@ export function Progreso() {
             fullWidth
             icon={siguiente.tipo === 'leccion' ? 'school' : (ICONO_TAREA[siguiente.id] ?? 'task_alt')}
             trailingIcon="arrow_forward"
+            className={styles.seguirBtn}
             onClick={() => abrirPaso(siguiente)}
           >
             {siguiente.tipo === 'leccion' ? `Lección: ${siguiente.titulo}` : siguiente.titulo}
@@ -263,11 +267,14 @@ function useSendero(pasos: number) {
     if (!ol) return
     const medir = () => {
       const items = Array.from(ol.children).filter((el): el is HTMLLIElement => el instanceof HTMLLIElement)
-      const centro = ol.clientWidth / 2
       setMedida({
         ancho: ol.clientWidth,
         alto: ol.clientHeight,
-        puntos: items.map((li, i) => ({ x: centro + ZIGZAG[i % ZIGZAG.length] * PASO_X, y: li.offsetTop + NODO_ALTO / 2 })),
+        // El zigzag se mueve con translateX (su valor en px sale de la matriz calculada)
+        puntos: items.map((li) => ({
+          x: li.offsetLeft + li.offsetWidth / 2 + new DOMMatrixReadOnly(getComputedStyle(li).transform).m41,
+          y: li.offsetTop + NODO_ALTO / 2,
+        })),
       })
     }
     medir()

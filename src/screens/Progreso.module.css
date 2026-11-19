@@ -12,6 +12,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  container: resumen / inline-size;
   display: grid;
   gap: 10px;
   padding: 20px;
@@ -139,22 +140,57 @@
   gap: 8px;
 }
 
+/* Lado a lado solo si los dos entran completos (banda de 340 px o más); si no, uno por fila */
+@container resumen (max-width: 339.98px) {
+  .accesos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* En celulares angostos (banda de menos de 300 px), racha y meta con el ícono arriba */
+@container resumen (max-width: 299.98px) {
+  .stat {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .stat strong {
+    white-space: nowrap;
+  }
+}
+
 .acceso {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  min-width: 0;
   height: 44px;
+  padding: 0 14px;
   border-radius: var(--z-radius-full);
   background: var(--z-surface);
   color: var(--z-on-surface);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
+.acceso > :global(.z-icon) {
+  flex-shrink: 0;
+}
+
+.accesoTexto {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Contador de recompensas: no se encoge; si falta espacio, el texto se acorta con «…» */
 .accesoBadge {
   display: grid;
+  flex-shrink: 0;
   place-items: center;
   min-width: 20px;
   height: 20px;
@@ -271,6 +307,8 @@
 
 /* ── Pasos en zigzag ──────────────────────────────────────────────── */
 .pasos {
+  /* Desplazamiento de cada posición del zigzag: menos en celulares angostos */
+  --paso-x: clamp(22px, 8vw, 38px);
   position: relative;
   display: grid;
   gap: 36px;
@@ -310,9 +348,10 @@
   display: grid;
   justify-items: center;
   gap: 6px;
-  width: 100%;
-  max-width: 320px;
-  transform: translateX(calc(var(--x) * 38px));
+  /* Del ancho de su contenido: el desplazamiento del zigzag no saca nada de la pantalla */
+  width: max-content;
+  max-width: 100%;
+  transform: translateX(calc(var(--x) * var(--paso-x)));
   text-align: center;
 }
 
@@ -412,7 +451,7 @@
 
 .pasoTexto {
   display: grid;
-  max-width: 220px;
+  max-width: min(220px, 58vw);
   padding: 6px 12px 7px;
   border-radius: var(--z-radius-lg);
   background: color-mix(in srgb, var(--z-surface) 90%, transparent);
@@ -457,6 +496,13 @@
 }
 
 /* ── Botón fijo con el siguiente paso ─────────────────────────────── */
+/* En celulares angostos la flecha final se oculta para que el nombre del paso entre completo */
+@media (max-width: 359.98px) {
+  .seguirBtn > :global(.z-icon):last-child {
+    display: none;
+  }
+}
+
 .seguir {
   justify-items: center;
 }

@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
+import type { CSSProperties } from 'react'
 import { cn } from '../lib/cn'
+import { formatMoney } from '../lib/format'
 import { Amount } from './Amount'
 import { Icon } from './Icon'
 import styles from './Metrics.module.css'
@@ -74,7 +76,8 @@ export function MetricCard({ label, value, caption, icon, tone = 'neutral', size
   return (
     <div className={cn(styles.metric, size === 'lg' && styles.metricLarge, outlined && styles.metricOutlined)}>
       {size !== 'lg' && iconNode}
-      <div style={{ display: 'grid', minWidth: 0 }}>
+      {/* El monto se achica según su largo para no salirse de la tarjeta en pantallas angostas */}
+      <div className={styles.metricBody} style={{ '--chars': formatMoney(value, sign).length } as CSSProperties}>
         <span className={styles.metricLabel}>{label}</span>
         <Amount value={value} tone={tone} sign={sign} className={styles.metricValue} />
         {caption && <span className={styles.metricCaption}>{caption}</span>}

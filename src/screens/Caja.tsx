@@ -97,7 +97,17 @@ export function Caja() {
         subtitle={businessName(business)}
         hideBack
         end={
-          <Button size="sm" variant="text" icon="tune" onClick={() => { setColchon(String(Math.round(caja.colchon))); setAjustes(true) }}>
+          <Button
+            size="sm"
+            variant="text"
+            icon="tune"
+            className={styles.topAction}
+            aria-label="Ajustes de caja"
+            onClick={() => {
+              setColchon(String(Math.round(caja.colchon)))
+              setAjustes(true)
+            }}
+          >
             Ajustes
           </Button>
         }
