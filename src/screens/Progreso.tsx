@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
@@ -78,6 +78,17 @@ export function Progreso() {
                 <small>{p.metaCumplida ? '¡Meta de hoy cumplida!' : 'Meta de hoy'}</small>
               </span>
             </span>
+          </div>
+          <div className={styles.accesos}>
+            <Link to="/tienda" className={styles.acceso} data-ripple="">
+              <Icon name="storefront" size={20} />
+              Tienda · {p.puntos} XP
+            </Link>
+            <Link to="/recompensas" className={styles.acceso} data-ripple="">
+              <Icon name="redeem" size={20} />
+              Recompensas
+              {p.porReclamar > 0 && <span className={styles.accesoBadge}>{p.porReclamar}</span>}
+            </Link>
           </div>
         </motion.section>
 

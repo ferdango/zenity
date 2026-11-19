@@ -10,6 +10,7 @@ import { CONSENTIMIENTO_DATOS, type FuenteDatos } from '../config/legal'
 import { track } from '../lib/analytics'
 import { loadBusinessData } from '../data/fuentes'
 import { analyze, type Analysis } from '../domain/engine'
+import { type Canje, codigoCanje, disponibilidad, PRODUCTOS } from '../domain/loyalty'
 import type {
   BankMovement,
   CategoriaId,
@@ -93,6 +94,10 @@ export interface DemoState {
   proyecciones: ProyeccionGuardada[]
   /** Hitos del camino de aprendizaje («negocio:caja», «negocio:sunat») → fecha */
   hitos: Record<string, string>
+  /** Loyalty: canjes en la tienda de puntos */
+  canjes: Canje[]
+  /** Loyalty: logros cuya recompensa ya se reclamó */
+  recompensas: string[]
   /** Conciliaciones de confianza media que el dueño confirmó (o marcó para consultar) */
   confirmados: Record<string, 'OK' | 'CONSULTA'>
 }
@@ -119,6 +124,8 @@ function initial(): DemoState {
     importaciones: [],
     proyecciones: [],
     hitos: {},
+    canjes: [],
+    recompensas: [],
     confirmados: {},
   }
 }
@@ -431,6 +438,23 @@ export function marcarHito(businessId: string, hito: 'caja' | 'sunat') {
   const clave = `${businessId}:${hito}`
   if (getDemoState().hitos[clave]) return
   setDemoState((s) => ({ ...s, hitos: { ...s.hitos, [clave]: AHORA } }))
+}
+
+/* ── Loyalty: tienda de puntos y recompensas ──────────────────── */
+
+/** Canjea un producto de la tienda con XP. Devuelve el canje o null si no alcanza o está agotado. */
+export function canjearProducto(productoId: string, disponibles: number): Canje | null {
+  const p = PRODUCTOS.find((x) => x.id === productoId)
+  if (!p || !disponibilidad(p, disponibles, getDemoState().canjes).ok) return null
+  const id = uid('canje')
+  const canje: Canje = { id, productoId, xp: p.xp, ts: AHORA, codigo: codigoCanje(id) }
+  setDemoState((s) => ({ ...s, canjes: [...s.canjes, canje] }))
+  return canje
+}
+
+/** Reclama la recompensa de un logro (una sola vez). */
+export function reclamarRecompensa(logroId: string) {
+  setDemoState((s) => (s.recompensas.includes(logroId) ? s : { ...s, recompensas: [...s.recompensas, logroId] }))
 }
 
 /** Restaura el seed: borra todo lo que hizo el usuario en la demo. */

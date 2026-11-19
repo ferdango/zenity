@@ -80,7 +80,7 @@
   padding: 0 5px;
   border-radius: var(--z-radius-full);
   background: var(--z-negative);
-  color: #3b0b05;
+  color: var(--z-on-negative);
   font-size: 0.6875rem;
   line-height: 20px;
   font-weight: 700;

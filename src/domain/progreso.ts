@@ -20,6 +20,8 @@ export interface EntradaProgreso {
   regimenRevisado: Record<string, boolean>
   /** Hitos sueltos («negocio:caja», «negocio:sunat») → fecha */
   hitos: Record<string, string>
+  /** XP extra de las recompensas reclamadas (logros) */
+  bonus?: number
 }
 
 /** XP por cada cosa que hace el dueño. */
@@ -96,7 +98,8 @@ export function xpDeHoy(e: EntradaProgreso): number {
     e.importaciones.length * XP.extracto +
     Object.keys(e.confirmados).length * XP.confirmado +
     Object.values(e.regimenRevisado).filter(Boolean).length * XP.regimen +
-    Object.keys(e.hitos).length * XP.hito
+    Object.keys(e.hitos).length * XP.hito +
+    (e.bonus ?? 0)
   )
 }
 

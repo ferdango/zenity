@@ -71,9 +71,10 @@
   --tile-chip: rgb(255 255 255 / 0.16);
   --tile-value: var(--z-on-hero);
   --tile-muted: var(--z-on-hero-muted);
-  --delta-good-bg: rgb(255 255 255 / 0.16);
+  /* Píldoras oscuras sobre el violeta: el verde y el rojo claros se leen con contraste AA */
+  --delta-good-bg: rgb(0 0 0 / 0.22);
   --delta-good: #b7f7cf;
-  --delta-bad-bg: rgb(255 255 255 / 0.16);
+  --delta-bad-bg: rgb(0 0 0 / 0.22);
   --delta-bad: #ffc2c2;
 }
 
