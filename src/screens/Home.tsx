@@ -13,6 +13,7 @@ import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
 import { Money } from '../components/zen'
 import { InicioOla1 } from '../components/zen/Inicio'
+import { OrigenSaldo } from '../components/zen/OrigenSaldo'
 import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
 import { movementInsights } from '../data/insights'
@@ -286,7 +287,7 @@ export function Home() {
               <span className={styles.bandLabel}>{saldoInicio ? 'Saldo actual · BCP cuenta corriente' : 'Saldo en tus conexiones'}</span>
               <Money animated value={saldoInicio?.saldo ?? saldoConexiones} className={styles.bandAmount} />
               <div className={styles.bandPills}>
-                {saldoInicio && <span className={styles.bandPill}>Al {saldoInicio.fecha}</span>}
+                {saldoInicio && <OrigenSaldo className={styles.bandPill} fuente="BCP cuenta corriente" />}
                 <button type="button" className={styles.bandPill} data-ripple="" onClick={toggleHideBalances} aria-pressed={hideBalances}>
                   <Icon name={hideBalances ? 'visibility' : 'visibility_off'} size={16} />
                   {hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}

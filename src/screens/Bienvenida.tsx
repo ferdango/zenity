@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '../components/Button'
+import { Dialog } from '../components/Dialog'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
 import { NoDemoData, Pill, SectionHead } from '../components/zen'
@@ -19,6 +20,7 @@ import {
   omitirInicio,
   otorgarPermisosDatos,
   permisoActivo,
+  restaurarPermisoDato,
   setMejorarZenity,
   setPermisoDato,
 } from '../state/demoStore'
@@ -236,10 +238,16 @@ export function Bienvenida() {
   )
 }
 
+type Fuente = (typeof FUENTES_DATOS)[number]
+
+/** «Tu cuenta BCP» → «tu cuenta BCP» para usarlo dentro de una frase. */
+const enFrase = (nombre: string) => (nombre.startsWith('Tu ') ? `tu ${nombre.slice(3)}` : nombre)
+
 /** Más → Permisos de datos: qué lee Zenity de cada fuente, con revocación por fuente. */
 export function PermisosDatos() {
   const { business, toast } = useApp()
   const { a, demo, businessId } = useZen()
+  const [revocar, setRevocar] = useState<Fuente | null>(null)
   const d = demo.datos[businessId]
   if (!a) {
     return (
@@ -252,6 +260,17 @@ export function PermisosDatos() {
     )
   }
   const permiso = (id: FuenteDatos) => d?.fuentes[id]
+  /** Activa o revoca; revocar se puede deshacer y deja el permiso exactamente como estaba. */
+  const aplicar = (f: Fuente, activo: boolean) => {
+    const previo = d?.fuentes[f.id]
+    setPermisoDato(businessId, f.id, activo)
+    if (activo) toast(`Zenity vuelve a leer ${enFrase(f.nombre)}`, 'lock')
+    else
+      toast(`Zenity dejó de leer ${enFrase(f.nombre)}`, 'lock_open', {
+        label: 'Deshacer',
+        onClick: () => restaurarPermisoDato(businessId, f.id, previo),
+      })
+  }
   return (
     <div className="z-page">
       <TopBar title="Permisos de datos" subtitle={businessName(business)} />
@@ -287,8 +306,9 @@ export function PermisosDatos() {
                     checked={activo}
                     aria-label={f.nombre}
                     onChange={(e) => {
-                      setPermisoDato(businessId, f.id, e.target.checked)
-                      toast(e.target.checked ? `Zenity vuelve a leer ${f.nombre}` : `Revocaste el permiso de ${f.nombre}`, e.target.checked ? 'lock' : 'lock_open')
+                      // Revocar una fuente obligatoria cambia lo que ves: primero se explica y se confirma
+                      if (!e.target.checked && f.obligatoria) setRevocar(f)
+                      else aplicar(f, e.target.checked)
                     }}
                   />
                 </div>
@@ -323,6 +343,31 @@ export function PermisosDatos() {
           <TextoLegal />
         </motion.div>
       </motion.div>
+
+      <Dialog
+        open={!!revocar}
+        onClose={() => setRevocar(null)}
+        icon={<Icon name="lock_open" size={24} />}
+        title={revocar ? `¿Dejar de leer ${enFrase(revocar.nombre)}?` : ''}
+        actions={
+          <>
+            <Button variant="text" onClick={() => setRevocar(null)}>
+              Mantener
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => {
+                if (revocar) aplicar(revocar, false)
+                setRevocar(null)
+              }}
+            >
+              Dejar de leer
+            </Button>
+          </>
+        }
+      >
+        Zenity deja de leer esta fuente desde ahora. Lo que ya ves queda como la última lectura: la conciliación y tu caja no se actualizan con ella. Puedes volver a activarla cuando quieras.
+      </Dialog>
     </div>
   )
 }

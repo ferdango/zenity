@@ -287,6 +287,13 @@ export function simularPago(businessId: string, comprobante: Comprobante, monto:
   }
   setDemoState((s) => ({ ...s, extraMovements: [...s.extraMovements, movement] }))
   track('cobro_recibido', { tras_recordatorio: !!getDemoState().recordatorios[comprobante.id], simulado: true })
+  return movement.id
+}
+
+/** Quita un pago simulado («Deshacer»): el comprobante vuelve a la lista de cobranza. */
+export function quitarPagoSimulado(movementId: string) {
+  setDemoState((s) => ({ ...s, extraMovements: s.extraMovements.filter((m) => m.id !== movementId || !m.simulado) }))
+  track('cobro_simulado_deshecho')
 }
 
 export function registrarPromesa(p: Omit<PromesaPago, 'registradaEn'>) {
@@ -404,6 +411,19 @@ export function setPermisoDato(businessId: string, fuente: FuenteDatos, activo: 
     return { ...s, datos: { ...s.datos, [businessId]: { ...actual, fuentes: { ...actual.fuentes, [fuente]: nuevo } } } }
   })
   track(activo ? 'datos_permiso_activado' : 'datos_permiso_revocado', { fuente })
+}
+
+/** Deja el permiso de una fuente como estaba antes (para «Deshacer» una revocación). */
+export function restaurarPermisoDato(businessId: string, fuente: FuenteDatos, previo: PermisoFuente | undefined) {
+  setDemoState((s) => {
+    const actual = s.datos[businessId]
+    if (!actual) return s
+    const fuentes = { ...actual.fuentes }
+    if (previo) fuentes[fuente] = previo
+    else delete fuentes[fuente]
+    return { ...s, datos: { ...s.datos, [businessId]: { ...actual, fuentes } } }
+  })
+  track('datos_permiso_restaurado', { fuente })
 }
 
 export function setMejorarZenity(businessId: string, mejorarZenity: boolean) {
