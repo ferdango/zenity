@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f3f5fa" />
+    <meta name="theme-color" content="#f5f5fa" />
     <meta name="color-scheme" content="dark" />
     <meta name="description" content="Zenity: conecta tus finanzas en un solo lugar. Prototipo mobile-first con asistente de IA." />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -31,7 +31,7 @@
         var p = JSON.parse(localStorage.getItem('zenity.theme') || '"light"')
         var dark = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#0f121a' : '#f3f5fa')
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#0f121a' : '#f5f5fa')
       } catch (e) {
         document.documentElement.dataset.theme = 'light'
       }

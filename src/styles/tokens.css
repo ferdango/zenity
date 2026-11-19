@@ -27,14 +27,15 @@
   --z-divider: rgb(190 205 255 / 0.09);
 
   /* ── Roles de color ──────────────────────────────────────── */
-  --z-primary: #9ec2ff;
-  --z-on-primary: #0a2a63;
-  --z-primary-container: #233d6b;
-  --z-on-primary-container: #d8e6ff;
-  --z-primary-fixed: #d8e6ff;
-  --z-on-primary-fixed: #061a40;
-  --z-secondary-container: #0c4a73;
-  --z-on-secondary-container: #c7e7ff;
+  /* Violeta de marca (estilo «Digital Wallet»): acciones, enlaces y estados activos */
+  --z-primary: #c3b1ff;
+  --z-on-primary: #25075e;
+  --z-primary-container: #362472;
+  --z-on-primary-container: #ebe3ff;
+  --z-primary-fixed: #e7ddff;
+  --z-on-primary-fixed: #1f0656;
+  --z-secondary-container: #2e2a66;
+  --z-on-secondary-container: #e1dcff;
 
   --z-positive: #72d99a;
   --z-positive-container: rgb(114 217 154 / 0.14);
@@ -50,14 +51,34 @@
 
   --z-inverse-surface: #e6e8ef;
   --z-inverse-on-surface: #262b36;
-  --z-inverse-primary: #0b57d0;
+  --z-inverse-primary: #5a22d6;
   --z-scrim: rgb(0 0 0 / 0.55);
 
   /* Sombra suave de las tarjetas (en oscuro basta el borde) */
   --z-card-shadow: none;
+  /* Tarjeta que flota sobre la banda violeta (acciones rápidas) */
+  --z-float-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.65);
+
+  /* ── Banda héroe violeta (saldo, totales) ───────────────────── */
+  --z-hero-bg:
+    radial-gradient(110% 80% at 88% 0%, rgb(176 96 255 / 0.42), transparent 62%),
+    linear-gradient(172deg, #1c0a5c 0%, #2f0f93 52%, #4515bd 100%);
+  --z-hero-top: #1c0a5c;
+  --z-on-hero: #ffffff;
+  --z-on-hero-muted: rgb(255 255 255 / 0.72);
+  --z-hero-chip: rgb(255 255 255 / 0.14);
+  --z-hero-chip-hover: rgb(255 255 255 / 0.22);
+  --z-magenta: #cf6bff;
+
+  /* Íconos sólidos de las tarjetas por categoría */
+  --z-chip-violet: #6d35f0;
+  --z-chip-blue: #3b6cf6;
+  --z-chip-green: #12a463;
+  --z-chip-orange: #f26b1d;
+  --z-chip-amber: #e09a00;
 
   /* Luz ambiental del fondo */
-  --z-ambient-1: rgb(66 133 244 / 0.16);
+  --z-ambient-1: rgb(110 60 240 / 0.16);
   --z-ambient-2: rgb(155 114 203 / 0.13);
   --z-ambient-3: rgb(20 184 166 / 0.07);
 
@@ -104,7 +125,7 @@
   /* Skeleton loader */
   --z-skel-1: #191e2b;
   --z-skel-2: #2b3245;
-  --z-skel-3: #487fed;
+  --z-skel-3: #8b6cf6;
 
   /* Tarjetas de cuentas (Figma): iguales en los dos temas */
   --z-card-purple: #9467d3;
@@ -176,13 +197,13 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --z-bg: #f3f5fa;
+  --z-bg: #f5f5fa;
   --z-surface-lowest: #ffffff;
-  --z-surface-low: #f8f9fc;
+  --z-surface-low: #f9f9fc;
   --z-surface: #ffffff;
-  --z-surface-high: #eef2f8;
-  --z-surface-highest: #e3e8f1;
-  --z-surface-glass: rgb(243 245 250 / 0.84);
+  --z-surface-high: #f1f1f7;
+  --z-surface-highest: #e6e6f0;
+  --z-surface-glass: rgb(245 245 250 / 0.86);
 
   --z-on-surface: #172033;
   --z-on-surface-variant: #46506a;
@@ -191,14 +212,14 @@
   --z-outline-variant: #d2d8e5;
   --z-divider: rgb(24 40 80 / 0.08);
 
-  --z-primary: #1a5fd6;
+  --z-primary: #5a22d6;
   --z-on-primary: #ffffff;
-  --z-primary-container: #dce8ff;
-  --z-on-primary-container: #0c2d6e;
-  --z-primary-fixed: #d6e4ff;
-  --z-on-primary-fixed: #0c2d6e;
-  --z-secondary-container: #d6ecff;
-  --z-on-secondary-container: #08365c;
+  --z-primary-container: #ede6ff;
+  --z-on-primary-container: #2b0b7d;
+  --z-primary-fixed: #e6dcff;
+  --z-on-primary-fixed: #22075f;
+  --z-secondary-container: #e6e2ff;
+  --z-on-secondary-container: #251a6b;
 
   --z-positive: #0d8f50;
   --z-positive-container: rgb(13 143 80 / 0.1);
@@ -214,12 +235,18 @@
 
   --z-inverse-surface: #1f2533;
   --z-inverse-on-surface: #eef1f7;
-  --z-inverse-primary: #9ec2ff;
+  --z-inverse-primary: #c3b1ff;
   --z-scrim: rgb(16 22 38 / 0.38);
 
   --z-card-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 18px -10px rgb(16 24 40 / 0.14);
+  --z-float-shadow: 0 22px 44px -24px rgb(43 12 140 / 0.38), 0 2px 8px rgb(16 24 40 / 0.05);
 
-  --z-ambient-1: rgb(26 95 214 / 0.07);
+  --z-hero-bg:
+    radial-gradient(110% 80% at 88% 0%, rgb(190 110 255 / 0.55), transparent 62%),
+    linear-gradient(172deg, #2a0b91 0%, #4113c6 50%, #6020e4 100%);
+  --z-hero-top: #2a0b91;
+
+  --z-ambient-1: rgb(90 34 214 / 0.07);
   --z-ambient-2: rgb(155 114 203 / 0.07);
   --z-ambient-3: rgb(20 184 166 / 0.05);
 
@@ -231,7 +258,7 @@
 
   --z-skel-1: #eef1f7;
   --z-skel-2: #dfe5ef;
-  --z-skel-3: #1a5fd6;
+  --z-skel-3: #5a22d6;
 
   --z-glow-1: #a9c7ff;
   --z-glow-2: #7fa9ff;

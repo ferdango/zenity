@@ -19,37 +19,32 @@ interface SummaryTileProps {
 const ICONS = { income: 'trending_up', expense: 'trending_down', total: 'savings', tax: 'account_balance' } as const
 
 /**
- * Tiles principales del Inicio: ingresos, egresos y utilidad (e impuestos SUNAT).
- * Dos líneas por tile para que se lean de un vistazo.
+ * Tiles principales del Inicio: ingresos, egresos y utilidad (e impuestos SUNAT),
+ * al estilo de las tarjetas por categoría: etiqueta, círculo de color y monto grande.
  */
 export function SummaryTile({ kind, label, value, caption, to, delta, status }: SummaryTileProps) {
   return (
     <Link to={to} className={cn(styles.summary, styles[kind])} data-ripple="">
+      <span className={styles.summaryLabel}>{label}</span>
       <span className={styles.summaryIcon} aria-hidden>
         <Icon name={ICONS[kind]} size={22} weight={500} />
       </span>
-      <span className={styles.summaryText}>
-        <span className={styles.summaryHead}>
-          <span className={styles.summaryLabel}>{label}</span>
-          <span className={styles.summaryCaption}>{caption}</span>
-        </span>
-        <span className={styles.summaryLine}>
-          <Amount value={value} className={styles.summaryValue} sign={kind === 'total' ? 'always' : 'never'} />
-          {delta !== undefined && delta !== null && (
-            <span className={styles.delta} data-negative={kind === 'expense' ? delta > 0 : delta < 0}>
-              <Icon name={delta >= 0 ? 'arrow_upward' : 'arrow_downward'} size={13} weight={600} />
-              {Math.abs(delta)}%<span className="visually-hidden"> vs. mes anterior</span>
-            </span>
-          )}
-          {status && (
-            <span className={cn(styles.delta, !status.icon && styles.deltaPlain)} data-negative={Boolean(status.negative)}>
-              {status.icon && <Icon name={status.icon} size={13} weight={600} />}
-              {status.label}
-            </span>
-          )}
-        </span>
+      <Amount value={value} className={styles.summaryValue} sign={kind === 'total' ? 'always' : 'never'} />
+      <span className={styles.summaryFoot}>
+        <span className={styles.summaryCaption}>{caption}</span>
+        {delta !== undefined && delta !== null && (
+          <span className={styles.delta} data-negative={kind === 'expense' ? delta > 0 : delta < 0}>
+            <Icon name={delta >= 0 ? 'arrow_upward' : 'arrow_downward'} size={13} weight={600} />
+            {Math.abs(delta)}%<span className="visually-hidden"> vs. mes anterior</span>
+          </span>
+        )}
+        {status && (
+          <span className={cn(styles.delta, !status.icon && styles.deltaPlain)} data-negative={Boolean(status.negative)}>
+            {status.icon && <Icon name={status.icon} size={13} weight={600} />}
+            {status.label}
+          </span>
+        )}
       </span>
-      <Icon name="chevron_right" size={20} className={styles.summaryArrow} />
     </Link>
   )
 }

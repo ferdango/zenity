@@ -169,7 +169,7 @@ export function Caja() {
           </motion.section>
         )}
 
-        <motion.div className={styles.card} variants={fadeUp}>
+        <motion.div className={`${styles.card} ${styles.chartHero}`} variants={fadeUp}>
           <div className={styles.grid2}>
             <div style={{ display: 'grid', gap: 2 }}>
               <span className={styles.muted}>Saldo de hoy</span>

@@ -9,8 +9,8 @@ import styles from './BottomNav.module.css'
 import { PRIMARY_NAV, showsBottomNav } from './nav'
 
 /**
- * Barra inferior (Figma: 5 botones circulares). El indicador activo se desliza
- * entre opciones y el icono pasa de contorno a relleno.
+ * Barra inferior plana (estilo «Digital Wallet»): la pestaña activa va en violeta con el
+ * ícono relleno, y una barra fina se desliza sobre ella.
  */
 export function BottomNav() {
   const { pathname } = useLocation()
@@ -46,9 +46,9 @@ export function BottomNav() {
                     if (active) window.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                 >
+                  {active && <motion.span layoutId="bottom-nav-indicator" className={styles.indicator} transition={spring.snappy} />}
                   <span className={styles.circle}>
-                    {active && <motion.span layoutId="bottom-nav-indicator" className={styles.indicator} transition={spring.snappy} />}
-                    {item.icon === 'spark' ? <Spark size={22} /> : <Icon name={item.icon} size={22} fill={active} />}
+                    {item.icon === 'spark' ? <Spark size={24} /> : <Icon name={item.icon} size={24} fill={active} />}
                     <AnimatePresence>
                       {count > 0 && (
                         <motion.span

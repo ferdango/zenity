@@ -8,7 +8,7 @@ import { readStorage, writeStorage } from './storage'
 export type ThemePref = 'light' | 'dark' | 'system'
 
 const KEY = 'zenity.theme'
-const META_COLOR = { light: '#f3f5fa', dark: '#0f121a' } as const
+const META_COLOR = { light: '#f5f5fa', dark: '#0f121a' } as const
 
 let pref: ThemePref = readStorage<ThemePref>(KEY, 'light')
 const listeners = new Set<() => void>()

@@ -91,3 +91,10 @@
     opacity: 0;
   }
 }
+
+/* Sobre la banda violeta del Inicio (celular, sin scroll): ícono blanco */
+@media (max-width: 1023.98px) {
+  :global([data-on-band='true']) .iconButton:not(.tonal, .filled, .inverse, .selected) {
+    --ib-fg: var(--z-on-hero);
+  }
+}
