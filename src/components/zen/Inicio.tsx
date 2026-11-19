@@ -10,12 +10,11 @@ import { Avance } from './Avance'
 import { DecisionSemana } from './DecisionSemana'
 import { LessonCard } from './index'
 import { SunatMes } from './SunatMes'
-import { TareasHoy } from './TareasHoy'
 import styles from './zen.module.css'
 
 /**
- * Inicio del dueño, solo lo esencial: alerta de caja · lo que hay que hacer hoy (revisar y cobrar)
- * · el pago mensual a SUNAT, resumido.
+ * Inicio del dueño, solo lo esencial: tu avance · la decisión de la semana · alerta de caja · el pago
+ * mensual a SUNAT, resumido. Revisar y cobrar viven en la pestaña «Tareas».
  * El saldo actual vive en la banda violeta de la pantalla (Home).
  */
 export function InicioOla1() {
@@ -64,8 +63,6 @@ export function InicioOla1() {
           </Link>
         </motion.div>
       )}
-
-      <TareasHoy />
 
       <SunatMes />
 
