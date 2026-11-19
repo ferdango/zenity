@@ -12,15 +12,35 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/resultados', '/progreso', '/tienda', '/recompensas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
+const MAS_PATHS = ['/mas', '/resultados', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
-/** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
+/** Páginas que viven dentro de «Tareas» en la barra inferior: revisar, cobrar y el camino de aprendizaje. */
+const TAREAS_PATHS = ['/tareas', '/revisar', '/cobrar', '/progreso', '/recompensas', '/tienda']
+
+const INICIO: NavItem = { id: 'inicio', label: 'Inicio', short: 'Inicio', icon: 'home', to: '/inicio', match: (p) => p === '/inicio' }
+const CAJA: NavItem = { id: 'caja', label: 'Caja', short: 'Caja', icon: 'monitoring', to: '/caja', match: (p) => p === '/caja' }
+const MAS: NavItem = { id: 'mas', label: 'Más', short: 'Más', icon: 'apps', to: '/mas', match: (p) => MAS_PATHS.includes(p) || p.startsWith('/conexion/') }
+
+/** Menú lateral (escritorio): Inicio · Tareas · Por revisar · Caja · Cobrar (y «Más» queda fuera). */
 export const PRIMARY_NAV: NavItem[] = [
-  { id: 'inicio', label: 'Inicio', short: 'Inicio', icon: 'home', to: '/inicio', match: (p) => p === '/inicio' },
+  INICIO,
+  { id: 'tareas', label: 'Tareas', short: 'Tareas', icon: 'task_alt', to: '/tareas', match: (p) => p === '/tareas' },
   { id: 'revisar', label: 'Por revisar', short: 'Revisar', icon: 'fact_check', to: '/revisar', match: (p) => p === '/revisar' },
-  { id: 'caja', label: 'Caja', short: 'Caja', icon: 'monitoring', to: '/caja', match: (p) => p === '/caja' },
+  CAJA,
   { id: 'cobrar', label: 'Cobrar', short: 'Cobrar', icon: 'payments', to: '/cobrar', match: (p) => p === '/cobrar' },
-  { id: 'mas', label: 'Más', short: 'Más', icon: 'apps', to: '/mas', match: (p) => MAS_PATHS.includes(p) || p.startsWith('/conexion/') },
+  MAS,
+]
+
+/**
+ * Barra inferior del celular: Inicio · Tareas · Caja · Zenity · Más. Revisar y Cobrar viven dentro de
+ * «Tareas» (la pestaña queda activa en ellas) y «Zenity» es «Pregúntale a Zenity».
+ */
+export const BOTTOM_NAV: NavItem[] = [
+  INICIO,
+  { id: 'tareas', label: 'Tareas', short: 'Tareas', icon: 'task_alt', to: '/tareas', match: (p) => TAREAS_PATHS.includes(p) },
+  CAJA,
+  { id: 'chat', label: 'Pregúntale a Zenity', short: 'Zenity', icon: 'spark', to: '/chat', match: (p) => p === '/chat' },
+  MAS,
 ]
 
 /** Herramientas del dueño (menú lateral): solo lo que usa en el día a día. */
@@ -57,6 +77,7 @@ export const REPORTS_NAV: NavItem[] = !FEATURES.herramientasAvanzadas ? [] : [
 export function isTabRoute(path: string): boolean {
   return (
     PRIMARY_NAV.some((item) => item.to === path) ||
+    BOTTOM_NAV.some((item) => item.to === path) ||
     path === '/inicio' ||
     path === '/resumen' ||
     path === '/chat' ||
@@ -65,7 +86,7 @@ export function isTabRoute(path: string): boolean {
   )
 }
 
-/** Rutas que muestran la barra de navegación inferior en móvil. */
+/** Rutas que muestran la barra de navegación inferior en móvil (las pestañas y lo que se abre desde «Tareas»). */
 export function showsBottomNav(path: string): boolean {
-  return PRIMARY_NAV.some((item) => item.to === path) || path === '/resumen' || path.startsWith('/movimientos/')
+  return BOTTOM_NAV.some((item) => item.to === path) || path === '/revisar' || path === '/cobrar' || path === '/resumen' || path.startsWith('/movimientos/')
 }

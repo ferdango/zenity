@@ -194,6 +194,8 @@
   --z-content: 640px;
   --z-sidenav: 288px;
   --z-bottom-nav: 100px;
+  /* Alto real de la barra inferior (para lo que se pega encima, como la caja del chat) */
+  --z-bottom-bar: calc(72px + max(var(--z-safe-bottom), 10px));
   --z-safe-bottom: env(safe-area-inset-bottom, 0px);
   --z-safe-top: env(safe-area-inset-top, 0px);
 
