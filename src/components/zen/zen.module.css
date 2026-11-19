@@ -978,6 +978,96 @@ textarea.input {
   transition: transform var(--z-dur-medium) var(--z-ease-emphasized);
 }
 
+/* Pago mensual a SUNAT: tarjeta pequeña que se abre para ver el desglose */
+.sunat {
+  border-radius: var(--z-radius-xl);
+  background: var(--z-surface);
+  border: 1px solid var(--z-divider);
+  box-shadow: var(--z-card-shadow);
+  overflow: hidden;
+}
+
+.sunatHead {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 12px 12px 14px;
+  text-align: left;
+  transition: background var(--z-dur-short) var(--z-ease-standard);
+}
+
+@media (hover: hover) {
+  .sunatHead:hover {
+    background: var(--z-surface-high);
+  }
+}
+
+.sunatEnd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--z-on-surface-variant);
+}
+
+.sunatEstimado {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--z-on-surface-low);
+}
+
+.sunatBody {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
+.sunatPartes {
+  display: grid;
+  padding: 4px 12px;
+  border-radius: var(--z-radius-lg);
+  background: var(--z-surface-high);
+}
+
+.sunatPartes > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.sunatPartes > div + div {
+  border-top: 1px solid var(--z-divider);
+}
+
+.sunatPartes dt {
+  font-size: 0.875rem;
+  color: var(--z-on-surface-variant);
+}
+
+.sunatPartes dd {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sunatNota {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--z-on-surface-variant);
+}
+
+.sunatNota > :global(.z-icon) {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 /* Fila grande de «Para hoy» en Inicio */
 .todo {
   composes: row;

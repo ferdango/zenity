@@ -8,10 +8,12 @@ import { inicioCompleto } from '../../state/demoStore'
 import { useCaja, useCobranzas, useLecciones, useZen } from '../../state/useZen'
 import { Icon } from '../Icon'
 import { LessonCard, Money } from './index'
+import { SunatMes } from './SunatMes'
 import styles from './zen.module.css'
 
 /**
- * Inicio del dueño, solo lo esencial: alerta de caja · lo que hay que hacer hoy (revisar y cobrar).
+ * Inicio del dueño, solo lo esencial: alerta de caja · lo que hay que hacer hoy (revisar y cobrar)
+ * · el pago mensual a SUNAT, resumido.
  * El saldo actual vive en la banda violeta de la pantalla (Home).
  */
 export function InicioOla1() {
@@ -93,6 +95,8 @@ export function InicioOla1() {
           </Link>
         </div>
       </motion.section>
+
+      <SunatMes />
 
       {leccion && (
         <motion.div variants={fadeUp}>
