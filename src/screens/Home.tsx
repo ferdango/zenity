@@ -12,7 +12,10 @@ import { PeriodPicker } from '../components/PeriodPicker'
 import { Spark } from '../components/Spark'
 import { Tour } from '../components/Tour'
 import { Money } from '../components/zen'
-import { InicioOla1 } from '../components/zen/Inicio'
+import { Avance } from '../components/zen/Avance'
+import { DecisionSemana } from '../components/zen/DecisionSemana'
+import { AlertaCaja, ConfigurarZenity, LeccionInicio } from '../components/zen/Inicio'
+import { SunatMes } from '../components/zen/SunatMes'
 import { OrigenSaldo } from '../components/zen/OrigenSaldo'
 import { HOY } from '../config/demo'
 import { businessName } from '../data/businesses'
@@ -309,7 +312,67 @@ export function Home() {
               </div>
             </motion.section>
 
-            {/* Acciones rápidas: tarjeta que flota sobre la banda */}
+            {/* 2 · El riesgo que viene: la alerta de caja */}
+            <div className={styles.bloque}>
+              <AlertaCaja />
+            </div>
+
+            {/* Sin cuentas conectadas, lo primero es conectar una */}
+            {ledger.empty && (
+              <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
+                <div className={styles.empty}>
+                  <span className={styles.emptyIcon}>
+                    <Icon name="add_card" size={28} />
+                  </span>
+                  <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
+                  <p className={styles.emptyText}>Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.</p>
+                  <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
+                    Conectar cuenta
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {FEATURES.inicioClasico && (
+              <motion.div className={styles.period} variants={fadeUp}>
+                <div data-tour="period">
+                  <PeriodPicker />
+                </div>
+              </motion.div>
+            )}
+
+            {/* 3 · Cómo le va al negocio este mes */}
+            {!ledger.empty && (
+              <motion.h2 className={styles.monthTitle} variants={fadeUp}>
+                Cómo te va en {month.toLowerCase()}
+              </motion.h2>
+            )}
+            {tiles}
+
+            {/* 4 · Qué hacer con esos números y 5 · lo que hay que pagar a SUNAT */}
+            <div className={styles.bloque}>
+              <DecisionSemana />
+              <SunatMes />
+            </div>
+
+            {/* 6 · Dónde está la plata */}
+            {!ledger.empty && (
+              <>
+                <motion.h2 className={styles.monthTitle} variants={fadeUp}>
+                  Tus cuentas
+                </motion.h2>
+                <motion.div variants={fadeUp} data-tour="accounts">
+                  <Carousel />
+                </motion.div>
+                <motion.div variants={fadeUp} style={{ display: 'grid' }}>
+                  <Button variant="tonal" size="lg" icon="link" className={styles.addButton} to="/conexiones" data-tour="add-account">
+                    Ver y agregar conexiones
+                  </Button>
+                </motion.div>
+              </>
+            )}
+
+            {/* 7 · Atajos */}
             <motion.nav className={styles.quick} variants={fadeUp} aria-label="Acciones rápidas">
               {ACCIONES.map((accion) => (
                 <Link
@@ -333,49 +396,12 @@ export function Home() {
               ))}
             </motion.nav>
 
-            <InicioOla1 />
-
-            {FEATURES.inicioClasico && (
-              <motion.div className={styles.period} variants={fadeUp}>
-                <div data-tour="period">
-                  <PeriodPicker />
-                </div>
-              </motion.div>
-            )}
-
-            {ledger.empty ? (
-              <motion.div variants={fadeUp} className={styles.emptyWrap} data-tour="accounts">
-                <div className={styles.empty}>
-                  <span className={styles.emptyIcon}>
-                    <Icon name="add_card" size={28} />
-                  </span>
-                  <h2 className={styles.emptyTitle}>Conecta la primera cuenta de {name}</h2>
-                  <p className={styles.emptyText}>Bancos, billeteras, APIs o archivos. Aquí solo verás los movimientos de este RUC.</p>
-                  <Button size="lg" icon="add" to="/conexiones/nueva" data-tour="add-account">
-                    Conectar cuenta
-                  </Button>
-                </div>
-              </motion.div>
-            ) : (
-              (
-                <>
-                  <motion.div variants={fadeUp} data-tour="accounts">
-                    <Carousel />
-                  </motion.div>
-                  <motion.div variants={fadeUp} style={{ display: 'grid' }}>
-                    <Button variant="tonal" size="lg" icon="link" className={styles.addButton} to="/conexiones" data-tour="add-account">
-                      Ver y agregar conexiones
-                    </Button>
-                  </motion.div>
-                </>
-              )
-            )}
-            {!ledger.empty && (
-              <motion.h2 className={styles.monthTitle} variants={fadeUp}>
-                Cómo te va en {month.toLowerCase()}
-              </motion.h2>
-            )}
-            {tiles}
+            {/* 8 · Configuración, tu avance de aprendizaje y la lección del día */}
+            <div className={styles.bloque}>
+              <ConfigurarZenity />
+              <Avance />
+              <LeccionInicio />
+            </div>
           </motion.div>
 
           {FEATURES.inicioClasico && (
