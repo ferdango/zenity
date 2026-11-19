@@ -15,9 +15,8 @@ import { PRIMARY_NAV, showsBottomNav } from './nav'
 export function BottomNav() {
   const { pathname } = useLocation()
   const visible = showsBottomNav(pathname)
-  const { a, demo, businessId } = useZen()
-  const preguntas = demo.comments.filter((c) => c.businessId === businessId && c.pregunta && !c.respondida).length
-  const porRevisar = (a?.porRevisar.length ?? 0) + preguntas
+  const { a } = useZen()
+  const porRevisar = a?.porRevisar.length ?? 0
 
   return createPortal(
     <AnimatePresence>

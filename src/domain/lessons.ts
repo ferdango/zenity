@@ -1,7 +1,6 @@
 /** Motor de microlecciones: cada lección tiene un disparador con los números del negocio. */
 import { LESSON_IDS, LESSONS, type LessonContent, type LessonContext } from '../config/lessons.ts'
 import { gratificacion } from './calendar.ts'
-import { interesesTotales, perfilCrediticio } from './credit.ts'
 import type { CashflowResult } from './cashflow.ts'
 import type { Cobranza } from './collections.ts'
 import { type Analysis, resumenMes } from './engine.ts'
@@ -18,8 +17,6 @@ export interface LessonInputs {
   /** Aviso de límite del régimen (≥ 80%) */
   limite: { pct: number; tope: number } | null
   corrections: Correction[]
-  /** El dueño ya abrió su perfil de crédito (F3) */
-  creditoVisto?: boolean
 }
 
 export interface LessonState {
@@ -67,17 +64,6 @@ export function evaluarLecciones(i: LessonInputs): LessonState {
     limite: i.limite ? { pct: fmtPct(i.limite.pct), tope: fmtSolesCorto(i.limite.tope), regimen: REGIMEN_NOMBRE[b.regimenTributario] } : null,
     revisados,
     conciliado: fmtPct(resumenMes(a, mes).conciliado),
-    credito: (() => {
-      const p = perfilCrediticio(a, i.hoy)
-      if (p.montoSugerido <= 0) return null
-      return {
-        excedente: fmtSolesCorto(Math.round(p.excedente)),
-        cuotaMax: fmtSolesCorto(Math.round(p.cuotaMaxima)),
-        monto: fmtSolesCorto(p.montoSugerido),
-        plazo: p.plazoSugerido,
-        intereses: fmtSolesCorto(Math.round(interesesTotales(p.montoSugerido, p.tea, p.plazoSugerido))),
-      }
-    })(),
   }
 
   const disparadas: Record<LessonId, boolean> = {
@@ -91,7 +77,6 @@ export function evaluarLecciones(i: LessonInputs): LessonState {
     L08: !!i.caja.alerta,
     L09: !!i.limite,
     L10: a.porRevisar.length === 0 && revisados > 0,
-    L11: !!i.creditoVisto,
   }
   return { context, activas: LESSON_IDS.filter((id) => disparadas[id]) }
 }

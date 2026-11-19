@@ -23,8 +23,7 @@ export function InicioOla1() {
   const cobranzas = useCobranzas()
   const lecciones = useLecciones()
   if (!a) return null
-  const preguntas = demo.comments.filter((c) => c.businessId === a.business.id && c.pregunta && !c.respondida).length
-  const porRevisar = a.porRevisar.length + preguntas
+  const porRevisar = a.porRevisar.length
   const vencidas = cobranzas.filter((c) => c.diasVencidos > 0).length
   const leccion = lecciones?.activas.find((id) => !demo.leccionesCerradas.includes(`${business.id}:${id}`))
 

@@ -1,6 +1,5 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 import { BusinessButton } from '../components/Business'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
@@ -16,17 +15,14 @@ import { FEATURES } from '../lib/features'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { resetDemo } from '../lib/resetDemo'
 import { useApp } from '../state/context'
-import { CONTADOR, setPersona } from '../state/demoStore'
 import { useZen } from '../state/useZen'
 
-/** «Más»: las herramientas del día a día, los ajustes y la demo (contador, BCP y reinicio). */
+/** «Más»: las herramientas del día a día, los ajustes y reiniciar la demo. */
 export function Mas() {
-  const navigate = useNavigate()
   const { business, connections } = useApp()
   const { a, demo } = useZen()
   const [confirmar, setConfirmar] = useState(false)
   const pct = a ? Math.round(resumenMes(a, HOY.slice(0, 7)).conciliado * 100) : null
-  const preguntas = demo.comments.filter((c) => c.businessId === business.id && c.pregunta && !c.respondida).length
 
   return (
     <div className="z-page">
@@ -47,15 +43,6 @@ export function Mas() {
               <LinkRow tone="positive" to="/cierre-caja" icon="point_of_sale" title="Cierre de caja" sub="Anota el efectivo que contaste hoy" />
             )}
             <LinkRow tone="violet" to="/personal" icon="person" title="Gasto personal" sub="Lo que sacaste del negocio para ti" />
-            <LinkRow tone="positive" to="/credito" icon="credit_score" title="Crédito BCP" sub="Cuánto te podrían prestar" />
-            <LinkRow
-              tone="info"
-              to="/mi-contador"
-              icon="support_agent"
-              title="Mi contador"
-              sub={CONTADOR.nombre}
-              end={preguntas ? <Pill tone="info">{preguntas} pregunta{preguntas === 1 ? '' : 's'}</Pill> : undefined}
-            />
             <LinkRow tone="info" to="/conciliacion?subir=1" icon="upload_file" title="Subir extracto del banco" sub="Excel o CSV de tu banca por internet" />
             <LinkRow tone="violet" to="/chat" icon="auto_awesome" title="Pregúntale a Zenity" sub="Respuestas con los números de tu negocio" />
           </div>
@@ -81,7 +68,7 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Ajustes" />
           <div className={styles.list}>
-            <LinkRow tone="positive" to="/permisos" icon="verified_user" title="Permisos de datos" sub="Qué lee Zenity y quién ve tus datos" end={!demo.datos[business.id] ? <Pill tone="media">Pendiente</Pill> : undefined} />
+            <LinkRow tone="positive" to="/permisos" icon="verified_user" title="Permisos de datos" sub="Qué lee Zenity de tus cuentas" end={!demo.datos[business.id] ? <Pill tone="media">Pendiente</Pill> : undefined} />
             <LinkRow tone="info" to="/bienvenida?paso=planilla" icon="groups" title="Tu planilla" sub="Trabajadores y sueldos" />
           </div>
           <ThemeSwitch />
@@ -90,42 +77,6 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Demo" />
           <div className={styles.list}>
-            <button
-              type="button"
-              className={styles.row}
-              data-ripple=""
-              onClick={() => {
-                setPersona('CONTADOR')
-                navigate('/contador')
-              }}
-            >
-              <span className={styles.rowIcon}>
-                <Icon name="switch_account" size={20} />
-              </span>
-              <span className={styles.rowText}>
-                <span className={styles.rowTitle}>Ver como contador</span>
-                <span className={styles.rowSub}>Portal multi-cliente de {CONTADOR.nombre} (mejor en escritorio)</span>
-              </span>
-              <Icon name="chevron_right" size={20} />
-            </button>
-            <button
-              type="button"
-              className={styles.row}
-              data-ripple=""
-              onClick={() => {
-                setPersona('BCP')
-                navigate('/bcp')
-              }}
-            >
-              <span className={styles.rowIcon}>
-                <Icon name="account_balance" size={20} />
-              </span>
-              <span className={styles.rowText}>
-                <span className={styles.rowTitle}>Ver como BCP</span>
-                <span className={styles.rowSub}>Expedientes que los clientes autorizaron compartir</span>
-              </span>
-              <Icon name="chevron_right" size={20} />
-            </button>
             <button type="button" className={styles.row} data-ripple="" onClick={() => setConfirmar(true)}>
               <span className={styles.rowIcon} style={{ color: 'var(--z-negative)' }}>
                 <Icon name="restart_alt" size={20} />

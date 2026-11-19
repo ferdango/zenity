@@ -12,7 +12,7 @@ export interface NavItem {
 }
 
 /** Páginas que viven dentro de «Más» (la pestaña queda activa en la barra inferior). */
-const MAS_PATHS = ['/mas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/mi-contador', '/credito', '/cierre-caja', '/permisos', '/metricas']
+const MAS_PATHS = ['/mas', '/conexiones', '/conexiones/nueva', '/conciliacion', '/personal', '/regimen', '/aprende', '/datos', '/cierre-caja', '/permisos', '/metricas']
 
 /** Barra inferior del dueño (sección 8 del brief): Inicio · Por revisar · Caja · Cobrar · Más. */
 export const PRIMARY_NAV: NavItem[] = [
@@ -30,8 +30,6 @@ export const TOOLS_NAV: NavItem[] = [
     ? [{ id: 'cierre-caja', label: 'Cierre de caja', short: 'Cierre', icon: 'point_of_sale', to: '/cierre-caja', match: (p: string) => p === '/cierre-caja' }]
     : []),
   { id: 'personal', label: 'Gasto personal', short: 'Personal', icon: 'person', to: '/personal', match: (p) => p === '/personal' },
-  { id: 'credito', label: 'Crédito BCP', short: 'Crédito', icon: 'credit_score', to: '/credito', match: (p) => p === '/credito' },
-  { id: 'mi-contador', label: 'Mi contador', short: 'Contador', icon: 'support_agent', to: '/mi-contador', match: (p) => p === '/mi-contador' },
   { id: 'chat', label: 'Pregúntale a Zenity', short: 'Zenity', icon: 'spark', to: '/chat', match: (p) => p === '/chat' },
   ...(FEATURES.herramientasAvanzadas
     ? [

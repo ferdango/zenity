@@ -1,14 +1,12 @@
 /**
  * Estado de la demo de la primera ola: lo que hace el usuario sobre el seed (correcciones, reglas,
- * comentarios, promesas, sueldo del dueño, lecciones…). Store externo con `useSyncExternalStore`:
+ * promesas, sueldo del dueño, lecciones…). Store externo con `useSyncExternalStore`:
  * lo leen tanto AppState (para el libro de Ingresos/Egresos) como las pantallas nuevas.
  * Se guarda en localStorage; «Reiniciar demo» lo borra y vuelve al seed.
  */
 import { useSyncExternalStore } from 'react'
-import type { FuenteExpediente } from '../config/credit'
-import { AHORA, CONTADOR_DEMO, HOY } from '../config/demo'
+import { AHORA, HOY } from '../config/demo'
 import { CONSENTIMIENTO_DATOS, type FuenteDatos } from '../config/legal'
-import { venceConsentimiento } from '../domain/credit'
 import { track } from '../lib/analytics'
 import { loadBusinessData } from '../data/fuentes'
 import { analyze, type Analysis } from '../domain/engine'
@@ -16,7 +14,6 @@ import type {
   BankMovement,
   CategoriaId,
   CierreCaja,
-  Comment,
   Comprobante,
   Correction,
   LessonEvent,
@@ -25,45 +22,8 @@ import type {
   RegimenLaboral,
   Rule,
 } from '../domain/types'
-import { diffDays, lastDayOfMonth } from '../domain/util'
+import { diffDays } from '../domain/util'
 import { readStorage, writeStorage } from '../lib/storage'
-
-export interface Permisos {
-  verMovimientos: boolean
-  editarCategorias: boolean
-  /** false = el dueño le quitó el acceso */
-  activo: boolean
-}
-
-export type EstadoSolicitud = 'ENVIADA' | 'PRE_APROBADA' | 'MAS_INFO' | 'NO_POR_AHORA' | 'ACEPTADA'
-
-/** Consentimiento del dueño para compartir su expediente con el BCP (revocable). */
-export interface Consentimiento {
-  fuentes: FuenteExpediente[]
-  otorgado: string
-  vence: string
-  revocado?: string
-}
-
-export interface Solicitud {
-  monto: number
-  plazo: number
-  tea: number
-  enviada: string
-  estado: EstadoSolicitud
-  /** Respuesta del BCP (simulada en la vista BCP) */
-  respuesta?: { monto?: number; plazo?: number; nota: string; ts: string }
-  /** Lo que el dueño contestó cuando el BCP pidió más información */
-  infoDueno?: string
-  /** Fecha del desembolso al aceptar */
-  desembolso?: string
-}
-
-export interface CreditoNegocio {
-  visto?: boolean
-  consentimiento?: Consentimiento
-  solicitud?: Solicitud
-}
 
 /** Permiso para leer una fuente de datos (revocable). */
 export interface PermisoFuente {
@@ -112,7 +72,6 @@ export interface DemoState {
   corrections: Correction[]
   rules: Rule[]
   extraMovements: BankMovement[]
-  comments: Comment[]
   promesas: PromesaPago[]
   overrides: Record<string, Overrides>
   /** Inicio del reto «30 días con cuentas separadas» por negocio */
@@ -120,14 +79,6 @@ export interface DemoState {
   lessonEvents: LessonEvent[]
   /** Lecciones cerradas en contexto ("negocio:L01"): ya no se muestran como tarjeta */
   leccionesCerradas: string[]
-  persona: 'DUENO' | 'CONTADOR' | 'BCP'
-  /** F3 · Perfil crediticio por negocio */
-  credito: Record<string, CreditoNegocio>
-  permisos: Record<string, Permisos>
-  /** Cuenta PCGE que asignó el contador a un movimiento */
-  pcge: Record<string, string>
-  /** Checks manuales del cierre del mes ("negocio:mes:item") */
-  cierre: Record<string, boolean>
   /** El dueño ya revisó su régimen (Mi progreso) */
   regimenRevisado: Record<string, boolean>
   /** Cierres de caja de las ventas en efectivo */
@@ -138,17 +89,13 @@ export interface DemoState {
   datos: Record<string, PermisosDatos>
   /** Configuración inicial por negocio */
   inicio: Record<string, InicioNegocio>
-  /** Meses que el contador cerró ("negocio:mes" → fecha) */
-  mesesCerrados: Record<string, string>
   importaciones: Importacion[]
   proyecciones: ProyeccionGuardada[]
-  /** Conciliaciones de confianza media que el dueño confirmó o consultó con su contador */
+  /** Conciliaciones de confianza media que el dueño confirmó (o marcó para consultar) */
   confirmados: Record<string, 'OK' | 'CONSULTA'>
 }
 
 const KEY = 'zenity.demo.v1'
-
-export const PERMISOS_INICIALES: Permisos = { verMovimientos: true, editarCategorias: true, activo: true }
 
 function initial(): DemoState {
   return {
@@ -156,24 +103,17 @@ function initial(): DemoState {
     corrections: [],
     rules: [],
     extraMovements: [],
-    comments: [],
     promesas: [],
     overrides: {},
     // El reto empezó el 1 de noviembre
     retoInicio: {},
     lessonEvents: [],
     leccionesCerradas: [],
-    persona: 'DUENO',
-    credito: {},
-    permisos: {},
-    pcge: {},
-    cierre: {},
     regimenRevisado: {},
     cierresCaja: [],
     recordatorios: {},
     datos: {},
     inicio: {},
-    mesesCerrados: {},
     importaciones: [],
     proyecciones: [],
     confirmados: {},
@@ -376,60 +316,10 @@ export function cerrarLeccion(businessId: string, lessonId: LessonId) {
   setDemoState((s) => ({ ...s, leccionesCerradas: [...new Set([...s.leccionesCerradas, `${businessId}:${lessonId}`])] }))
 }
 
-export function setPersona(persona: DemoState['persona']) {
-  setDemoState((s) => (s.persona === persona ? s : { ...s, persona }))
-}
-
-export function permisosDe(s: DemoState, businessId: string): Permisos {
-  return s.permisos[businessId] ?? PERMISOS_INICIALES
-}
-
-export function setPermisos(businessId: string, patch: Partial<Permisos>) {
-  setDemoState((s) => ({ ...s, permisos: { ...s.permisos, [businessId]: { ...permisosDe(s, businessId), ...patch } } }))
-}
-
-export function comentar(c: Omit<Comment, 'id' | 'ts'>): string {
-  const id = uid('com')
-  setDemoState((s) => ({ ...s, comments: [...s.comments, { ...c, id, ts: new Date().toISOString() }] }))
-  track('comentario', { autor: c.autor, pregunta: !!c.pregunta })
-  return id
-}
-
-/** El dueño responde una pregunta del contador: la respuesta vuelve al hilo. */
-export function responderPregunta(pregunta: Comment, texto: string) {
-  setDemoState((s) => ({
-    ...s,
-    comments: [
-      ...s.comments.map((c) => (c.id === pregunta.id ? { ...c, respondida: true } : c)),
-      { id: uid('com'), businessId: pregunta.businessId, movementId: pregunta.movementId, autor: 'DUENO', texto, ts: new Date().toISOString() },
-    ],
-  }))
-}
-
-export function asignarCuenta(movementIds: string[], cuenta: string) {
-  setDemoState((s) => ({ ...s, pcge: { ...s.pcge, ...Object.fromEntries(movementIds.map((id) => [id, cuenta])) } }))
-  track('contador_cuenta_asignada', { movimientos: movementIds.length, lote: movementIds.length > 1 })
-}
-
-export function setCierre(key: string, value: boolean) {
-  setDemoState((s) => ({ ...s, cierre: { ...s.cierre, [key]: value } }))
-}
-
 export function marcarRegimenRevisado(businessId: string) {
   if (getDemoState().regimenRevisado[businessId]) return
   setDemoState((s) => ({ ...s, regimenRevisado: { ...s.regimenRevisado, [businessId]: true } }))
   track('regimen_revisado')
-}
-
-/** El contador cierra el mes del cliente: «días de cierre» = días desde el fin de mes. */
-export function cerrarMes(businessId: string, mes: string, conPendientes = false) {
-  setDemoState((s) => ({ ...s, mesesCerrados: { ...s.mesesCerrados, [`${businessId}:${mes}`]: AHORA } }))
-  track('cierre_mes_completado', { dias: diffDays(lastDayOfMonth(mes), HOY), con_pendientes: conPendientes })
-}
-
-export function reabrirMes(businessId: string, mes: string) {
-  const clave = `${businessId}:${mes}`
-  setDemoState((s) => ({ ...s, mesesCerrados: Object.fromEntries(Object.entries(s.mesesCerrados).filter(([k]) => k !== clave)) }))
 }
 
 /* ── Extracto, cierre de caja y proyecciones ──────────────────── */
@@ -465,12 +355,9 @@ export function guardarProyeccion(businessId: string, saldo7: number) {
   setDemoState((st) => ({ ...st, proyecciones: [...st.proyecciones, { businessId, fecha: HOY, saldo7 }] }))
 }
 
-/** El dueño confirma una conciliación de confianza media, o se la consulta a su contador. */
+/** El dueño confirma una conciliación de confianza media. */
 export function responderConciliacion(input: { businessId: string; matchId: string; movementId: string; regla: string; motivo: string; respuesta: 'OK' | 'CONSULTA' }) {
   setDemoState((s) => ({ ...s, confirmados: { ...s.confirmados, [input.matchId]: input.respuesta } }))
-  if (input.respuesta === 'CONSULTA') {
-    comentar({ businessId: input.businessId, movementId: input.movementId, autor: 'DUENO', texto: `¿Puedes revisar esta conciliación? Zenity dice: ${input.motivo}` })
-  }
   track('conciliacion_confirmada', { regla: input.regla, respuesta: input.respuesta === 'OK' ? 'correcta' : 'consulta' })
 }
 
@@ -536,82 +423,9 @@ export function inicioCompleto(s: DemoState, businessId: string): boolean {
   return !!i?.permisos && !!i?.planilla
 }
 
-/* ── F3 · Crédito ─────────────────────────────────────────────── */
-
-function setCredito(businessId: string, patch: (c: CreditoNegocio) => CreditoNegocio) {
-  setDemoState((s) => ({ ...s, credito: { ...s.credito, [businessId]: patch(s.credito[businessId] ?? {}) } }))
-}
-
-/** Consentimiento vigente (no revocado ni vencido). */
-export function consentimientoActivo(c: CreditoNegocio | undefined): Consentimiento | null {
-  const k = c?.consentimiento
-  return k && !k.revocado && k.vence >= HOY ? k : null
-}
-
-export function marcarCreditoVisto(businessId: string, segmento: string) {
-  if (getDemoState().credito[businessId]?.visto) return
-  setCredito(businessId, (c) => ({ ...c, visto: true }))
-  track('credito_perfil_visto', { segmento })
-}
-
-export function otorgarConsentimiento(businessId: string, fuentes: FuenteExpediente[]) {
-  setCredito(businessId, (c) => ({ ...c, consentimiento: { fuentes, otorgado: AHORA, vence: venceConsentimiento(HOY) } }))
-  track('credito_consentimiento', { fuentes: fuentes.length })
-}
-
-export function revocarConsentimiento(businessId: string) {
-  setCredito(businessId, (c) => (c.consentimiento ? { ...c, consentimiento: { ...c.consentimiento, revocado: AHORA } } : c))
-  track('credito_consentimiento_revocado')
-}
-
-export function enviarSolicitud(businessId: string, monto: number, plazo: number, tea: number) {
-  setCredito(businessId, (c) => ({ ...c, solicitud: { monto, plazo, tea, enviada: AHORA, estado: 'ENVIADA' } }))
-  track('credito_solicitud_enviada', { plazo })
-}
-
-/** El BCP responde (vista BCP de la demo). */
-export function responderSolicitud(businessId: string, estado: 'PRE_APROBADA' | 'MAS_INFO' | 'NO_POR_AHORA', respuesta: { monto?: number; plazo?: number; nota: string }) {
-  setCredito(businessId, (c) => (c.solicitud ? { ...c, solicitud: { ...c.solicitud, estado, respuesta: { ...respuesta, ts: AHORA } } } : c))
-  track('credito_respuesta_bcp', { estado })
-}
-
-/** El dueño contesta el pedido de información: la solicitud vuelve a evaluación. */
-export function enviarInformacion(businessId: string, texto: string) {
-  setCredito(businessId, (c) => (c.solicitud ? { ...c, solicitud: { ...c.solicitud, estado: 'ENVIADA', infoDueno: texto } } : c))
-}
-
-/** Acepta la pre-aprobación: el desembolso entra hoy a la cuenta BCP y las cuotas, a la caja. */
-export function aceptarCredito(businessId: string) {
-  const s = getDemoState()
-  const sol = s.credito[businessId]?.solicitud
-  if (!sol || sol.estado !== 'PRE_APROBADA') return
-  const monto = sol.respuesta?.monto ?? sol.monto
-  const plazo = sol.respuesta?.plazo ?? sol.plazo
-  const saldo = analysisFor(businessId)?.saldoActual ?? 0
-  const movement: BankMovement = {
-    id: uid('desembolso'),
-    businessId,
-    fecha: AHORA,
-    monto,
-    glosa: 'DESEMBOLSO PRESTAMO CAPITAL DE TRABAJO BCP',
-    numeroOperacion: String(Math.floor(100_000_000 + Math.random() * 800_000_000)),
-    contraparteNombre: 'BCP',
-    canal: 'TRANSFERENCIA',
-    saldoDespues: Math.round((saldo + monto) * 100) / 100,
-    simulado: true,
-  }
-  setDemoState((st) => ({
-    ...st,
-    extraMovements: [...st.extraMovements, movement],
-    credito: { ...st.credito, [businessId]: { ...st.credito[businessId], solicitud: { ...sol, monto, plazo, estado: 'ACEPTADA', desembolso: HOY } } },
-  }))
-  track('credito_aceptado', { plazo })
-}
-
 /** Restaura el seed: borra todo lo que hizo el usuario en la demo. */
 export function reiniciarDemo() {
   state = initial()
   emit()
 }
 
-export const CONTADOR = CONTADOR_DEMO

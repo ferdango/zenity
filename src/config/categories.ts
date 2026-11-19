@@ -35,30 +35,3 @@ export const CATEGORIAS: Record<CategoriaId, Categoria> = {
 }
 
 export const CATEGORIA_IDS = Object.keys(CATEGORIAS) as CategoriaId[]
-
-/** Cuentas que el contador puede asignar en el portal. */
-export const CUENTAS_PCGE = [
-  { codigo: '1041', nombre: 'Cuentas corrientes operativas' },
-  { codigo: '12', nombre: 'Cuentas por cobrar comerciales – terceros' },
-  { codigo: '14', nombre: 'Cuentas por cobrar al personal, accionistas y gerentes' },
-  { codigo: '40', nombre: 'Tributos por pagar' },
-  { codigo: '42', nombre: 'Cuentas por pagar comerciales – terceros' },
-  { codigo: '45', nombre: 'Obligaciones financieras' },
-  { codigo: '60', nombre: 'Compras' },
-  { codigo: '62', nombre: 'Gastos de personal' },
-  { codigo: '631', nombre: 'Transporte, correos y gastos de viaje' },
-  { codigo: '632', nombre: 'Asesoría y consultoría' },
-  { codigo: '634', nombre: 'Mantenimiento y reparaciones' },
-  { codigo: '635', nombre: 'Alquileres' },
-  { codigo: '636', nombre: 'Servicios básicos' },
-  { codigo: '637', nombre: 'Publicidad, publicaciones, relaciones públicas' },
-  { codigo: '64', nombre: 'Gastos por tributos' },
-  { codigo: '659', nombre: 'Otros gastos de gestión' },
-  { codigo: '67', nombre: 'Gastos financieros' },
-  { codigo: '70', nombre: 'Ventas' },
-  { codigo: '75', nombre: 'Otros ingresos de gestión' },
-] as const
-
-export function nombreCuenta(codigo: string): string {
-  return CUENTAS_PCGE.find((c) => c.codigo === codigo)?.nombre ?? codigo
-}

@@ -3,7 +3,6 @@ import { useMemo } from 'react'
 import { HOY } from '../config/demo'
 import { proyectarCaja } from '../domain/cashflow'
 import { estadoCierres, eventoEfectivo } from '../domain/cierres'
-import { cuotaAceptada, eventosCredito, perfilCrediticio } from '../domain/credit'
 import { porCobrar } from '../domain/collections'
 import type { Analysis } from '../domain/engine'
 import { evaluarLecciones } from '../domain/lessons'
@@ -29,16 +28,6 @@ export function useCobranzas() {
   return useMemo(() => (a ? porCobrar(a, demo.promesas, HOY) : []), [a, demo.promesas])
 }
 
-/** Cuotas de un crédito ya aceptado (el desembolso ya entró como movimiento del banco). */
-export function useCuotasCredito() {
-  const { demo, businessId } = useZen()
-  const sol = demo.credito[businessId]?.solicitud
-  return useMemo(
-    () => (sol?.estado === 'ACEPTADA' && sol.desembolso ? eventosCredito(sol.monto, sol.plazo, sol.tea, sol.desembolso).slice(1) : []),
-    [sol],
-  )
-}
-
 /** Cierres de caja del negocio activo con su estado (boletas, depósito, efectivo por depositar). */
 export function useCierres() {
   const { a, demo } = useZen()
@@ -47,19 +36,11 @@ export function useCierres() {
 
 export function useCaja(dias: number) {
   const { a, demo } = useZen()
-  const cuotas = useCuotasCredito()
   const cierres = useCierres()
   return useMemo(
-    () => (a ? proyectarCaja(a, demo.promesas, HOY, dias, [...cuotas, ...eventoEfectivo(cierres, HOY)]) : null),
-    [a, demo.promesas, dias, cuotas, cierres],
+    () => (a ? proyectarCaja(a, demo.promesas, HOY, dias, eventoEfectivo(cierres, HOY)) : null),
+    [a, demo.promesas, dias, cierres],
   )
-}
-
-/** F3 · Perfil crediticio del negocio activo. */
-export function usePerfilCrediticio() {
-  const { a, demo, businessId } = useZen()
-  const cuota = cuotaAceptada(demo.credito[businessId]?.solicitud)
-  return useMemo(() => (a ? perfilCrediticio(a, HOY, demo.promesas, cuota) : null), [a, demo.promesas, cuota])
 }
 
 export function useSimulador() {
@@ -86,9 +67,8 @@ export function useLecciones() {
             caja,
             limite: sim?.aviso ?? null,
             corrections: demo.corrections,
-            creditoVisto: !!demo.credito[a.business.id]?.visto,
           })
         : null,
-    [a, caja, cobranzas, sim, demo.corrections, demo.credito],
+    [a, caja, cobranzas, sim, demo.corrections],
   )
 }

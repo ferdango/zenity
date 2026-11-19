@@ -19,7 +19,6 @@ export interface DemoBusiness {
   sueldoPromedio: number
   /** F-04, definido por el usuario */
   sueldoDueno?: number
-  contadorId?: string
   /** F-06, por defecto = 1 semana de egresos promedio */
   colchonCaja?: number
   /** Celular del negocio (Yape y links de cobro), 9 dígitos */
@@ -226,20 +225,6 @@ export interface Correction {
   ts: string
 }
 
-export interface Comment {
-  id: string
-  businessId: string
-  /** Movimiento del hilo, o un tema general («simulador») */
-  movementId: string
-  autor: 'DUENO' | 'CONTADOR'
-  texto: string
-  ts: string
-  /** Pregunta del contador que espera respuesta del dueño */
-  pregunta?: boolean
-  /** La pregunta ya fue respondida */
-  respondida?: boolean
-}
-
 export interface PromesaPago {
   comprobanteId: string
   fecha: string
@@ -258,7 +243,6 @@ export type FuenteCaja =
   | 'IMPUESTOS'
   | 'GRATIFICACION'
   | 'CTS'
-  | 'CREDITO'
   | 'EFECTIVO'
 
 export interface CashEvent {
@@ -272,7 +256,7 @@ export interface CashEvent {
   montoPesimista?: number
 }
 
-export type LessonId = 'L01' | 'L02' | 'L03' | 'L04' | 'L05' | 'L06' | 'L07' | 'L08' | 'L09' | 'L10' | 'L11'
+export type LessonId = 'L01' | 'L02' | 'L03' | 'L04' | 'L05' | 'L06' | 'L07' | 'L08' | 'L09' | 'L10'
 
 export interface LessonEvent {
   lessonId: LessonId

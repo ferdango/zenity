@@ -4,7 +4,7 @@ import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '../components/Button'
 import { Icon } from '../components/Icon'
 import { TopBar } from '../components/TopBar'
-import { LinkRow, NoDemoData, Pill, SectionHead } from '../components/zen'
+import { NoDemoData, Pill, SectionHead } from '../components/zen'
 import styles from '../components/zen/zen.module.css'
 import { CONSENTIMIENTO_DATOS, FUENTES_DATOS, type FuenteDatos } from '../config/legal'
 import { businessName } from '../data/businesses'
@@ -14,7 +14,6 @@ import { fmtFecha, fmtSolesCorto } from '../domain/util'
 import { fadeUp, staggerContainer } from '../lib/motion'
 import { useApp } from '../state/context'
 import {
-  CONTADOR,
   confirmarPlanilla,
   inicioCompleto,
   omitirInicio,
@@ -161,9 +160,6 @@ export function Bienvenida() {
             <motion.div variants={fadeUp}>
               <TextoLegal />
             </motion.div>
-            <motion.p className={styles.muted} variants={fadeUp}>
-              Tu contador ({CONTADOR.nombre}) solo ve tus movimientos si se lo permites en «Mi contador», y el BCP solo ve tu perfil si lo autorizas en «Crédito BCP».
-            </motion.p>
             {faltaObligatoria && (
               <motion.p className={styles.bannerWarn} variants={fadeUp}>
                 <Icon name="info" size={20} />
@@ -321,14 +317,6 @@ export function PermisosDatos() {
               <span>Con un permiso revocado, lo que ves es la última lectura: la conciliación y la caja no se actualizan con esa fuente.</span>
             </p>
           )}
-        </motion.section>
-
-        <motion.section className={styles.section} variants={fadeUp}>
-          <SectionHead title="Quién más ve tus datos" />
-          <div className={styles.list}>
-            <LinkRow tone="info" to="/mi-contador" icon="support_agent" title={`Tu contador · ${CONTADOR.nombre}`} sub="Ve tus movimientos solo si se lo permites" />
-            <LinkRow tone="positive" to="/credito" icon="credit_score" title="BCP" sub="Solo tu perfil de crédito, y solo si lo autorizas" />
-          </div>
         </motion.section>
 
         <motion.div variants={fadeUp}>

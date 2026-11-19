@@ -435,7 +435,7 @@ button.stat:hover {
   background: var(--z-divider);
 }
 
-/* Tablas (portal del contador, caja, simulador) */
+/* Tablas (caja, simulador) */
 .tableWrap {
   overflow-x: auto;
   border-radius: var(--z-radius-lg);

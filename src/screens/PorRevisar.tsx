@@ -14,7 +14,7 @@ import { businessName } from '../data/businesses'
 import { tituloMovimiento } from '../data/demoLedger'
 import { alternativas, partyKey } from '../domain/categorization'
 import { resumenMes } from '../domain/engine'
-import type { BankMovement, CategoriaId, Comment } from '../domain/types'
+import type { BankMovement, CategoriaId } from '../domain/types'
 import { fmtFecha, monthOf } from '../domain/util'
 import { HOY } from '../config/demo'
 import { FEATURES } from '../lib/features'
@@ -30,7 +30,6 @@ import {
   deshacer,
   marcarCreoRegla,
   responderConciliacion,
-  responderPregunta,
   type UndoToken,
 } from '../state/demoStore'
 import { useZen } from '../state/useZen'
@@ -76,8 +75,7 @@ export function PorRevisar() {
   }
 
   const cola = a.porRevisar
-  const preguntas = demo.comments.filter((c) => c.businessId === a.business.id && c.pregunta && !c.respondida)
-  const pendientes = cola.length + preguntas.length
+  const pendientes = cola.length
   // Revisados: los que corrigió el dueño y los que resolvió una de sus reglas
   const corregidos = new Set(demo.corrections.filter((c) => c.businessId === a.business.id && c.origen === 'APP').map((c) => c.movementId))
   const porRegla = [...a.classifications.values()].filter((c) => c.fuente === 'REGLA_NEGOCIO' && !corregidos.has(c.movementId)).length
@@ -135,7 +133,7 @@ export function PorRevisar() {
 
   return (
     <PorRevisarView
-      {...{ business, a, cola, preguntas, pendientes, revisados, total, actual, siguiente, minutos, whatsapp, setWhatsapp, salida, otra, setOtra, busqueda, setBusqueda, regla, elegir, soloEstaVez, siempre }}
+      {...{ business, a, cola, pendientes, revisados, total, actual, siguiente, minutos, whatsapp, setWhatsapp, salida, otra, setOtra, busqueda, setBusqueda, regla, elegir, soloEstaVez, siempre }}
     />
   )
 }
@@ -144,7 +142,6 @@ type ViewProps = {
   business: ReturnType<typeof useApp>['business']
   a: NonNullable<ReturnType<typeof useZen>['a']>
   cola: BankMovement[]
-  preguntas: Comment[]
   pendientes: number
   revisados: number
   total: number
@@ -170,7 +167,6 @@ function PorRevisarView({
   business,
   a,
   cola,
-  preguntas,
   pendientes,
   revisados,
   total,
@@ -270,10 +266,6 @@ function PorRevisarView({
             <ProgressBar value={total ? revisados / total : 0} label="Avance de la revisión" />
           </section>
         )}
-
-        {preguntas.map((p) => (
-          <Pregunta key={p.id} pregunta={p} />
-        ))}
 
         {actual && !whatsapp && (
           <div className={styles.reviewStack}>
@@ -563,46 +555,9 @@ function VistaWhatsApp({ movement: m }: { movement: BankMovement }) {
   )
 }
 
-/** Pregunta del contador (F-08) que llega como tarjeta especial. */
-function Pregunta({ pregunta }: { pregunta: Comment }) {
-  const { business, toast } = useApp()
-  const [texto, setTexto] = useState('')
-  const m = analysisFor(business.id)?.movementsById.get(pregunta.movementId)
-  const responder = (t: string) => {
-    if (!t.trim()) return
-    responderPregunta(pregunta, t.trim())
-    toast('Respuesta enviada a tu contador', 'send')
-  }
-  return (
-    <motion.article className={styles.reviewCard} style={{ background: 'var(--z-primary-container)' }} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <span className={styles.lessonKicker} style={{ color: 'var(--z-on-primary-container)' }}>
-        <Icon name="support_agent" size={18} />
-        Tu contador pregunta
-      </span>
-      <p className="t-title-m">{pregunta.texto}</p>
-      {m && (
-        <p className={styles.small} style={{ color: 'var(--z-on-primary-container)' }}>
-          {fmtFecha(m.fecha)} · {tituloMovimiento(m)} · {formatMoney(m.monto, 'always')}
-        </p>
-      )}
-      <div className={styles.chipsWrap}>
-        {['Es un gasto del negocio', 'Es personal', 'Te mando el comprobante'].map((r) => (
-          <Chip key={r} onClick={() => responder(r)}>
-            {r}
-          </Chip>
-        ))}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: 8, alignItems: 'center' }}>
-        <input className={styles.input} placeholder="Escribe tu respuesta" value={texto} onChange={(e) => setTexto(e.target.value)} aria-label="Respuesta al contador" />
-        <IconButton icon="send" label="Enviar respuesta" variant="filled" onClick={() => responder(texto)} />
-      </div>
-    </motion.article>
-  )
-}
-
 /**
  * Conciliaciones del mes con confianza media (0.60–0.89): Zenity ya las aplicó, pero el dueño puede
- * confirmarlas o consultarlas con su contador. No cuentan en «Por revisar» (decisión del prototipo).
+ * confirmarlas. No cuentan en «Por revisar» (decisión del prototipo).
  */
 function ConfianzaMedia() {
   const { a, demo } = useZen()
@@ -619,9 +574,9 @@ function ConfianzaMedia() {
       <div className={styles.list}>
         {media.map((m) => {
           const mov = a.movementsById.get(m.movementIds[0])!
-          const responder = (respuesta: 'OK' | 'CONSULTA') => {
-            responderConciliacion({ businessId: a.business.id, matchId: m.id, movementId: mov.id, regla: m.regla, motivo: m.motivo, respuesta })
-            toast(respuesta === 'OK' ? 'Conciliación confirmada' : 'Le preguntaste a tu contador', respuesta === 'OK' ? 'task_alt' : 'support_agent')
+          const responder = () => {
+            responderConciliacion({ businessId: a.business.id, matchId: m.id, movementId: mov.id, regla: m.regla, motivo: m.motivo, respuesta: 'OK' })
+            toast('Conciliación confirmada', 'task_alt')
           }
           return (
             <article key={m.id} className={styles.card}>
@@ -639,11 +594,8 @@ function ConfianzaMedia() {
               </div>
               <div className={styles.actions}>
                 <Pill tone="info">{REGLA_LABEL[m.regla]}</Pill>
-                <Button size="sm" variant="tonal" icon="check" onClick={() => responder('OK')}>
+                <Button size="sm" variant="tonal" icon="check" onClick={responder}>
                   Está bien
-                </Button>
-                <Button size="sm" variant="text" icon="support_agent" onClick={() => responder('CONSULTA')}>
-                  Preguntar a mi contador
                 </Button>
               </div>
             </article>
