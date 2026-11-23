@@ -33,6 +33,7 @@ import { Conexiones } from './screens/Conexiones'
 import { ConnectionResult } from './screens/ConnectionResult'
 import { Home } from './screens/Home'
 import { Login } from './screens/Login'
+import { MapasUx, MapaUxDetalle } from './screens/MapasUx'
 import { Movements } from './screens/Movements'
 import { NotificationsPrompt } from './screens/NotificationsPrompt'
 import { RegisterCompany, RegisterPersonal } from './screens/Register'
@@ -94,6 +95,8 @@ function AnimatedRoutes() {
         <Route path="/analizando" element={screen(<Analyzing />)} />
         <Route path="/conexiones/resultado" element={screen(<ConnectionResult />)} />
         <Route path="/bienvenida" element={screen(<Bienvenida />)} />
+        <Route path="/ux" element={screen(<MapasUx />)} />
+        <Route path="/ux/:mapa" element={screen(<MapaUxDetalle />)} />
         <Route element={screen(<AppShell />)}>
           <Route path="/inicio" element={<Home />} />
           <Route path="/movimientos/:tab" element={<Movements />} />
