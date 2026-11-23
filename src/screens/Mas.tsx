@@ -96,6 +96,7 @@ export function Mas() {
         <motion.section className={styles.section} variants={fadeUp}>
           <SectionHead title="Demo" />
           <div className={styles.list}>
+            <LinkRow tone="info" to="/ux" icon="account_tree" title="Mapas de UX" sub="Empatía, journey, blueprint, flujo, site map y roadmap" />
             <button type="button" className={styles.row} data-ripple="" onClick={() => setConfirmar(true)}>
               <span className={styles.rowIcon} style={{ color: 'var(--z-negative)' }}>
                 <Icon name="restart_alt" size={20} />
